@@ -6,7 +6,6 @@ import os
 import re
 
 from cover_agent.AICaller import AICaller
-from cover_agent.CoverageProcessor import CoverageProcessor
 from cover_agent.CustomLogger import CustomLogger
 from cover_agent.FilePreprocessor import FilePreprocessor
 from cover_agent.PromptBuilder import PromptBuilder

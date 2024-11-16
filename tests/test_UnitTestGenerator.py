@@ -1,4 +1,3 @@
-from cover_agent.CoverageProcessor import CoverageProcessor
 from cover_agent.ReportGenerator import ReportGenerator
 from cover_agent.Runner import Runner
 from cover_agent.UnitTestGenerator import UnitTestGenerator
