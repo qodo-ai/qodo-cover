@@ -766,7 +766,6 @@ class UnitTestValidator:
             "--compare-branch={}".format(self.comparison_branch),
             self.code_coverage_report_path
         ]
-        print(diff_cover_args)
 
         self.logger.info(f'Running diff coverage module with args: "{diff_cover_args}"')
         try:
