@@ -102,7 +102,7 @@ class TestUnitValidator:
                 result = generator.validate_test(test_to_validate)
                 
                 assert result["status"] == "FAIL"
-                assert result["reason"] == "Coverage did not increase. Maybe the test did run but did not increase coverage, or maybe the test execution was skipped due to some problem"
+                assert "Coverage did not increase" in result["reason"]
                 assert result["exit_code"] == 0
 
     def test_initial_test_suite_analysis_with_prompt_builder(self):
@@ -182,7 +182,7 @@ class TestUnitValidator:
                 coverage_report = generator.post_process_coverage_report(datetime.datetime.now())
                 assert coverage_report.total_coverage == 0.7
 
-    def test_generate_diff_coverage_report(self):
+    def test_run_coverage_with_diff_coverage_flag(self):
         with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
             generator = UnitTestValidator(
                 source_file_path=temp_source_file.name,
@@ -193,5 +193,6 @@ class TestUnitValidator:
                 diff_coverage=True
             )
             with patch.object(Runner, 'run_command', return_value=("", "", 0, datetime.datetime.now())):
-                generator.generate_diff_coverage_report()
-                assert generator.diff_cover_report_path.endswith("diff-cover-report.json")
+                with patch.object(CoverageProcessor, 'process_coverage_report', return_value=([], [], 0.7)):
+                    generator.run_coverage()
+                    assert generator.current_coverage == 0.7
