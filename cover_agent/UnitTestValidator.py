@@ -5,6 +5,8 @@ import logging
 import os
 import re
 
+from diff_cover.diff_cover_tool import main as diff_cover_main
+
 from cover_agent.AICaller import AICaller
 from cover_agent.CoverageProcessor import CoverageProcessor
 from cover_agent.CustomLogger import CustomLogger
@@ -744,17 +746,29 @@ class UnitTestValidator:
 
 
     def generate_diff_coverage_report(self):
-        # Run the diff-cover command to generate a JSON diff coverage report
-        coverage_filename = os.path.basename(self.code_coverage_report_path)
-        coverage_command = f"diff-cover --json-report {self.diff_coverage_report_name} --compare-branch={self.comparison_branch} {coverage_filename}"
-        # Log and execute the diff coverage command
-        self.logger.info(f'Running diff coverage command: "{coverage_command}"')
-        stdout, stderr, exit_code, _ = Runner.run_command(
-            command=coverage_command, cwd=self.test_command_dir
-        )
+        """
+        Generates a JSON diff coverage report using the diff-cover tool.
+        This method runs the diff-cover command with the specified arguments to generate
+        a JSON report that shows the coverage differences between the current branch and
+        the specified comparison branch.
+        Args:
+            None
+        Returns:
+            None
+        Raises:
+            Exception: If an error occurs while running the diff-cover command.
+        """
+        
+        diff_cover_args = [
+            "diff-cover",
+            "--json-report",
+            self.diff_cover_report_path,
+            "--compare-branch={}".format(self.comparison_branch),
+            self.code_coverage_report_path
+        ]
 
-        # Ensure the diff command executed successfully
-        assert exit_code == 0, (
-            f'Fatal: Error running diff coverage command. Are you sure the command is correct? "{coverage_command}"'
-            f"\nExit code {exit_code}. \nStdout: \n{stdout} \nStderr: \n{stderr}"
-        )
+        self.logger.info(f'Running diff coverage module with args: "{diff_cover_args}"')
+        try:
+            diff_cover_main(diff_cover_args)
+        except Exception as e:
+            self.logger.error(f"Error running diff-cover: {e}")

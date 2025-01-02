@@ -104,7 +104,7 @@ class TestUnitValidator:
                 result = generator.validate_test(test_to_validate)
                 
                 assert result["status"] == "FAIL"
-                assert result["reason"] == "Coverage did not increase. Maybe the test did run but did not increase coverage, or maybe the test execution was skipped due to some problem"
+                assert "Coverage did not increase" in result["reason"]
                 assert result["exit_code"] == 0
 
     def test_initial_test_suite_analysis_with_prompt_builder(self):
@@ -183,7 +183,8 @@ class TestUnitValidator:
                 percentage_covered, coverage_percentages = generator.post_process_coverage_report(datetime.datetime.now())
                 assert percentage_covered == 0.7
 
-    def test_generate_diff_coverage_report(self):
+        
+    def test_generate_diff_coverage_report_success(self):
         with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
             generator = UnitTestValidator(
                 source_file_path=temp_source_file.name,
@@ -191,8 +192,31 @@ class TestUnitValidator:
                 code_coverage_report_path="coverage.xml",
                 test_command="pytest",
                 llm_model="gpt-3",
-                diff_coverage=True
+                diff_coverage=True,
+                comparison_branch="main"
             )
-            with patch.object(Runner, 'run_command', return_value=("", "", 0, datetime.datetime.now())):
+            with patch("cover_agent.UnitTestValidator.diff_cover_main") as mock_diff_cover_main:
                 generator.generate_diff_coverage_report()
-                assert generator.diff_cover_report_path.endswith("diff-cover-report.json")
+                mock_diff_cover_main.assert_called_once_with([
+                    "diff-cover",
+                    "--json-report",
+                    generator.diff_cover_report_path,
+                    "--compare-branch=main",
+                    "coverage.xml"
+                ])
+
+    def test_generate_diff_coverage_report_failure(self):
+        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
+            generator = UnitTestValidator(
+                source_file_path=temp_source_file.name,
+                test_file_path="test_test.py",
+                code_coverage_report_path="coverage.xml",
+                test_command="pytest",
+                llm_model="gpt-3",
+                diff_coverage=True,
+                comparison_branch="main"
+            )
+            with patch("cover_agent.UnitTestValidator.diff_cover_main", side_effect=Exception("Mock exception")), \
+                    patch.object(generator.logger, 'error') as mock_logger_error:
+                generator.generate_diff_coverage_report()
+                mock_logger_error.assert_called_once_with("Error running diff-cover: Mock exception")

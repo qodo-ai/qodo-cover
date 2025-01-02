@@ -1,5 +1,6 @@
 # Makefile
 SITE_PACKAGES=$(shell python -c "import wandb, os; print(os.path.dirname(wandb.__file__))")
+DIFF_COVER_TEMPLATES=$(shell python -c "import site; print(site.getsitepackages()[0])")
 TOML_FILES=$(shell find cover_agent/settings -name "*.toml" | sed 's/.*/-\-add-data "&:."/' | tr '\n' ' ')
 
 .PHONY: test build installer
@@ -22,6 +23,7 @@ installer:
 		--add-data "cover_agent/version.txt:." \
 		$(TOML_FILES) \
 		--add-data "$(SITE_PACKAGES)/vendor:wandb/vendor" \
+		--add-data "$(DIFF_COVER_TEMPLATES)/diff_cover/templates:diff_cover/templates" \
 		--hidden-import=tiktoken_ext.openai_public \
 		--hidden-import=tiktoken_ext \
 		--hidden-import=wandb \
