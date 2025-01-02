@@ -13,6 +13,12 @@ class CoverageData:
     """
     A class to represent coverage data.
 
+    This class is used to encapsulate information about code coverage
+    for a file or class, such as the line numbers that are covered by
+    tests, the number of lines that are covered, the line numbers that
+    are not covered by tests, the number of lines that are not covered,
+    and the coverage percentage.
+
     Attributes:
         covered_lines (int): The line numbers that are covered by tests.
         covered (int)      : The number of lines that are covered by tests.
@@ -30,6 +36,10 @@ class CoverageData:
 class CoverageReport:
     """
     A class to represent the coverage report of a project.
+
+    This class is used to encapsulate information about the coverage
+    of a project, such as the total coverage percentage and the coverage
+    data for each file in the project.
 
     Attributes:
     ----------
@@ -73,9 +83,24 @@ class CoverageProcessor(ABC):
 
     @abstractmethod
     def parse_coverage_report(self) -> Dict[str, CoverageData]:
+        """
+        Parses the coverage report and extracts coverage data.
+
+        This method should be implemented by subclasses to parse the specific
+        coverage report format and return a dictionary mapping file names to
+        their respective coverage data.
+
+        Returns:
+            Dict[str, CoverageData]: A dictionary where keys are file names and
+                                    values are CoverageData instances containing
+                                    coverage information for each file.
+        """
         pass
     
     def process_coverage_report(self, time_of_test_command: int) -> CoverageReport:
+        """
+        Processes the coverage report and returns the coverage data.
+        """
         self._is_coverage_valid(time_of_test_command=time_of_test_command)
         coverage = self.parse_coverage_report()
         report = CoverageReport(0.0, coverage)
@@ -89,6 +114,9 @@ class CoverageProcessor(ABC):
     def _is_coverage_valid(
         self, time_of_test_command: int
     ) ->  None:
+        """
+        Checks if the coverage report is valid and up-to-date.
+        """
         if not self._is_report_exist():
             raise FileNotFoundError(f'Coverage report "{self.file_path}" not found')
         if self._is_report_obsolete(time_of_test_command):
@@ -101,6 +129,11 @@ class CoverageProcessor(ABC):
         return int(round(os.path.getmtime(self.file_path) * 1000)) < time_of_test_command
     
 class CoberturaProcessor(CoverageProcessor):
+    """
+    A class to process Cobertura code coverage reports.
+    Inherits from CoverageProcessor class and implements
+    the parse_coverage_report method.
+    """
     def parse_coverage_report(self) -> Dict[str, CoverageData]:
         tree = ET.parse(self.file_path)
         root = tree.getroot()
@@ -125,6 +158,11 @@ class CoberturaProcessor(CoverageProcessor):
         return CoverageData(lines_covered, len(lines_covered), lines_missed, len(lines_missed), coverage_percentage)
 
 class LcovProcessor(CoverageProcessor):
+    """
+    A class to process LCOV code coverage reports.
+    Inherits from CoverageProcessor class and implements
+    the parse_coverage_report method.
+    """
     def parse_coverage_report(self) -> Dict[str, CoverageData]:
         coverage = {}
         try:
@@ -153,6 +191,14 @@ class LcovProcessor(CoverageProcessor):
         return coverage
 
 class JacocoProcessor(CoverageProcessor):
+    """
+    A class to process JaCoCo code coverage reports.
+    Inherits from CoverageProcessor class and implements
+    the parse_coverage_report method.
+
+    This class supports parsing JaCoCo code coverage
+    reports in both XML and CSV formats.
+    """
     def parse_coverage_report(self) -> Dict[str, CoverageData]:
         coverage = {}
         package_name, class_name = self._extract_package_and_class_java()
@@ -235,6 +281,13 @@ class JacocoProcessor(CoverageProcessor):
         return missed, covered
 
 class DiffCoverageProcessor(CoverageProcessor):
+    """
+    A class to process diff coverage reports.
+    Inherits from CoverageProcessor class and implements
+    the parse_coverage_report method.
+
+    This class is used to process diff coverage reports in JSON format.
+    """
     def __init__(
         self,
         diff_coverage_report_path: str,
@@ -291,6 +344,12 @@ class DiffCoverageProcessor(CoverageProcessor):
         return coverage
 
 class CoverageReportFilter:
+    """
+    A class to filter coverage reports based on
+    file patterns. This class abstracts the logic
+    for filtering coverage reports based on file
+    patterns.
+    """
     def filter_report(self, report: CoverageReport, file_pattern: str) -> CoverageReport:
         filtered_coverage = {
             file: coverage 
