@@ -135,7 +135,7 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        pip install poetry wandb tree_sitter
+        pip install poetry wandb tree_sitter diff-cover
         poetry install
     - name: Build Executable
       run: make installer
