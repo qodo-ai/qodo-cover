@@ -116,6 +116,13 @@ class CoverageProcessor(ABC):
     ) ->  None:
         """
         Checks if the coverage report is valid and up-to-date.
+
+        Args:
+            time_of_test_command (int): The timestamp of the test command.
+
+        Raises:
+            FileNotFoundError: If the coverage report file does not exist.
+            ValueError: If the coverage report file is outdated.
         """
         if not self._is_report_exist():
             raise FileNotFoundError(f'Coverage report "{self.file_path}" not found')
@@ -123,9 +130,24 @@ class CoverageProcessor(ABC):
             raise ValueError("Coverage report is outdated")
 
     def _is_report_exist(self) -> bool:
+        """
+        Checks if the coverage report file exists.
+
+        Returns:
+            bool: True if the file exists, False otherwise.
+        """
         return os.path.exists(self.file_path)
 
     def _is_report_obsolete(self, time_of_test_command: int) -> bool:
+        """
+        Checks if the coverage report file is obsolete based on the test command time.
+
+        Args:
+            time_of_test_command (int): The timestamp of the test command.
+
+        Returns:
+            bool: True if the report is obsolete, False otherwise.
+        """
         return int(round(os.path.getmtime(self.file_path) * 1000)) < time_of_test_command
     
 class CoberturaProcessor(CoverageProcessor):
@@ -351,6 +373,16 @@ class CoverageReportFilter:
     patterns.
     """
     def filter_report(self, report: CoverageReport, file_pattern: str) -> CoverageReport:
+        """
+        Filters the coverage report based on the specified file pattern.
+
+        Args:
+            report (CoverageReport): The coverage report to filter.
+            file_pattern (str): The file pattern to filter by.
+
+        Returns:
+            CoverageReport: The filtered coverage report.
+        """
         filtered_coverage = {
             file: coverage 
             for file, coverage in report.file_coverage.items()
