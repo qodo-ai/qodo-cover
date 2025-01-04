@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.1//EN" "report.dtd">
+<report name="cover-agent">
+    <sessioninfo id="dhruv-901682b" start="1736034030672" dump="1736034033451" />
+    <package name="com/davidparry/cover">
+        <class name="com/davidparry/cover/User" sourcefilename="SimpleMathOperations.java">
+            <method name="&lt;init&gt;" desc="(Ljava/lang/String;I)V" line="5">
+                <counter type="INSTRUCTION" missed="9" covered="0" />
+                <counter type="LINE" missed="4" covered="0" />
+                <counter type="COMPLEXITY" missed="1" covered="0" />
+                <counter type="METHOD" missed="1" covered="0" />
+            </method>
+            <method name="getName" desc="()Ljava/lang/String;" line="10">
+                <counter type="INSTRUCTION" missed="3" covered="0" />
+                <counter type="LINE" missed="1" covered="0" />
+                <counter type="COMPLEXITY" missed="1" covered="0" />
+                <counter type="METHOD" missed="1" covered="0" />
+            </method>
+            <counter type="INSTRUCTION" missed="12" covered="0" />
+            <counter type="LINE" missed="5" covered="0" />
+            <counter type="COMPLEXITY" missed="2" covered="0" />
+            <counter type="METHOD" missed="2" covered="0" />
+            <counter type="CLASS" missed="1" covered="0" />
+        </class>
+        <class name="com/davidparry/cover/SimpleMathOperations"
+            sourcefilename="SimpleMathOperations.java">
+            <method name="&lt;init&gt;" desc="()V" line="13">
+                <counter type="INSTRUCTION" missed="0" covered="3" />
+                <counter type="LINE" missed="0" covered="1" />
+                <counter type="COMPLEXITY" missed="0" covered="1" />
+                <counter type="METHOD" missed="0" covered="1" />
+            </method>
+            <method name="add" desc="(II)I" line="16">
+                <counter type="INSTRUCTION" missed="0" covered="4" />
+                <counter type="LINE" missed="0" covered="1" />
+                <counter type="COMPLEXITY" missed="0" covered="1" />
+                <counter type="METHOD" missed="0" covered="1" />
+            </method>
+            <method name="subtract" desc="(II)I" line="20">
+                <counter type="INSTRUCTION" missed="0" covered="4" />
+                <counter type="LINE" missed="0" covered="1" />
+                <counter type="COMPLEXITY" missed="0" covered="1" />
+                <counter type="METHOD" missed="0" covered="1" />
+            </method>
+            <method name="multiply" desc="(II)I" line="24">
+                <counter type="INSTRUCTION" missed="4" covered="0" />
+                <counter type="LINE" missed="1" covered="0" />
+                <counter type="COMPLEXITY" missed="1" covered="0" />
+                <counter type="METHOD" missed="1" covered="0" />
+            </method>
+            <method name="divide" desc="(II)D" line="28">
+                <counter type="INSTRUCTION" missed="13" covered="0" />
+                <counter type="BRANCH" missed="2" covered="0" />
+                <counter type="LINE" missed="3" covered="0" />
+                <counter type="COMPLEXITY" missed="2" covered="0" />
+                <counter type="METHOD" missed="1" covered="0" />
+            </method>
+            <method name="fibonacci" desc="(I)I" line="35">
+                <counter type="INSTRUCTION" missed="17" covered="0" />
+                <counter type="BRANCH" missed="2" covered="0" />
+                <counter type="LINE" missed="3" covered="0" />
+                <counter type="COMPLEXITY" missed="2" covered="0" />
+                <counter type="METHOD" missed="1" covered="0" />
+            </method>
+            <counter type="INSTRUCTION" missed="34" covered="11" />
+            <counter type="BRANCH" missed="4" covered="0" />
+            <counter type="LINE" missed="7" covered="3" />
+            <counter type="COMPLEXITY" missed="5" covered="3" />
+            <counter type="METHOD" missed="3" covered="3" />
+            <counter type="CLASS" missed="0" covered="1" />
+        </class>
+        <sourcefile name="SimpleMathOperations.java">
+            <line nr="5" mi="2" ci="0" mb="0" cb="0" />
+            <line nr="6" mi="3" ci="0" mb="0" cb="0" />
+            <line nr="7" mi="3" ci="0" mb="0" cb="0" />
+            <line nr="8" mi="1" ci="0" mb="0" cb="0" />
+            <line nr="10" mi="3" ci="0" mb="0" cb="0" />
+            <line nr="13" mi="0" ci="3" mb="0" cb="0" />
+            <line nr="16" mi="0" ci="4" mb="0" cb="0" />
+            <line nr="20" mi="0" ci="4" mb="0" cb="0" />
+            <line nr="24" mi="4" ci="0" mb="0" cb="0" />
+            <line nr="28" mi="2" ci="0" mb="2" cb="0" />
+            <line nr="29" mi="5" ci="0" mb="0" cb="0" />
+            <line nr="31" mi="6" ci="0" mb="0" cb="0" />
+            <line nr="35" mi="3" ci="0" mb="2" cb="0" />
+            <line nr="36" mi="2" ci="0" mb="0" cb="0" />
+            <line nr="38" mi="12" ci="0" mb="0" cb="0" />
+            <counter type="INSTRUCTION" missed="46" covered="11" />
+            <counter type="BRANCH" missed="4" covered="0" />
+            <counter type="LINE" missed="12" covered="3" />
+            <counter type="COMPLEXITY" missed="7" covered="3" />
+            <counter type="METHOD" missed="5" covered="3" />
+            <counter type="CLASS" missed="1" covered="1" />
+        </sourcefile>
+        <counter type="INSTRUCTION" missed="46" covered="11" />
+        <counter type="BRANCH" missed="4" covered="0" />
+        <counter type="LINE" missed="12" covered="3" />
+        <counter type="COMPLEXITY" missed="7" covered="3" />
+        <counter type="METHOD" missed="5" covered="3" />
+        <counter type="CLASS" missed="1" covered="1" />
+    </package>
+    <counter type="INSTRUCTION" missed="46" covered="11" />
+    <counter type="BRANCH" missed="4" covered="0" />
+    <counter type="LINE" missed="12" covered="3" />
+    <counter type="COMPLEXITY" missed="7" covered="3" />
+    <counter type="METHOD" missed="5" covered="3" />
+    <counter type="CLASS" missed="1" covered="1" />
+</report>
