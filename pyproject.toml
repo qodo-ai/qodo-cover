@@ -21,7 +21,7 @@ diff-cover = "^9.1.1"
 tenacity = "^9.0.0"
 
 # LLM Dependencies
-litellm = { git = "https://github.com/Codium-research/litellm_2024_10_29.git" }
+litellm = "^1.57.0"
 openai = "^1.52.1"
 tiktoken = "^0.8.0"
 boto3 = "^1.34.121"
