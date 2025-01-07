@@ -79,6 +79,7 @@ sh tests_integration/test_with_docker.sh \
   --code-coverage-report-path "CalculatorApi.Tests/TestResults/coverage.cobertura.xml" \
   --test-command "dotnet test --collect:'XPlat Code Coverage' CalculatorApi.Tests/ && find . -name 'coverage.cobertura.xml' -exec mv {} CalculatorApi.Tests/TestResults/coverage.cobertura.xml \;" \
   --coverage-type "cobertura" \
+  --desired-coverage "50" \
   --model $MODEL \
   $log_db_arg
 
