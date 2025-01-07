@@ -22,7 +22,7 @@ installer:
 		--add-data "cover_agent/version.txt:." \
 		$(TOML_FILES) \
 		--add-data "$(SITE_PACKAGES)/vendor:wandb/vendor" \
-		--add-data "anthropic_tokenizer.json:litellm/litellm_core_utils/tokenizers" \
+		--add-data "build_helpers/anthropic_tokenizer.json:litellm/litellm_core_utils/tokenizers" \
 		--hidden-import=tiktoken_ext.openai_public \
 		--hidden-import=tiktoken_ext \
 		--hidden-import=wandb \
