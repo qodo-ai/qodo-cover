@@ -1,6 +1,6 @@
 # Makefile
 SITE_PACKAGES=$(shell python3 -c "import wandb, os; print(os.path.dirname(wandb.__file__))")
-DIFF_COVER_TEMPLATES=$(shell python -c "import diff_cover, os; print(os.path.join(os.path.dirname(diff_cover.__file__), 'templates'))")
+DIFF_COVER_TEMPLATES=$(shell python3 -c "import diff_cover, os; print(os.path.join(os.path.dirname(diff_cover.__file__), 'templates'))")
 TOML_FILES=$(shell find cover_agent/settings -name "*.toml" | sed 's/.*/-\-add-data "&:."/' | tr '\n' ' ')
 
 .PHONY: test build installer
