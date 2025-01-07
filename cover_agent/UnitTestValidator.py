@@ -681,6 +681,7 @@ class UnitTestValidator:
             report_path=self.code_coverage_report_path,
             src_file_path=self.source_file_path,
             is_global_coverage_enabled=self.use_report_coverage_feature_flag,
+            file_pattern=None,
             diff_coverage_report_path=self.diff_cover_report_path,
         )
         self.logger.info(
