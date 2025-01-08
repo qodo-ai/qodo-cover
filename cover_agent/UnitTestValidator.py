@@ -449,7 +449,6 @@ class UnitTestValidator:
                     if exit_code != 0:
                         break
                 
-
                 # Step 3: Check for pass/fail from the Runner object
                 if exit_code != 0:
                     # Test failed, roll back the test file to its original content
@@ -571,13 +570,13 @@ class UnitTestValidator:
                     old_v: CoverageData = self.current_coverage_report.file_coverage[key]
                     if new_v.coverage > old_v.coverage and key == self.source_file_path.split("/")[-1]:
                         self.logger.info(
-                            f"Coverage for provided source file: {key} increased from {round(self.last_coverage_percentages[key] * 100, 2)} to {round(new_v.coverage * 100, 2)}"
+                            f"Coverage for provided source file: {key} increased to {round(new_v.coverage * 100, 2)}"
                         )
                     elif new_v.coverage > old_v.coverage:
                         self.logger.info(
-                            f"Coverage for non-source file: {key} increased from {round(self.last_coverage_percentages[key] * 100, 2)} to {round(new_v.coverage * 100, 2)}"
+                            f"Coverage for non-source file: {key} increased to {round(new_v.coverage * 100, 2)}"
                         )
-
+                
                 self.logger.info(
                     f"Test passed and coverage increased. Current coverage: {round(new_coverage_report.total_coverage * 100, 2)}%"
                 )
