@@ -121,6 +121,7 @@ sh tests_integration/test_with_docker.sh \
   --test-file-path "ui.test.js" \
   --test-command "npm run test:coverage" \
   --code-coverage-report-path "coverage/coverage.xml" \
+  --desired-coverage "60" \
   --model $MODEL \
   $log_db_arg
 
