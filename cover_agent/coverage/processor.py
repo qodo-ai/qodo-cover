@@ -163,8 +163,20 @@ class CoberturaProcessor(CoverageProcessor):
         for cls in root.findall(".//class"):
             cls_filename = cls.get("filename")
             if cls_filename:
-                coverage[cls_filename] = self._parse_coverage_data_for_class(cls)
+                if cls_filename not in coverage:
+                    coverage[cls_filename] = self._parse_coverage_data_for_class(cls)
+                else:
+                    coverage[cls_filename] = self._merge_coverage_data(coverage[cls_filename], self._parse_coverage_data_for_class(cls))
         return coverage
+
+    def _merge_coverage_data(self, existing_coverage: CoverageData, new_coverage: CoverageData) -> CoverageData:
+        covered_lines = existing_coverage.covered_lines + new_coverage.covered_lines
+        missed_lines = existing_coverage.missed_lines + new_coverage.missed_lines
+        covered = existing_coverage.covered + new_coverage.covered
+        missed = existing_coverage.missed + new_coverage.missed
+        total_lines = covered + missed
+        coverage_percentage = (float(covered) / total_lines) if total_lines > 0 else 0.0
+        return CoverageData(covered_lines, covered, missed_lines, missed, coverage_percentage)
 
     def _parse_coverage_data_for_class(self, cls) -> CoverageData:
         lines_covered, lines_missed = [], []

@@ -84,6 +84,12 @@ def mock_xml_tree(monkeypatch):
                                             <line number="2" hits="0"/>
                                         </lines>
                                     </class>
+                                    <class filename="app.py">
+                                        <lines>
+                                            <line number="3" hits="1"/>
+                                            <line number="4" hits="0"/>
+                                        </lines>
+                                    </class>
                                 </classes>
                             </package>
                         </packages>
@@ -189,10 +195,10 @@ class TestCoberturaProcessor:
         """
         coverage = processor.parse_coverage_report()
         assert len(coverage) == 1, "Expected coverage data for one file"
-        assert coverage["app.py"].covered_lines == [1], "Should list line 1 as covered"
-        assert coverage["app.py"].covered == 1, "Should have 1 line as covered"
-        assert coverage["app.py"].missed_lines == [2], "Should list line 2 as missed"
-        assert coverage["app.py"].missed == 1, "Should have 1 line as missed"
+        assert coverage["app.py"].covered_lines == [1, 3], "Should list lines 1 and 3 as covered"
+        assert coverage["app.py"].covered == 2, "Should have 2 line as covered"
+        assert coverage["app.py"].missed_lines == [2, 4], "Should list lines 2 and 4 as missed"
+        assert coverage["app.py"].missed == 2, "Should have 2 line as missed"
         assert coverage["app.py"].coverage == 0.5, "Coverage should be 50 percent"
 
 class TestLcovProcessor:
