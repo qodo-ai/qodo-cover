@@ -3,6 +3,9 @@ name: Nightly Integration Tests
 # Define the events that will trigger this workflow
 on:
   # Schedule the workflow to run nightly at midnight
+  pull_request:
+    branches:
+      - main
   schedule:
     - cron: '0 0 * * *'
   # Allow manual triggering of the workflow
