@@ -84,12 +84,6 @@ def mock_xml_tree(monkeypatch):
                                             <line number="2" hits="0"/>
                                         </lines>
                                     </class>
-                                    <class filename="app.py">
-                                        <lines>
-                                            <line number="3" hits="1"/>
-                                            <line number="4" hits="0"/>
-                                        </lines>
-                                    </class>
                                 </classes>
                             </package>
                         </packages>
@@ -195,10 +189,10 @@ class TestCoberturaProcessor:
         """
         coverage = processor.parse_coverage_report()
         assert len(coverage) == 1, "Expected coverage data for one file"
-        assert coverage["app.py"].covered_lines == [1, 3], "Should list lines 1 and 3 as covered"
-        assert coverage["app.py"].covered == 2, "Should have 2 line as covered"
-        assert coverage["app.py"].missed_lines == [2, 4], "Should list lines 2 and 4 as missed"
-        assert coverage["app.py"].missed == 2, "Should have 2 line as missed"
+        assert coverage["app.py"].covered_lines == [1], "Should list line 1 as covered"
+        assert coverage["app.py"].covered == 1, "Should have 1 line as covered"
+        assert coverage["app.py"].missed_lines == [2], "Should list line 2 as missed"
+        assert coverage["app.py"].missed == 1, "Should have 1 line as missed"
         assert coverage["app.py"].coverage == 0.5, "Coverage should be 50 percent"
 
 class TestLcovProcessor:
@@ -278,10 +272,9 @@ class TestJacocoProcessor:
         # Assert
         assert len(coverage_data) == 1
         assert 'MyClass' in coverage_data
-        # should not include <counter type="LINE" missed="5" covered="15"/>
-        assert coverage_data['MyClass'].missed == 0
-        assert coverage_data['MyClass'].covered == 0
-        assert coverage_data['MyClass'].coverage == 0
+        assert coverage_data['MyClass'].missed == 5
+        assert coverage_data['MyClass'].covered == 15
+        assert coverage_data['MyClass'].coverage == 0.75
 
     # Handle empty or malformed XML/CSV coverage reports
     def test_parse_empty_xml_coverage_report(self, mocker):
@@ -307,147 +300,6 @@ class TestJacocoProcessor:
         assert coverage_data['MyClass'].missed == 0
         assert coverage_data['MyClass'].covered == 0
         assert coverage_data['MyClass'].coverage == 0.0
-
-    def test_returns_empty_lists_and_float(self, mocker):
-        # Mocking the necessary methods
-        mocker.patch(
-            "cover_agent.coverage.processor.JacocoProcessor._extract_package_and_class_java",
-            return_value=("com.example", "Example"),
-        )
-        mocker.patch(
-            "cover_agent.coverage.processor.JacocoProcessor._parse_jacoco_xml",
-            return_value=([], []),
-        )
-
-        # Initialize the CoverageProcessor object
-        coverage_processor = JacocoProcessor(
-            file_path="path/to/coverage.xml",
-            src_file_path="path/to/example.java",
-        )
-
-        # Invoke the parse_coverage_report_jacoco method
-        coverageData = coverage_processor.parse_coverage_report()
-
-        # Assert the results
-        assert coverageData["Example"].covered_lines == [], "Expected covered_lines to be an empty list"
-        assert coverageData["Example"].missed_lines == [], "Expected missed_lines to be an empty list"
-        assert coverageData["Example"].coverage == 0, "Expected coverage percentage to be 0"
-
-    def test_parse_missed_covered_lines_jacoco_xml_no_source_file(self, mocker):
-        #, mock_xml_tree
-        mocker.patch(
-            "cover_agent.coverage.processor.JacocoProcessor._extract_package_and_class_java",
-            return_value=("com.example", "MyClass"),
-        )
-        xml_str = """<?xml version="1.0" encoding="UTF-8"?>
-                        <report>
-                            <package name="path/to">
-                                <sourcefile name="MyClass.java">
-                                    <line nr="35" mi="0" ci="9" mb="0" cb="0"/>
-                                    <line nr="36" mi="0" ci="1" mb="0" cb="0"/>
-                                    <line nr="37" mi="0" ci="3" mb="0" cb="0"/>
-                                    <line nr="38" mi="0" ci="9" mb="0" cb="0"/>
-                                    <line nr="39" mi="1" ci="0" mb="0" cb="0"/>
-                                    <line nr="40" mi="5" ci="0" mb="0" cb="0"/>
-                                    <line nr="41" mi="9" ci="0" mb="0" cb="0"/>
-                                    <counter type="INSTRUCTION" missed="53" covered="387"/>
-                                    <counter type="BRANCH" missed="2" covered="6"/>
-                                    <counter type="LINE" missed="9" covered="94"/>
-                                    <counter type="COMPLEXITY" missed="5" covered="23"/>
-                                    <counter type="METHOD" missed="3" covered="21"/>
-                                    <counter type="CLASS" missed="0" covered="1"/>
-                                </sourcefile>
-                            </package>
-                        </report>"""
-        mocker.patch(
-            "xml.etree.ElementTree.parse",
-            return_value=ET.ElementTree(ET.fromstring(xml_str))
-        )
-        processor = JacocoProcessor("path/to/coverage_report.xml", "path/to/MySecondClass.java")
-
-        # Action
-        coverage_data = processor.parse_coverage_report()
-
-        # Assert
-        assert 'MySecondClass' not in coverage_data
-
-    def test_parse_missed_covered_lines_jacoco_xml(self, mocker):
-        #, mock_xml_tree
-        mocker.patch(
-            "cover_agent.coverage.processor.JacocoProcessor._extract_package_and_class_java",
-            return_value=("com.example", "MyClass"),
-        )
-        xml_str = """<report>
-                        <package name="path/to">
-                            <sourcefile name="MyClass.java">
-                                <line nr="35" mi="0" ci="9" mb="0" cb="0"/>
-                                <line nr="36" mi="0" ci="1" mb="0" cb="0"/>
-                                <line nr="37" mi="0" ci="3" mb="0" cb="0"/>
-                                <line nr="38" mi="0" ci="9" mb="0" cb="0"/>
-                                <line nr="39" mi="1" ci="0" mb="0" cb="0"/>
-                                <line nr="40" mi="5" ci="0" mb="0" cb="0"/>
-                                <line nr="41" mi="9" ci="0" mb="0" cb="0"/>
-                                <counter type="INSTRUCTION" missed="53" covered="387"/>
-                                <counter type="BRANCH" missed="2" covered="6"/>
-                                <counter type="LINE" missed="9" covered="94"/>
-                                <counter type="COMPLEXITY" missed="5" covered="23"/>
-                                <counter type="METHOD" missed="3" covered="21"/>
-                                <counter type="CLASS" missed="0" covered="1"/>
-                            </sourcefile>
-                        </package>
-                    </report>"""
-        mocker.patch(
-            "xml.etree.ElementTree.parse",
-            return_value=ET.ElementTree(ET.fromstring(xml_str))
-        )
-        processor = JacocoProcessor("path/to/coverage_report.xml", "path/to/MyClass.java")
-
-        # Action
-        coverage_data = processor.parse_coverage_report()
-
-        # Assert
-        assert "MyClass" in coverage_data
-        assert coverage_data["MyClass"].missed_lines == [39, 40, 41]
-        assert coverage_data["MyClass"].covered_lines == [35, 36, 37, 38]
-
-    def test_parse_missed_covered_lines_kotlin_jacoco_xml(self, mocker):
-        #, mock_xml_tree
-        mocker.patch(
-            "cover_agent.coverage.processor.JacocoProcessor._extract_package_and_class_kotlin",
-            return_value=("com.example", "MyClass"),
-        )
-        xml_str = """<report>
-                        <package name="path/to">
-                            <sourcefile name="MyClass.kt">
-                                <line nr="35" mi="0" ci="9" mb="0" cb="0"/>
-                                <line nr="36" mi="0" ci="1" mb="0" cb="0"/>
-                                <line nr="37" mi="0" ci="3" mb="0" cb="0"/>
-                                <line nr="38" mi="0" ci="9" mb="0" cb="0"/>
-                                <line nr="39" mi="1" ci="0" mb="0" cb="0"/>
-                                <line nr="40" mi="5" ci="0" mb="0" cb="0"/>
-                                <line nr="41" mi="9" ci="0" mb="0" cb="0"/>
-                                <counter type="INSTRUCTION" missed="53" covered="387"/>
-                                <counter type="BRANCH" missed="2" covered="6"/>
-                                <counter type="LINE" missed="9" covered="94"/>
-                                <counter type="COMPLEXITY" missed="5" covered="23"/>
-                                <counter type="METHOD" missed="3" covered="21"/>
-                                <counter type="CLASS" missed="0" covered="1"/>
-                            </sourcefile>
-                        </package>
-                    </report>"""
-        mocker.patch(
-            "xml.etree.ElementTree.parse",
-            return_value=ET.ElementTree(ET.fromstring(xml_str))
-        )
-        processor = JacocoProcessor("path/to/coverage_report.xml", "path/to/MyClass.kt")
-
-        # Action
-        coverage_data = processor.parse_coverage_report()
-
-        # Assert
-        assert "MyClass" in coverage_data
-        assert coverage_data["MyClass"].missed_lines == [39, 40, 41]
-        assert coverage_data["MyClass"].covered_lines == [35, 36, 37, 38]
 
 class TestDiffCoverageProcessor:
     # Successfully parse JSON diff coverage report and extract coverage data for matching file path
