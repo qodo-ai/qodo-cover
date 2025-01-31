@@ -22,7 +22,6 @@ class UnitTestGenerator:
         test_command: str,
         llm_model: str,
         agent_completion: AgentCompletionABC,
-        api_base: str = "",
         test_command_dir: str = os.getcwd(),
         included_files: list = None,
         coverage_type="cobertura",
@@ -39,6 +38,7 @@ class UnitTestGenerator:
             code_coverage_report_path (str): The path to the code coverage report file.
             test_command (str): The command to run tests.
             llm_model (str): The language model to be used for test generation.
+            agent_completion (AgentCompletionABC): The agent completion object to be used for test generation.
             api_base (str, optional): The base API url to use in case model is set to Ollama or Hugging Face. Defaults to an empty string.
             test_command_dir (str, optional): The directory where the test command should be executed. Defaults to the current working directory.
             included_files (list, optional): A list of paths to included files. Defaults to None.

@@ -7,11 +7,10 @@ import re
 
 from diff_cover.diff_cover_tool import main as diff_cover_main
 
-from cover_agent.AICaller import AICaller
+from cover_agent.AgentCompletionABC import AgentCompletionABC
 from cover_agent.CoverageProcessor import CoverageProcessor
 from cover_agent.CustomLogger import CustomLogger
 from cover_agent.FilePreprocessor import FilePreprocessor
-from cover_agent.PromptBuilder import PromptBuilder
 from cover_agent.Runner import Runner
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.utils import load_yaml
@@ -25,7 +24,7 @@ class UnitTestValidator:
         code_coverage_report_path: str,
         test_command: str,
         llm_model: str,
-        api_base: str = "",
+        agent_completion: AgentCompletionABC,
         test_command_dir: str = os.getcwd(),
         included_files: list = None,
         coverage_type="cobertura",
@@ -46,6 +45,7 @@ class UnitTestValidator:
             code_coverage_report_path (str): The path to the code coverage report file.
             test_command (str): The command to run tests.
             llm_model (str): The language model to be used for test generation.
+            agent_completion (AgentCompletionABC): The agent completion object to use for test generation.
             api_base (str, optional): The base API url to use in case model is set to Ollama or Hugging Face. Defaults to an empty string.
             test_command_dir (str, optional): The directory where the test command should be executed. Defaults to the current working directory.
             included_files (list, optional): A list of paths to included files. Defaults to None.
@@ -80,9 +80,7 @@ class UnitTestValidator:
         self.diff_coverage = diff_coverage
         self.comparison_branch = comparison_branch
         self.num_attempts = num_attempts
-
-        # Objects to instantiate
-        self.ai_caller = AICaller(model=llm_model, api_base=api_base)
+        self.agent_completion = agent_completion
 
         # Get the logger instance from CustomLogger
         self.logger = CustomLogger.get_logger(__name__)
@@ -163,31 +161,6 @@ class UnitTestValidator:
         # Return the language name in lowercase
         return language_name.lower()
 
-    def _init_prompt_builder(self):
-        """
-        Builds a prompt using the provided information to be used for validating tests.
-
-        This method checks for the existence of failed test runs and then calls the PromptBuilder class to construct the prompt.
-        The prompt includes details such as the source file path, test file path, code coverage report, included files,
-        additional instructions, failed test runs, and the programming language being used.
-
-        Returns:
-            str: The generated prompt to be used for test generation.
-        """
-
-        # Call PromptBuilder to build the prompt
-        self.prompt_builder = PromptBuilder(
-            source_file_path=self.source_file_path,
-            test_file_path=self.test_file_path,
-            code_coverage_report=self.code_coverage_report,
-            included_files=self.included_files,
-            additional_instructions=self.additional_instructions,
-            failed_test_runs="", # see if this can be None
-            language=self.language,
-            testing_framework=self.testing_framework,
-            project_root=self.project_root,
-        )
-
     def initial_test_suite_analysis(self):
         """
         Perform the initial analysis of the test suite structure.
@@ -205,27 +178,21 @@ class UnitTestValidator:
             None
         """
         try:
-            self._init_prompt_builder() # Initialize the prompt builder
-
             test_headers_indentation = None
             allowed_attempts = 3
             counter_attempts = 0
             while (
                 test_headers_indentation is None and counter_attempts < allowed_attempts
             ):
-                prompt_headers_indentation = self.prompt_builder.build_prompt_custom(
-                    file="analyze_suite_test_headers_indentation"
-                )
-                response, prompt_token_count, response_token_count = (
-                    self.ai_caller.call_model(prompt=prompt_headers_indentation)
-                )
-                self.ai_caller.model = self.llm_model
+                # Read in the test file content and pass into agent completion
+                test_file_content = self._read_file(self.test_file_path)
+                response, prompt_token_count, response_token_count, prompt = self.agent_completion.analyze_suite_test_headers_indentation(test_file_content)
+
+                # Update the total token counts and load the response into a dictionary
                 self.total_input_token_count += prompt_token_count
                 self.total_output_token_count += response_token_count
                 tests_dict = load_yaml(response)
-                test_headers_indentation = tests_dict.get(
-                    "test_headers_indentation", None
-                )
+                test_headers_indentation = tests_dict.get("test_headers_indentation", None)
                 counter_attempts += 1
 
             if test_headers_indentation is None:
@@ -239,13 +206,8 @@ class UnitTestValidator:
                 not relevant_line_number_to_insert_tests_after
                 and counter_attempts < allowed_attempts
             ):
-                prompt_test_insert_line = self.prompt_builder.build_prompt_custom(
-                    file="analyze_suite_test_insert_line"
-                )
-                response, prompt_token_count, response_token_count = (
-                    self.ai_caller.call_model(prompt=prompt_test_insert_line)
-                )
-                self.ai_caller.model = self.llm_model
+                response, prompt_token_count, response_token_count, prompt = self.agent_completion.analyze_test_insert_line(test_file_content)
+
                 self.total_input_token_count += prompt_token_count
                 self.total_output_token_count += response_token_count
                 tests_dict = load_yaml(response)
@@ -659,33 +621,15 @@ class UnitTestValidator:
             str: The error summary extracted from the response or a default error message if extraction fails.
         """
         try:
-            # Update the PromptBuilder object with stderr and stdout
-            self.prompt_builder.stderr_from_run = fail_details["stderr"]
-            self.prompt_builder.stdout_from_run = fail_details["stdout"]
-            self.prompt_builder.processed_test_file = fail_details["processed_test_file"]
-
-            # Build the prompt
-            custom_prompt = self.prompt_builder.build_prompt_custom(
-                file="analyze_test_run_failure"
-            )
-
-            # Reset the stderr, stdout, and processed test file in the prompt builder
-            self.prompt_builder.stderr_from_run = ""
-            self.prompt_builder.stdout_from_run = ""
-            self.prompt_builder.processed_test_file = ""
-
             # Run the analysis via LLM
-            response, prompt_token_count, response_token_count = (
-                self.ai_caller.call_model(prompt=custom_prompt, stream=False)
+            response, prompt_token_count, response_token_count, prompt = self.agent_completion.analyze_test_failure(
+                stderr=fail_details["stderr"],
+                stdout=fail_details["stdout"],
+                processed_test_file=fail_details["processed_test_file"],
             )
             self.total_input_token_count += prompt_token_count
             self.total_output_token_count += response_token_count
             output_str = response.strip()
-            # tests_dict = load_yaml(response)
-            # if tests_dict.get("error_summary"):
-            #     output_str = tests_dict.get("error_summary")
-            # else:
-            #     output_str = f"ERROR: Unable to summarize error message from inputs. STDERR: {fail_details["stderr"]}\nSTDOUT: {fail_details["stderr"]}."
             return output_str
         except Exception as e:
             logging.error(f"Error extracting error message: {e}")
@@ -775,3 +719,19 @@ class UnitTestValidator:
 
     def get_current_coverage(self):
             return self.current_coverage_report.total_coverage
+
+    def _read_file(self, file_path):
+        """
+        Helper method to read file contents.
+
+        Parameters:
+            file_path (str): Path to the file to be read.
+
+        Returns:
+            str: The content of the file.
+        """
+        try:
+            with open(file_path, "r") as f:
+                return f.read()
+        except Exception as e:
+            return f"Error reading {file_path}: {e}"

@@ -68,7 +68,6 @@ class CoverAgent:
             coverage_type=args.coverage_type,
             additional_instructions=args.additional_instructions,
             llm_model=args.model,
-            api_base=args.api_base,
             use_report_coverage_feature_flag=args.use_report_coverage_feature_flag,
             agent_completion=self.agent_completion,
         )
@@ -85,11 +84,11 @@ class CoverAgent:
             desired_coverage=args.desired_coverage,
             additional_instructions=args.additional_instructions,
             llm_model=args.model,
-            api_base=args.api_base,
             use_report_coverage_feature_flag=args.use_report_coverage_feature_flag,
             diff_coverage=args.diff_coverage,
             comparison_branch=args.branch,
-            num_attempts=args.run_tests_multiple_times
+            num_attempts=args.run_tests_multiple_times,
+            agent_completion=self.agent_completion,
         )
 
     def parse_command_to_run_only_a_single_test(self, args):

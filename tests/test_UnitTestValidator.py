@@ -12,20 +12,25 @@ import tempfile
 
 class TestUnitValidator:
     def test_extract_error_message_exception_handling(self):
-            # PromptBuilder will not instantiate so we're expecting an empty error_message.
-            with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
-                generator = UnitTestValidator(
-                    source_file_path=temp_source_file.name,
-                    test_file_path="test_test.py",
-                    code_coverage_report_path="coverage.xml",
-                    test_command="pytest",
-                    llm_model="gpt-3"
-                )
-                with patch.object(generator, 'ai_caller') as mock_ai_caller:
-                    mock_ai_caller.call_model.side_effect = Exception("Mock exception")
-                    fail_details = {"stderr": "stderr content", "stdout": "stdout content", "processed_test_file": ""}
-                    error_message = generator.extract_error_message(fail_details)
-                    assert '' in error_message
+        """Ensure exception handling works when calling agent_completion for error extraction."""
+        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
+            mock_agent_completion = MagicMock()
+            generator = UnitTestValidator(
+                source_file_path=temp_source_file.name,
+                test_file_path="test_test.py",
+                code_coverage_report_path="coverage.xml",
+                test_command="pytest",
+                llm_model="gpt-3",
+                agent_completion=mock_agent_completion
+            )
+
+            # Simulate agent_completion raising an exception
+            mock_agent_completion.analyze_test_failure.side_effect = Exception("Mock exception")
+
+            fail_details = {"stderr": "stderr content", "stdout": "stdout content", "processed_test_file": ""}
+            error_message = generator.extract_error_message(fail_details)
+
+            assert error_message == ""  # Should return an empty string on failure
 
     def test_run_coverage_with_report_coverage_flag(self):
         with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
@@ -35,6 +40,7 @@ class TestUnitValidator:
                 code_coverage_report_path="coverage.xml",
                 test_command="pytest",
                 llm_model="gpt-3",
+                agent_completion=MagicMock(),
                 use_report_coverage_feature_flag=True
             )
             with patch.object(Runner, 'run_command', return_value=("", "", 0, datetime.datetime.now())):
@@ -45,31 +51,32 @@ class TestUnitValidator:
 
 
     def test_extract_error_message_with_prompt_builder(self):
+        """Ensure error message extraction works properly with agent_completion."""
         with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
+            mock_agent_completion = MagicMock()
             generator = UnitTestValidator(
                 source_file_path=temp_source_file.name,
                 test_file_path="test_test.py",
                 code_coverage_report_path="coverage.xml",
                 test_command="pytest",
-                llm_model="gpt-3"
+                llm_model="gpt-3",
+                agent_completion=mock_agent_completion
             )
-            
-            # Mock the prompt builder
-            mock_prompt_builder = MagicMock()
-            generator.prompt_builder = mock_prompt_builder
-            mock_prompt_builder.build_prompt_custom.return_value = "test prompt"
-            
+
             mock_response = """
             error_summary: Test failed due to assertion error in test_example
             """
-            
-            with patch.object(generator.ai_caller, 'call_model', return_value=(mock_response, 10, 10)):
-                fail_details = {"stderr": "AssertionError: assert False", "stdout": "test_example failed", "processed_test_file": ""}
-                error_message = generator.extract_error_message(fail_details)
-                
-                assert error_message == 'error_summary: Test failed due to assertion error in test_example'
-                mock_prompt_builder.build_prompt_custom.assert_called_once_with(file="analyze_test_run_failure")
+            mock_agent_completion.analyze_test_failure.return_value = (mock_response, 10, 10, "test prompt")
 
+            fail_details = {"stderr": "AssertionError: assert False", "stdout": "test_example failed", "processed_test_file": ""}
+            error_message = generator.extract_error_message(fail_details)
+
+            assert error_message.strip() == "error_summary: Test failed due to assertion error in test_example"
+            mock_agent_completion.analyze_test_failure.assert_called_once_with(
+                stderr=fail_details["stderr"],
+                stdout=fail_details["stdout"],
+                processed_test_file=fail_details["processed_test_file"]
+            )
 
     def test_validate_test_pass_no_coverage_increase_with_prompt(self):
         with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
@@ -78,7 +85,8 @@ class TestUnitValidator:
                 test_file_path="test_test.py",
                 code_coverage_report_path="coverage.xml",
                 test_command="pytest",
-                llm_model="gpt-3"
+                llm_model="gpt-3",
+                agent_completion=MagicMock()
             )
             
             # Setup initial state
@@ -107,38 +115,40 @@ class TestUnitValidator:
                 assert "Coverage did not increase" in result["reason"]
                 assert result["exit_code"] == 0
 
-    def test_initial_test_suite_analysis_with_prompt_builder(self):
+    def test_initial_test_suite_analysis_with_agent_completion(self):
+        """Ensure the initial test suite analysis properly uses agent_completion."""
         with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
+            mock_agent_completion = MagicMock()
             generator = UnitTestValidator(
                 source_file_path=temp_source_file.name,
                 test_file_path="test_test.py",
                 code_coverage_report_path="coverage.xml",
                 test_command="pytest",
-                llm_model="gpt-3"
+                llm_model="gpt-3",
+                agent_completion=mock_agent_completion
             )
 
-            # Mock the prompt builder
-            mock_prompt_builder = MagicMock()
-            generator.prompt_builder = mock_prompt_builder
-            mock_prompt_builder.build_prompt_custom.side_effect = [
-                "test_headers_indentation: 4",
-                "relevant_line_number_to_insert_tests_after: 100\nrelevant_line_number_to_insert_imports_after: 10\ntesting_framework: pytest"
-            ]
+            # Mock responses from agent_completion
+            mock_agent_completion.analyze_suite_test_headers_indentation.return_value = (
+                "test_headers_indentation: 4", 10, 10, "test prompt"
+            )
+            mock_agent_completion.analyze_test_insert_line.return_value = (
+                "relevant_line_number_to_insert_tests_after: 100\nrelevant_line_number_to_insert_imports_after: 10\ntesting_framework: pytest",
+                10, 10, "test prompt"
+            )
 
-            # Mock the AI caller responses
-            with patch.object(generator.ai_caller, 'call_model') as mock_call:
-                mock_call.side_effect = [
-                    ("test_headers_indentation: 4", 10, 10),
-                    ("relevant_line_number_to_insert_tests_after: 100\nrelevant_line_number_to_insert_imports_after: 10\ntesting_framework: pytest", 10, 10)
-                ]
+            # Run the function (without _init_prompt_builder)
+            generator.initial_test_suite_analysis()
 
-                generator.initial_test_suite_analysis()
+            # Assertions to check the expected values
+            assert generator.test_headers_indentation == 4
+            assert generator.relevant_line_number_to_insert_tests_after == 100
+            assert generator.relevant_line_number_to_insert_imports_after == 10
+            assert generator.testing_framework == "pytest"
 
-                assert generator.test_headers_indentation == 4
-                assert generator.relevant_line_number_to_insert_tests_after == 100
-                assert generator.relevant_line_number_to_insert_imports_after == 10
-                assert generator.testing_framework == "pytest"
-
+            # Ensure the correct agent_completion methods were called
+            mock_agent_completion.analyze_suite_test_headers_indentation.assert_called_once()
+            mock_agent_completion.analyze_test_insert_line.assert_called_once()
     
     def test_post_process_coverage_report_with_report_coverage_flag(self):
         with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
@@ -148,6 +158,7 @@ class TestUnitValidator:
                 code_coverage_report_path="coverage.xml",
                 test_command="pytest",
                 llm_model="gpt-3",
+                agent_completion=MagicMock(),
                 use_report_coverage_feature_flag=True
             )
             with patch.object(CoverageProcessor, 'process_coverage_report', return_value={'test.py': ([1], [1], 1.0)}):
@@ -163,6 +174,7 @@ class TestUnitValidator:
                 code_coverage_report_path="coverage.xml",
                 test_command="pytest",
                 llm_model="gpt-3",
+                agent_completion=MagicMock(),
                 diff_coverage=True
             )
             with patch.object(generator, 'generate_diff_coverage_report'), \
@@ -177,7 +189,8 @@ class TestUnitValidator:
                 test_file_path="test_test.py",
                 code_coverage_report_path="coverage.xml",
                 test_command="pytest",
-                llm_model="gpt-3"
+                llm_model="gpt-3",
+                agent_completion=MagicMock()
             )
             with patch.object(CoverageProcessor, 'process_coverage_report', return_value=([], [], 0.7)):
                 percentage_covered, coverage_percentages = generator.post_process_coverage_report(datetime.datetime.now())
@@ -192,6 +205,7 @@ class TestUnitValidator:
                 code_coverage_report_path="coverage.xml",
                 test_command="pytest",
                 llm_model="gpt-3",
+                agent_completion=MagicMock(),
                 diff_coverage=True,
                 comparison_branch="main"
             )
@@ -213,6 +227,7 @@ class TestUnitValidator:
                 code_coverage_report_path="coverage.xml",
                 test_command="pytest",
                 llm_model="gpt-3",
+                agent_completion=MagicMock(),
                 diff_coverage=True,
                 comparison_branch="main"
             )
