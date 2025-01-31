@@ -6,7 +6,6 @@ import os
 import re
 
 from cover_agent.AICaller import AICaller
-from cover_agent.CoverageProcessor import CoverageProcessor
 from cover_agent.CustomLogger import CustomLogger
 from cover_agent.FilePreprocessor import FilePreprocessor
 from cover_agent.PromptBuilder import PromptBuilder
@@ -86,16 +85,6 @@ class UnitTestGenerator:
         with open(self.source_file_path, "r") as f:
             self.source_code = f.read()
 
-    # def build_prompt(self, failed_test_runs):
-    #     """
-    #     Run code coverage and build the prompt to be used for generating tests.
-
-    #     Returns:
-    #         None
-    #     """
-    #     # Run coverage and build the prompt
-    #     self.prompt = self.build_prompt(failed_test_runs=failed_test_runs)
-
     def get_code_language(self, source_file_path):
         """
         Get the programming language based on the file extension of the provided source file path.
@@ -161,18 +150,16 @@ class UnitTestGenerator:
             return out_str
         return ""
 
-    def build_prompt(self, failed_test_runs, language, testing_framework, code_coverage_report) -> dict:
+    def check_for_failed_test_runs(self, failed_test_runs):
         """
-        Builds a prompt using the provided information to be used for generating tests.
+        Processes the failed test runs and returns a formatted string with details of the failed tests.
 
-        This method checks for the existence of failed test runs and then calls the PromptBuilder class to construct the prompt.
-        The prompt includes details such as the source file path, test file path, code coverage report, included files,
-        additional instructions, failed test runs, and the programming language being used.
+        Args:
+            failed_test_runs (list): A list of dictionaries containing information about failed test runs.
 
         Returns:
-            str: The generated prompt to be used for test generation.
+            str: A formatted string with details of the failed tests.
         """
-        # Check for existence of failed tests:
         if not failed_test_runs:
             failed_test_runs_value = ""
         else:
@@ -195,6 +182,29 @@ class UnitTestGenerator:
             except Exception as e:
                 self.logger.error(f"Error processing failed test runs: {e}")
                 failed_test_runs_value = ""
+
+        return failed_test_runs_value
+
+    def build_prompt(self, failed_test_runs, language, testing_framework, code_coverage_report) -> dict:
+        """
+        Builds a prompt using the provided information to be used for generating tests.
+
+        This method processes the failed test runs using the check_for_failed_test_runs method and then calls the PromptBuilder class to construct the prompt.
+        The prompt includes details such as the source file path, test file path, code coverage report, included files,
+        additional instructions, failed test runs, and the programming language being used.
+
+        Args:
+            failed_test_runs (list): A list of dictionaries containing information about failed test runs.
+            language (str): The programming language being used.
+            testing_framework (str): The testing framework being used.
+            code_coverage_report (str): The code coverage report.
+
+        Returns:
+            dict: The generated prompt to be used for test generation.
+        """
+
+        # Check for failed test runs
+        failed_test_runs_value = self.check_for_failed_test_runs(failed_test_runs)
 
         # Call PromptBuilder to build the prompt
         self.prompt_builder = PromptBuilder(
