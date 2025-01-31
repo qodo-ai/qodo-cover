@@ -52,7 +52,7 @@ class TestPromptBuilder:
         builder.code_coverage_report = "Coverage Report Content"
         builder.included_files = ""
 
-        result = builder.build_prompt_custom(file="test_generation_prompt")
+        result = builder.build_prompt(file="test_generation_prompt")
         assert "## Additional Includes" not in result["user"]
 
     def test_non_empty_included_files_section_in_prompt(self, monkeypatch):
@@ -69,7 +69,7 @@ class TestPromptBuilder:
         builder.test_file = "Test Content"
         builder.code_coverage_report = "Coverage Report Content"
 
-        result = builder.build_prompt_custom(file="test_generation_prompt")
+        result = builder.build_prompt(file="test_generation_prompt")
         assert "## Additional Includes" in result["user"]
         assert "Included Files Content" in result["user"]
 
@@ -86,7 +86,7 @@ class TestPromptBuilder:
         builder.test_file = "Test Content"
         builder.code_coverage_report = "Coverage Report Content"
 
-        result = builder.build_prompt_custom(file="test_generation_prompt")
+        result = builder.build_prompt(file="test_generation_prompt")
         assert "## Additional Instructions" not in result["user"]
 
     def test_empty_failed_test_runs_section_not_in_prompt(self, monkeypatch):
@@ -102,7 +102,7 @@ class TestPromptBuilder:
         builder.test_file = "Test Content"
         builder.code_coverage_report = "Coverage Report Content"
 
-        result = builder.build_prompt_custom(file="test_generation_prompt")
+        result = builder.build_prompt(file="test_generation_prompt")
         assert "## Previous Iterations Failed Tests" not in result["user"]
 
     def test_non_empty_additional_instructions_section_in_prompt(self, monkeypatch):
@@ -118,7 +118,7 @@ class TestPromptBuilder:
         builder.test_file = "Test Content"
         builder.code_coverage_report = "Coverage Report Content"
 
-        result = builder.build_prompt_custom(file="test_generation_prompt")
+        result = builder.build_prompt(file="test_generation_prompt")
         assert "## Additional Instructions" in result["user"]
         assert "Additional Instructions Content" in result["user"]
 
@@ -137,11 +137,11 @@ class TestPromptBuilder:
         builder.test_file = "Test Content"
         builder.code_coverage_report = "Coverage Report Content"
 
-        result = builder.build_prompt_custom(file="test_generation_prompt")
+        result = builder.build_prompt(file="test_generation_prompt")
         assert "## Previous Iterations Failed Tests" in result["user"]
         assert "Failed Test Runs Content" in result["user"]
 
-    def test_build_prompt_custom_handles_rendering_exception(self, monkeypatch):
+    def test_build_prompt_handles_rendering_exception(self, monkeypatch):
         def mock_render(*args, **kwargs):
             raise Exception("Rendering error")
 
@@ -155,7 +155,7 @@ class TestPromptBuilder:
             test_file_path="test_path",
             code_coverage_report="coverage_report",
         )
-        result = builder.build_prompt_custom("custom_file")
+        result = builder.build_prompt("custom_file")
         assert result == {"system": "", "user": ""}
 
     def test_build_prompt_handles_rendering_exception(self, monkeypatch):
@@ -172,7 +172,7 @@ class TestPromptBuilder:
             test_file_path="test_path",
             code_coverage_report="coverage_report",
         )
-        result = builder.build_prompt_custom(file="test_generation_prompt")
+        result = builder.build_prompt(file="test_generation_prompt")
         assert result == {"system": "", "user": ""}
 
 class TestPromptBuilderEndToEnd:
@@ -198,7 +198,7 @@ class TestPromptBuilderEndToEnd:
         builder.stdout_from_run = "stdout content"
         builder.processed_test_file = "processed test file content"
 
-        result = builder.build_prompt_custom("analyze_test_run_failure")
+        result = builder.build_prompt("analyze_test_run_failure")
         assert "stderr content" in result["user"]
         assert "stdout content" in result["user"]
 
@@ -207,7 +207,7 @@ class TestPromptBuilderEndToEnd:
         os.remove(test_file.name)
         os.remove(tmp_file.name)
 
-    def test_build_prompt_custom_missing_settings(self, monkeypatch):
+    def test_build_prompt_missing_settings(self, monkeypatch):
         # Mock get_settings to return None for the file
         def mock_get_settings():
             return type('Settings', (), {'get': lambda x: None})()
@@ -220,6 +220,6 @@ class TestPromptBuilderEndToEnd:
             code_coverage_report="coverage_report"
         )
         
-        result = builder.build_prompt_custom("nonexistent_file")
+        result = builder.build_prompt("nonexistent_file")
         assert result == {"system": "", "user": ""}
 

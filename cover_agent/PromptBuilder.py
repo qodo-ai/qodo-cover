@@ -126,7 +126,7 @@ class PromptBuilder:
         except Exception as e:
             return f"Error reading {file_path}: {e}"
 
-    def build_prompt_custom(
+    def build_prompt(
         self,
         file: str,
         source_file_name: str = None,

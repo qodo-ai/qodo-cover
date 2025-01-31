@@ -11,7 +11,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
 
     def generate_tests(self, failed_tests, language, test_framework, coverage_report):
         """Generates additional unit tests to improve test coverage."""
-        prompt = self.builder.build_prompt_custom(
+        prompt = self.builder.build_prompt(
             file="test_generation_prompt",
             failed_tests_section=failed_tests,
             language=language,
@@ -23,7 +23,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
 
     def analyze_test_failure(self, stderr, stdout, processed_test_file):
         """Analyzes the output of a failed test to determine the cause of failure."""
-        prompt = self.builder.build_prompt_custom(
+        prompt = self.builder.build_prompt(
             file="analyze_test_run_failure",
             stderr=stderr,
             stdout=stdout,
@@ -34,7 +34,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
 
     def analyze_test_insert_line(self, test_file):
         """Determines where to insert new test cases."""
-        prompt = self.builder.build_prompt_custom(
+        prompt = self.builder.build_prompt(
             file="analyze_suite_test_insert_line",
             test_file=test_file,
         )
@@ -43,7 +43,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
 
     def analyze_test_against_context(self, test_code, context):
         """Validates whether a generated test is appropriate for its corresponding source code."""
-        prompt = self.builder.build_prompt_custom(
+        prompt = self.builder.build_prompt(
             file="analyze_test_against_context",
             test_code=test_code,
             context=context,
@@ -53,7 +53,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
 
     def analyze_suite_test_headers_indentation(self, test_file):
         """Determines the indentation style used in test suite headers."""
-        prompt = self.builder.build_prompt_custom(
+        prompt = self.builder.build_prompt(
             file="analyze_suite_test_headers_indentation",
             test_file=test_file,
         )

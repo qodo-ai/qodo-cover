@@ -24,7 +24,7 @@ sequenceDiagram
     CoverAgent->>UnitTestGenerator: initial_test_suite_analysis()
     
     loop Analyze test suite headers indentation
-        UnitTestGenerator->>PromptBuilder: build_prompt_custom(analyze_suite_test_headers_indentation)
+        UnitTestGenerator->>PromptBuilder: build_prompt(analyze_suite_test_headers_indentation)
         PromptBuilder-->>UnitTestGenerator: Return prompt
         note right of UnitTestGenerator: Request in prompt: <br/>1. Programming language of the test file <br/>2. Testing framework needed to run tests <br/>3. Number of tests in the file <br/>4. Indentation of the test headers
         PromptBuilder-->>AICaller: Construct and return full prompt
@@ -37,7 +37,7 @@ sequenceDiagram
     end
 
     loop Analyze test insert lines
-        UnitTestGenerator->>PromptBuilder: build_prompt_custom(analyze_suite_test_insert_line)
+        UnitTestGenerator->>PromptBuilder: build_prompt(analyze_suite_test_insert_line)
         PromptBuilder-->>UnitTestGenerator: Return prompt
         note right of UnitTestGenerator: Request in prompt: <br/>1. Programming language of the test file <br/>2. Testing framework needed to run tests <br/>3. Number of tests in the file <br/>4. Line number to insert new tests <br/>5. Line number to insert new imports
         PromptBuilder-->>AICaller: Construct and return full prompt
