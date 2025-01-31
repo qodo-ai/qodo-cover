@@ -5,12 +5,9 @@ import logging
 import os
 import re
 
-from cover_agent.AICaller import AICaller
 from cover_agent.CustomLogger import CustomLogger
 from cover_agent.FilePreprocessor import FilePreprocessor
-from cover_agent.PromptBuilder import PromptBuilder
-from cover_agent.DefaultAgentCompletion import DefaultAgentCompletion
-from cover_agent.Runner import Runner
+from cover_agent.AgentCompletionABC import AgentCompletionABC
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.settings.token_handling import clip_tokens, TokenEncoder
 from cover_agent.utils import load_yaml
@@ -24,6 +21,7 @@ class UnitTestGenerator:
         code_coverage_report_path: str,
         test_command: str,
         llm_model: str,
+        agent_completion: AgentCompletionABC,
         api_base: str = "",
         test_command_dir: str = os.getcwd(),
         included_files: list = None,
@@ -68,23 +66,7 @@ class UnitTestGenerator:
         self.use_report_coverage_feature_flag = use_report_coverage_feature_flag
         self.last_coverage_percentages = {}
         self.llm_model = llm_model
-
-        # Objects to instantiate
-        self.ai_caller = AICaller(model=llm_model, api_base=api_base)
-        self.prompt_builder = PromptBuilder(
-            source_file_path=self.source_file_path,
-            test_file_path=self.test_file_path,
-            code_coverage_report="",
-            included_files=self.included_files,
-            additional_instructions=self.additional_instructions,
-            failed_test_runs="",
-            language="",
-            testing_framework="",
-            project_root=self.project_root,
-        )
-        self.agent_completion = DefaultAgentCompletion(
-            builder=self.prompt_builder, caller=self.ai_caller
-        )
+        self.agent_completion = agent_completion
 
         # Get the logger instance from CustomLogger
         self.logger = CustomLogger.get_logger(__name__)
