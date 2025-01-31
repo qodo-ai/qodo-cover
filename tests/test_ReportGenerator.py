@@ -1,6 +1,7 @@
 import pytest
 from cover_agent.ReportGenerator import ReportGenerator
 
+
 class TestReportGeneration:
     @pytest.fixture
     def sample_results(self):
@@ -40,9 +41,15 @@ class TestReportGeneration:
             content = file.read()
 
         # Verify that key parts of the expected HTML output are present in the report
-        assert expected_output[0] in content  # Check if the start of the HTML is correct
-        assert expected_output[1] in content  # Check if the table header includes "Status"
-        assert expected_output[2] in content  # Check if the row includes "test_current_date"
+        assert (
+            expected_output[0] in content
+        )  # Check if the start of the HTML is correct
+        assert (
+            expected_output[1] in content
+        )  # Check if the table header includes "Status"
+        assert (
+            expected_output[2] in content
+        )  # Check if the row includes "test_current_date"
         assert expected_output[3] in content  # Check if the HTML closes properly
 
     def test_generate_partial_diff_basic(self):
@@ -53,6 +60,5 @@ class TestReportGeneration:
         assert '<span class="diff-added">+line4</span>' in diff_output
         assert '<span class="diff-removed">-line2</span>' in diff_output
         assert '<span class="diff-unchanged"> line1</span>' in diff_output
-
 
         # Additional validation can be added based on specific content if required

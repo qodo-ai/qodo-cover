@@ -93,7 +93,7 @@ class ReportGenerator:
     @classmethod
     def generate_full_diff(cls, original, processed):
         """
-        Generates a full view of both the original and processed test files, 
+        Generates a full view of both the original and processed test files,
         highlighting added, removed, and unchanged lines, showing the full code.
 
         :param original: String content of the original test file.
@@ -104,26 +104,26 @@ class ReportGenerator:
 
         diff_html = []
         for line in diff:
-            if line.startswith('+'):
+            if line.startswith("+"):
                 diff_html.append(f'<span class="diff-added">{line}</span>')
-            elif line.startswith('-'):
+            elif line.startswith("-"):
                 diff_html.append(f'<span class="diff-removed">{line}</span>')
             else:
                 diff_html.append(f'<span class="diff-unchanged">{line}</span>')
-        return '\n'.join(diff_html)
+        return "\n".join(diff_html)
 
     @classmethod
     def generate_partial_diff(cls, original, processed, context_lines=3):
         """
         Generates a partial diff of both the original and processed test files,
         showing only added, removed, or changed lines with a few lines of context.
-        
+
         Note:
         - The `difflib.unified_diff` function is used, which includes header lines (`---` and `+++`)
           that indicate the original and modified file names or timestamps.
         - It also includes context lines starting with `@@`, which show the range of lines affected.
         - These lines are essential parts of the diff output and should be included in the expected outputs of tests.
-        
+
         :param original: String content of the original test file.
         :param processed: String content of the processed test file.
         :param context_lines: Number of context lines to include around changes.
@@ -131,25 +131,23 @@ class ReportGenerator:
         """
         # Use unified_diff to generate a partial diff with context
         diff = difflib.unified_diff(
-            original.splitlines(), 
-            processed.splitlines(), 
-            n=context_lines
+            original.splitlines(), processed.splitlines(), n=context_lines
         )
 
         diff_html = []
         for line in diff:
-            if line.startswith('+') and not line.startswith('+++'):
+            if line.startswith("+") and not line.startswith("+++"):
                 diff_html.append(f'<span class="diff-added">{line}</span>')
-            elif line.startswith('-') and not line.startswith('---'):
+            elif line.startswith("-") and not line.startswith("---"):
                 diff_html.append(f'<span class="diff-removed">{line}</span>')
-            elif line.startswith('@@'):
+            elif line.startswith("@@"):
                 # Highlight the diff context (line numbers)
                 diff_html.append(f'<span class="diff-context">{line}</span>')
             else:
                 # Show unchanged lines as context
                 diff_html.append(f'<span class="diff-unchanged">{line}</span>')
-        
-        return '\n'.join(diff_html)
+
+        return "\n".join(diff_html)
 
     @classmethod
     def generate_report(cls, results, file_path):
@@ -161,7 +159,9 @@ class ReportGenerator:
         """
         # Generate the full diff for each result
         for result in results:
-            result['full_diff'] = cls.generate_full_diff(result['original_test_file'], result['processed_test_file'])
+            result["full_diff"] = cls.generate_full_diff(
+                result["original_test_file"], result["processed_test_file"]
+            )
 
         template = Template(cls.HTML_TEMPLATE)
         html_content = template.render(results=results)

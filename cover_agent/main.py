@@ -16,7 +16,10 @@ def parse_args():
         "--test-file-path", required=True, help="Path to the input test file."
     )
     parser.add_argument(
-        "--project-root", required=False, help="Path to the root of the project.", default=""
+        "--project-root",
+        required=False,
+        help="Path to the root of the project.",
+        default="",
     )
     parser.add_argument(
         "--test-file-output-path",
@@ -124,9 +127,8 @@ def parse_args():
         "--run-each-test-separately",
         type=bool,
         default=False,
-        help="Run each test separately. Default: False"
+        help="Run each test separately. Default: False",
     )
-
 
     return parser.parse_args()
 

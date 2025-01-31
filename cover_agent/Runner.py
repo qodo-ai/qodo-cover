@@ -20,11 +20,18 @@ class Runner:
         # Get the current time before running the test command, in milliseconds
         command_start_time = int(round(time.time() * 1000))
 
-        max_allowed_runtime_seconds = get_settings().get("tests.max_allowed_runtime_seconds", 30)
+        max_allowed_runtime_seconds = get_settings().get(
+            "tests.max_allowed_runtime_seconds", 30
+        )
         # Ensure the command is executed with shell=True for string commands
         try:
             result = subprocess.run(
-                command, shell=True, cwd=cwd, text=True, capture_output=True, timeout=max_allowed_runtime_seconds
+                command,
+                shell=True,
+                cwd=cwd,
+                text=True,
+                capture_output=True,
+                timeout=max_allowed_runtime_seconds,
             )
 
             # Return a dictionary with the desired information
@@ -32,4 +39,3 @@ class Runner:
         except subprocess.TimeoutExpired:
             # Handle the timeout case
             return "", "Command timed out", -1, command_start_time
-

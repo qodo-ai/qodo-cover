@@ -5,15 +5,17 @@ Defines wrapper objects around the types returned by LSP to ensure decoupling be
 from __future__ import annotations
 
 from enum import IntEnum, Enum
+
 try:
     from typing import NotRequired, TypedDict, List, Dict, Union
-except ImportError: # before Python 3.11
+except ImportError:  # before Python 3.11
     from typing_extensions import NotRequired, TypedDict, List, Dict, Union
 
 URI = str
 DocumentUri = str
 Uint = int
 RegExp = str
+
 
 class Position(TypedDict):
     """Position in a text document expressed as zero-based line and character
@@ -87,6 +89,7 @@ class Location(TypedDict):
     absolutePath: str
     relativePath: str
 
+
 class CompletionItemKind(IntEnum):
     """The kind of a completion entry."""
 
@@ -116,6 +119,7 @@ class CompletionItemKind(IntEnum):
     Operator = 24
     TypeParameter = 25
 
+
 class CompletionItem(TypedDict):
     """A completion item represents a text snippet that is
     proposed to complete text that is being typed."""
@@ -133,6 +137,7 @@ class CompletionItem(TypedDict):
     detail: NotRequired[str]
     """ A human-readable string with additional information
     about this item, like type or symbol information. """
+
 
 class SymbolKind(IntEnum):
     """A symbol kind."""
@@ -164,6 +169,7 @@ class SymbolKind(IntEnum):
     Operator = 25
     TypeParameter = 26
 
+
 class SymbolTag(IntEnum):
     """Symbol tags are extra annotations that tweak the rendering of a symbol.
 
@@ -171,6 +177,7 @@ class SymbolTag(IntEnum):
 
     Deprecated = 1
     """ Render a symbol as obsolete, usually using a strike-out. """
+
 
 class UnifiedSymbolInformation(TypedDict):
     """Represents information about programming constructs like variables, classes,
@@ -206,7 +213,7 @@ class UnifiedSymbolInformation(TypedDict):
 
     detail: NotRequired[str]
     """ More detail for this symbol, e.g the signature of a function. """
-    
+
     range: NotRequired[Range]
     """ The range enclosing this symbol not including leading/trailing whitespace but everything else
     like comments. This information is typically used to determine if the clients cursor is
@@ -215,7 +222,9 @@ class UnifiedSymbolInformation(TypedDict):
     """ The range that should be selected and revealed when this symbol is being picked, e.g the name of a function.
     Must be contained by the `range`. """
 
-TreeRepr = Dict[int, List['TreeRepr']]
+
+TreeRepr = Dict[int, List["TreeRepr"]]
+
 
 class MarkupKind(Enum):
     """Describes the content type that a client supports in various
@@ -229,9 +238,11 @@ class MarkupKind(Enum):
     Markdown = "markdown"
     """ Markdown is supported as a content format """
 
+
 class __MarkedString_Type_1(TypedDict):
     language: str
     value: str
+
 
 MarkedString = Union[str, "__MarkedString_Type_1"]
 """ MarkedString can be used to render human readable text. It is either a markdown string
@@ -246,6 +257,7 @@ ${value}
 
 Note that markdown strings will be sanitized - that means html will be escaped.
 @deprecated use MarkupContent instead. """
+
 
 class MarkupContent(TypedDict):
     """A `MarkupContent` literal represents a string value which content is interpreted base on its
@@ -275,6 +287,7 @@ class MarkupContent(TypedDict):
     """ The type of the Markup """
     value: str
     """ The content itself """
+
 
 class Hover(TypedDict):
     """The result of a hover request."""

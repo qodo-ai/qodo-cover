@@ -37,9 +37,7 @@ class TestMain:
 
     @patch("cover_agent.CoverAgent.UnitTestGenerator")
     @patch("cover_agent.CoverAgent.os.path.isfile")
-    def test_main_source_file_not_found(
-        self, mock_isfile, mock_unit_cover_agent
-    ):
+    def test_main_source_file_not_found(self, mock_isfile, mock_unit_cover_agent):
         args = argparse.Namespace(
             source_file_path="test_source.py",
             test_file_path="test_file.py",
@@ -96,9 +94,7 @@ class TestMain:
     @patch("cover_agent.main.CoverAgent")
     @patch("cover_agent.main.parse_args")
     @patch("cover_agent.main.os.path.isfile")
-    def test_main_calls_agent_run(
-        self, mock_isfile, mock_parse_args, mock_cover_agent
-    ):
+    def test_main_calls_agent_run(self, mock_isfile, mock_parse_args, mock_cover_agent):
         args = argparse.Namespace(
             source_file_path="test_source.py",
             test_file_path="test_file.py",
@@ -121,12 +117,14 @@ class TestMain:
         )
         mock_parse_args.return_value = args
         # Mock os.path.isfile to return True for both source and test file paths
-        mock_isfile.side_effect = lambda path: path in [args.source_file_path, args.test_file_path]
+        mock_isfile.side_effect = lambda path: path in [
+            args.source_file_path,
+            args.test_file_path,
+        ]
         mock_agent_instance = MagicMock()
         mock_cover_agent.return_value = mock_agent_instance
-    
+
         main()
-    
+
         mock_cover_agent.assert_called_once_with(args)
         mock_agent_instance.run.assert_called_once()
-

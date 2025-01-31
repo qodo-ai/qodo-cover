@@ -2,6 +2,7 @@
 This module contains constants used in the LSP protocol.
 """
 
+
 class LSPConstants:
     """
     This class contains constants used in the LSP protocol.

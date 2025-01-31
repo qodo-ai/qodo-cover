@@ -13,11 +13,16 @@ async def run():
     if args.project_language == "python":
         context_helper = ContextHelper(args)
     else:
-        raise NotImplementedError("Unsupported language: {}".format(args.project_language))
+        raise NotImplementedError(
+            "Unsupported language: {}".format(args.project_language)
+        )
 
     # scan the project directory for test files
     test_files = find_test_files(args)
-    print("============\nTest files to be extended:\n" + ''.join(f"{f}\n============\n" for f in test_files))
+    print(
+        "============\nTest files to be extended:\n"
+        + "".join(f"{f}\n============\n" for f in test_files)
+    )
 
     # start the language server
     async with context_helper.start_server():
@@ -29,11 +34,17 @@ async def run():
         for test_file in test_files:
             # Find the context files for the test file
             context_files = await context_helper.find_test_file_context(test_file)
-            print("Context files for test file '{}':\n{}".format(test_file, ''.join(f"{f}\n" for f in context_files)))
+            print(
+                "Context files for test file '{}':\n{}".format(
+                    test_file, "".join(f"{f}\n" for f in context_files)
+                )
+            )
 
             # Analyze the test file against the context files
             print("\nAnalyzing test file against context files...")
-            source_file, context_files_include = await context_helper.analyze_context(test_file, context_files, ai_caller)
+            source_file, context_files_include = await context_helper.analyze_context(
+                test_file, context_files, ai_caller
+            )
 
             if source_file:
                 try:

@@ -3,6 +3,7 @@ from pathlib import Path
 
 from grep_ast import TreeContext
 from grep_ast.parsers import PARSERS, filename_to_lang
+
 # from pygments.lexers import guess_lexer_for_filename
 # from pygments.token import Token
 from tree_sitter_languages import get_language, get_parser
@@ -16,15 +17,22 @@ class FileMap:
     Supported languages: C, C++, C#, elisp, elixir, go, java, javascript, ocaml, php, python, ql, ruby, rust, typescript
     """
 
-    def __init__(self, fname_full_path: str, parent_context=True, child_context=False,
-                 header_max=0, margin=0, project_base_path: str = None):
+    def __init__(
+        self,
+        fname_full_path: str,
+        parent_context=True,
+        child_context=False,
+        header_max=0,
+        margin=0,
+        project_base_path: str = None,
+    ):
         self.fname_full_path = fname_full_path
         self.project_base_path = project_base_path
         if project_base_path:
             self.fname_rel = os.path.relpath(fname_full_path, project_base_path)
         else:
             self.fname_rel = fname_full_path
-        self.main_queries_path = Path(__file__).parent.parent / 'queries'
+        self.main_queries_path = Path(__file__).parent.parent / "queries"
         if not os.path.exists(fname_full_path):
             print(f"File {fname_full_path} does not exist")
         with open(fname_full_path, "r") as f:
@@ -69,9 +77,9 @@ class FileMap:
             return ""
 
         output = ""
-        def_lines = [q['line'] for q in query_results if q['kind'] == "def"]
+        def_lines = [q["line"] for q in query_results if q["kind"] == "def"]
         output += "\n"
-        output += query_results[0]['fname'] + ":\n"
+        output += query_results[0]["fname"] + ":\n"
         output += self.render_file_summary(def_lines)
         return output
 

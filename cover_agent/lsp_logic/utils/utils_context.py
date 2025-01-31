@@ -25,21 +25,28 @@ async def analyze_context(test_file, context_files, args, ai_caller):
         test_file_rel_str = os.path.relpath(test_file, args.project_root)
         context_files_rel_filtered_list_str = ""
         for file in context_files:
-            context_files_rel_filtered_list_str += f"`{os.path.relpath(file, args.project_root)}\n`"
-        variables = {"language": args.project_language,
-                     "test_file_name_rel": test_file_rel_str,
-                     "test_file_content": open(test_file, 'r').read(),
-                     "context_files_names_rel": context_files_rel_filtered_list_str
-                     }
+            context_files_rel_filtered_list_str += (
+                f"`{os.path.relpath(file, args.project_root)}\n`"
+            )
+        variables = {
+            "language": args.project_language,
+            "test_file_name_rel": test_file_rel_str,
+            "test_file_content": open(test_file, "r").read(),
+            "context_files_names_rel": context_files_rel_filtered_list_str,
+        }
         environment = Environment(undefined=StrictUndefined)
-        system_prompt = environment.from_string(get_settings().analyze_test_against_context.system).render(variables)
-        user_prompt = environment.from_string(get_settings().analyze_test_against_context.user).render(variables)
-        response, prompt_token_count, response_token_count = (
-            ai_caller.call_model(prompt={"system": system_prompt, "user": user_prompt}, stream=False)
+        system_prompt = environment.from_string(
+            get_settings().analyze_test_against_context.system
+        ).render(variables)
+        user_prompt = environment.from_string(
+            get_settings().analyze_test_against_context.user
+        ).render(variables)
+        response, prompt_token_count, response_token_count = ai_caller.call_model(
+            prompt={"system": system_prompt, "user": user_prompt}, stream=False
         )
         response_dict = load_yaml(response)
-        if int(response_dict.get('is_this_a_unit_test', 0)) == 1:
-            source_file_rel = response_dict.get('main_file', "").strip().strip('`')
+        if int(response_dict.get("is_this_a_unit_test", 0)) == 1:
+            source_file_rel = response_dict.get("main_file", "").strip().strip("`")
             source_file = os.path.join(args.project_root, source_file_rel)
             for file in context_files:
                 file_rel = os.path.relpath(file, args.project_root)
@@ -47,7 +54,9 @@ async def analyze_context(test_file, context_files, args, ai_caller):
                     context_files_include = [f for f in context_files if f != file]
 
         if source_file:
-            print(f"Test file: `{test_file}`,\nis a unit test file for source file: `{source_file}`")
+            print(
+                f"Test file: `{test_file}`,\nis a unit test file for source file: `{source_file}`"
+            )
         else:
             print(f"Test file: `{test_file}` is not a unit test file")
     except Exception as e:
@@ -63,20 +72,24 @@ async def find_test_file_context(args, lsp, test_file):
 
         # get tree-sitter query results
         # print("\nGetting tree-sitter query results for the target file...")
-        fname_summary = FileMap(target_file, parent_context=False, child_context=False,
-                                header_max=0, project_base_path=args.project_root)
+        fname_summary = FileMap(
+            target_file,
+            parent_context=False,
+            child_context=False,
+            header_max=0,
+            project_base_path=args.project_root,
+        )
         query_results, captures = fname_summary.get_query_results()
         # print("Tree-sitter query results for the target file done.")
 
         # print("\nGetting context ...")
-        context_files, context_symbols = await lsp.get_direct_context(captures,
-                                                                  args.project_language,
-                                                                  args.project_root,
-                                                                  rel_file)
+        context_files, context_symbols = await lsp.get_direct_context(
+            captures, args.project_language, args.project_root, rel_file
+        )
         # filter empty files
         context_files_filtered = []
         for file in context_files:
-            with open(file, 'r') as f:
+            with open(file, "r") as f:
                 if f.read().strip():
                     context_files_filtered.append(file)
         context_files = context_files_filtered
@@ -96,4 +109,6 @@ async def initialize_language_server(args):
         sleep(0.1)
         return lsp
     else:
-        raise NotImplementedError("Unsupported language: {}".format(args.project_language))
+        raise NotImplementedError(
+            "Unsupported language: {}".format(args.project_language)
+        )

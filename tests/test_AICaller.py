@@ -51,7 +51,9 @@ class TestAICaller:
             ai_caller.call_model(prompt)
 
         # assert str(exc_info.value) == "list index out of range"
-        assert str(exc_info.value) == "'NoneType' object is not subscriptable" # this error message might change for different versions of litellm
+        assert (
+            str(exc_info.value) == "'NoneType' object is not subscriptable"
+        )  # this error message might change for different versions of litellm
 
     @patch("cover_agent.AICaller.litellm.completion")
     @patch.dict(os.environ, {"WANDB_API_KEY": "test_key"})
@@ -124,7 +126,9 @@ class TestAICaller:
         mock_response.usage = Mock(prompt_tokens=2, completion_tokens=10)
         mock_completion.return_value = mock_response
         # Call the method
-        response, prompt_tokens, response_tokens = ai_caller.call_model(prompt, stream=False)
+        response, prompt_tokens, response_tokens = ai_caller.call_model(
+            prompt, stream=False
+        )
         assert response == "response"
         assert prompt_tokens == 2
         assert response_tokens == 10
@@ -141,14 +145,18 @@ class TestAICaller:
                 "choices": [{"message": {"content": "response"}}],
                 "usage": {"prompt_tokens": 2, "completion_tokens": 10},
             }
-            response, prompt_tokens, response_tokens = ai_caller.call_model(prompt, stream=True)
+            response, prompt_tokens, response_tokens = ai_caller.call_model(
+                prompt, stream=True
+            )
             assert response == "response"
             assert prompt_tokens == 2
 
     @patch("cover_agent.AICaller.litellm.completion")
     @patch.dict(os.environ, {"WANDB_API_KEY": "test_key"})
     @patch("cover_agent.AICaller.Trace.log")
-    def test_call_model_wandb_logging_exception(self, mock_log, mock_completion, ai_caller):
+    def test_call_model_wandb_logging_exception(
+        self, mock_log, mock_completion, ai_caller
+    ):
         mock_completion.return_value = [
             {"choices": [{"delta": {"content": "response"}}]}
         ]

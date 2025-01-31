@@ -31,6 +31,7 @@ SOFTWARE.
 
 from enum import Enum, IntEnum, IntFlag
 from typing import Dict, List, Literal, Union
+
 try:
     from typing import NotRequired, TypedDict
 except ImportError:  # before Python 3.11
@@ -5402,7 +5403,9 @@ class MarkdownClientCapabilities(TypedDict):
 
 
 class __CodeActionClientCapabilities_codeActionLiteralSupport_Type_1(TypedDict):
-    codeActionKind: "__CodeActionClientCapabilities_codeActionLiteralSupport_codeActionKind_Type_1"
+    codeActionKind: (
+        "__CodeActionClientCapabilities_codeActionLiteralSupport_codeActionKind_Type_1"
+    )
     """ The code action kind is support with the following value
     set. """
 

@@ -38,7 +38,10 @@ The follow is the status of the test:
 ```
 """
 
-def analayze_test_results(db_connection_string, response_file_path="test_results_analysis.md"):
+
+def analayze_test_results(
+    db_connection_string, response_file_path="test_results_analysis.md"
+):
     # Create an instance of the UnitTestDB class
     unit_test_db = UnitTestDB(db_connection_string)
 
@@ -48,7 +51,7 @@ def analayze_test_results(db_connection_string, response_file_path="test_results
     # Analyze the test results using the LLM
     for test_result in test_results:
         # Only analyze failed test results
-        if test_result['status'] == "FAIL":
+        if test_result["status"] == "FAIL":
             # Print banner for each test result
             print("============================================================")
             print(f"Test Result ID: {test_result['id']}")
@@ -56,29 +59,32 @@ def analayze_test_results(db_connection_string, response_file_path="test_results
 
             # Fill in PROMPT string with the test result dictionary contents
             prompt = PROMPT_TEMPLATE.format(
-                prompt=test_result['prompt'],
-                source_file=test_result['source_file'],
-                original_test_file=test_result['original_test_file'],
-                processed_test_file=test_result['processed_test_file'],
-                stdout=test_result['stdout'],
-                stderr=test_result['stderr'],
-                status=test_result['status']
+                prompt=test_result["prompt"],
+                source_file=test_result["source_file"],
+                original_test_file=test_result["original_test_file"],
+                processed_test_file=test_result["processed_test_file"],
+                stdout=test_result["stdout"],
+                stderr=test_result["stderr"],
+                status=test_result["status"],
             )
-            
+
             # Create an instance of the AICaller class
             ai_caller = AICaller(model="gpt-4o")
 
             # Call the LLM and get the response
             prompt_dict = {"system": "", "user": prompt}
-            response, input_token_count, output_token_count = ai_caller.call_model(prompt_dict)
+            response, input_token_count, output_token_count = ai_caller.call_model(
+                prompt_dict
+            )
 
             # Print the token count of the input and output
             print(f"Input token count: {input_token_count}")
             print(f"Output token count: {output_token_count}")
-            
+
             # Append the response to a file
             with open(response_file_path, "a") as f:
                 f.write(response)
+
 
 if __name__ == "__main__":
     RESPONSE_FILEPATH = "test_results_analysis.md"
@@ -88,4 +94,6 @@ if __name__ == "__main__":
         f.write("")
 
     db_connection_string = "sqlite:///increase_project_coverage.db"
-    analayze_test_results(db_connection_string=db_connection_string, response_file_path=RESPONSE_FILEPATH)
+    analayze_test_results(
+        db_connection_string=db_connection_string, response_file_path=RESPONSE_FILEPATH
+    )

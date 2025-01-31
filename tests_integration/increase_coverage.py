@@ -45,8 +45,8 @@ class Args:
         self.prompt_only = False
         self.strict_coverage = False
         self.run_tests_multiple_times = 1
-        self.use_report_coverage_feature_flag=False
-        self.log_db_path="increase_project_coverage.db"
+        self.use_report_coverage_feature_flag = False
+        self.log_db_path = "increase_project_coverage.db"
 
 
 if __name__ == "__main__":

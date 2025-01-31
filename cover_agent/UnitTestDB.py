@@ -7,8 +7,9 @@ from cover_agent.ReportGenerator import ReportGenerator
 
 Base = declarative_base()
 
+
 class UnitTestGenerationAttempt(Base):
-    __tablename__ = 'unit_test_generation_attempts'
+    __tablename__ = "unit_test_generation_attempts"
     id = Column(Integer, primary_key=True)
     run_time = Column(DateTime, default=datetime.now)  # Use local time
     status = Column(String)
@@ -23,6 +24,7 @@ class UnitTestGenerationAttempt(Base):
     source_file = Column(Text)
     original_test_file = Column(Text)
     processed_test_file = Column(Text)
+
 
 class UnitTestDB:
     def __init__(self, db_connection_string):
@@ -50,14 +52,14 @@ class UnitTestDB:
             session.add(new_attempt)
             session.commit()
             return new_attempt.id
-        
+
     def get_all_attempts(self):
-        '''
+        """
         Retrieve all unit test generation attempts from the database.
 
         Returns:
             list: A list of dictionaries containing details of each attempt in the format required by the ReportGenerator.
-        '''
+        """
         with self.Session() as session:
             attempts = session.query(UnitTestGenerationAttempt).all()
 
@@ -92,9 +94,13 @@ class UnitTestDB:
         # Use the ReportGenerator to generate the HTML report
         ReportGenerator.generate_report(self.get_all_attempts(), report_filepath)
 
-def dump_to_report(path_to_db="cover_agent_unit_test_runs.db", report_filepath="test_results.html"):
+
+def dump_to_report(
+    path_to_db="cover_agent_unit_test_runs.db", report_filepath="test_results.html"
+):
     unittest_db = UnitTestDB(f"sqlite:///{path_to_db}")
     unittest_db.dump_to_report(report_filepath)
+
 
 def dump_to_report_cli():
     parser = argparse.ArgumentParser(description="Generate a unit test report.")
@@ -102,13 +108,13 @@ def dump_to_report_cli():
         "--path-to-db",
         type=str,
         default="cover_agent_unit_test_runs.db",
-        help="Path to the SQLite database file."
+        help="Path to the SQLite database file.",
     )
     parser.add_argument(
         "--report-filepath",
         type=str,
         default="test_results.html",
-        help="Path to the HTML report file."
+        help="Path to the HTML report file.",
     )
     args = parser.parse_args()
     dump_to_report(path_to_db=args.path_to_db, report_filepath=args.report_filepath)

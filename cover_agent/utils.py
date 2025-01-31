@@ -158,31 +158,44 @@ def parse_args_full_repo():
     """
     parser = argparse.ArgumentParser(description=f"Cover Agent v{__version__}")
     parser.add_argument(
-        "--max-test-files-allowed-to-analyze", type=int, default=20, help="The maximum number of test files to analyze."
+        "--max-test-files-allowed-to-analyze",
+        type=int,
+        default=20,
+        help="The maximum number of test files to analyze.",
     )
-    parser.add_argument("--look-for-oldest-unchanged-test-file",
-                        action="store_true", help="If set, Cover-Agent will look for the oldest unchanged test file to analyze.")
+    parser.add_argument(
+        "--look-for-oldest-unchanged-test-file",
+        action="store_true",
+        help="If set, Cover-Agent will look for the oldest unchanged test file to analyze.",
+    )
 
     parser.add_argument(
-        "--project-language", required=True, default="python", help="The programming language of the project ([python, javascript, typescript])."
+        "--project-language",
+        required=True,
+        default="python",
+        help="The programming language of the project ([python, javascript, typescript]).",
     )
     parser.add_argument(
         "--project-root", required=True, help="Path to the root of the project."
     )
 
     parser.add_argument(
-        "--test-folder", required=False, help="Relative path to the relevant tests folder."
+        "--test-folder",
+        required=False,
+        help="Relative path to the relevant tests folder.",
     )
 
     parser.add_argument(
-        "--test-file", required=False, help="Relative path to the specific test file we want to extend."
+        "--test-file",
+        required=False,
+        help="Relative path to the specific test file we want to extend.",
     )
 
     parser.add_argument(
         "--run-each-test-separately",
         type=bool,
         default=True,
-        help="Run each test separately. Default: True"
+        help="Run each test separately. Default: True",
     )
 
     parser.add_argument(
@@ -312,18 +325,23 @@ def find_test_files(args) -> list:
             if hasattr(args, "test_folder") and args.test_folder:
                 if args.test_folder not in root:
                     continue
-            if 'test' in root.split(os.sep):
+            if "test" in root.split(os.sep):
                 for file in files:
                     if filename_to_lang(file) == language:
                         test_files.append(os.path.join(root, file))
             else:
                 # Check if any file contains 'test' in its name
                 for file in files:
-                    if 'test' in file:
+                    if "test" in file:
                         if filename_to_lang(file) == language:
                             test_files.append(os.path.join(root, file))
-        if len(test_files) >= MAX_TEST_FILES and args.look_for_oldest_unchanged_test_file:
-            print(f"Found {len(test_files)} test files. Stopping at {MAX_TEST_FILES} test files.")
+        if (
+            len(test_files) >= MAX_TEST_FILES
+            and args.look_for_oldest_unchanged_test_file
+        ):
+            print(
+                f"Found {len(test_files)} test files. Stopping at {MAX_TEST_FILES} test files."
+            )
             break
 
     if args.look_for_oldest_unchanged_test_file:

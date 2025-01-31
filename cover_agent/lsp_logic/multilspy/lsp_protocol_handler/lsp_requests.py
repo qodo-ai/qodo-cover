@@ -32,6 +32,7 @@ SOFTWARE.
 from typing import List, Union
 from cover_agent.lsp_logic.multilspy.lsp_protocol_handler import lsp_types
 
+
 class LspRequest:
     def __init__(self, send_request):
         self.send_request = send_request

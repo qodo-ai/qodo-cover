@@ -1,6 +1,7 @@
 from threading import Lock
 from tiktoken import get_encoding
 
+
 class TokenEncoder:
     _encoder_instance = None
     _model = None
@@ -8,10 +9,14 @@ class TokenEncoder:
 
     @classmethod
     def get_token_encoder(cls):
-        if cls._encoder_instance is None:  # Check without acquiring the lock for performance
+        if (
+            cls._encoder_instance is None
+        ):  # Check without acquiring the lock for performance
             with cls._lock:  # Lock acquisition to ensure thread safety
                 if cls._encoder_instance is None:
-                    cls._encoder_instance = get_encoding("o200k_base") # for now, we use the same encoder for all models
+                    cls._encoder_instance = get_encoding(
+                        "o200k_base"
+                    )  # for now, we use the same encoder for all models
         return cls._encoder_instance
 
 
@@ -23,7 +28,13 @@ class TokenHandler:
         return len(self.encoder.encode(patch))
 
 
-def clip_tokens(text: str, max_tokens: int, add_three_dots=True, num_input_tokens=None, delete_last_line=False) -> str:
+def clip_tokens(
+    text: str,
+    max_tokens: int,
+    add_three_dots=True,
+    num_input_tokens=None,
+    delete_last_line=False,
+) -> str:
     if not text:
         return text
 
@@ -46,11 +57,11 @@ def clip_tokens(text: str, max_tokens: int, add_three_dots=True, num_input_token
         if num_output_chars > 0:
             clipped_text = text[:num_output_chars]
             if delete_last_line:
-                clipped_text = clipped_text.rsplit('\n', 1)[0]
+                clipped_text = clipped_text.rsplit("\n", 1)[0]
             if add_three_dots:
                 clipped_text += "\n...(truncated)"
-        else: # if the text is empty
-            clipped_text =  ""
+        else:  # if the text is empty
+            clipped_text = ""
 
         return clipped_text
     except Exception as e:

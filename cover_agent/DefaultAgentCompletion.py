@@ -2,6 +2,7 @@ from cover_agent.AgentCompletionABC import AgentCompletionABC
 from cover_agent.PromptBuilder import PromptBuilder
 from cover_agent.AICaller import AICaller
 
+
 class DefaultAgentCompletion(AgentCompletionABC):
     """Default implementation using PromptBuilder and AICaller."""
 

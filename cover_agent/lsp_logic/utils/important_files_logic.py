@@ -177,7 +177,9 @@ ROOT_IMPORTANT_FILES = [
 
 
 # Normalize the lists once
-NORMALIZED_ROOT_IMPORTANT_FILES = set(os.path.normpath(path) for path in ROOT_IMPORTANT_FILES)
+NORMALIZED_ROOT_IMPORTANT_FILES = set(
+    os.path.normpath(path) for path in ROOT_IMPORTANT_FILES
+)
 
 
 def is_important(file_path):

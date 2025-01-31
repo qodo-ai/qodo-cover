@@ -32,4 +32,3 @@ class TestGetVersion:
         mock_sys.frozen = True
         mock_sys._MEIPASS = os.path.dirname(__file__)
         assert get_version() == "1.2.3"
-

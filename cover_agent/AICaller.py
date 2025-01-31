@@ -5,7 +5,14 @@ import time
 import litellm
 from functools import wraps
 from wandb.sdk.data_types.trace_tree import Trace
-from tenacity import retry, retry_if_exception_type, retry_if_not_exception_type, stop_after_attempt, wait_fixed
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    retry_if_not_exception_type,
+    stop_after_attempt,
+    wait_fixed,
+)
+
 MODEL_RETRIES = 3
 
 
@@ -15,16 +22,14 @@ def conditional_retry(func):
         if not self.enable_retry:
             return func(self, *args, **kwargs)
 
-        @retry(
-            stop=stop_after_attempt(MODEL_RETRIES),
-            wait=wait_fixed(1)
-        )
+        @retry(stop=stop_after_attempt(MODEL_RETRIES), wait=wait_fixed(1))
         def retry_wrapper():
             return func(self, *args, **kwargs)
 
         return retry_wrapper()
 
     return wrapper
+
 
 class AICaller:
     def __init__(self, model: str, api_base: str = "", enable_retry=True):
@@ -62,7 +67,10 @@ class AICaller:
             if self.model in ["o1-preview", "o1-mini"]:
                 # o1 doesn't accept a system message so we add it to the prompt
                 messages = [
-                    {"role": "user", "content": prompt["system"] + "\n" + prompt["user"]},
+                    {
+                        "role": "user",
+                        "content": prompt["system"] + "\n" + prompt["user"],
+                    },
                 ]
             else:
                 messages = [
@@ -149,4 +157,3 @@ class AICaller:
 
         # Returns: Response, Prompt token count, and Completion token count
         return content, prompt_tokens, completion_tokens
-

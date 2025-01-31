@@ -8,6 +8,7 @@ from cover_agent.UnitTestDB import UnitTestDB, UnitTestGenerationAttempt
 DB_NAME = "unit_test_runs.db"
 DATABASE_URL = f"sqlite:///{DB_NAME}"
 
+
 @pytest.fixture(scope="class")
 def unit_test_db():
     # Create an empty DB file for testing
@@ -23,6 +24,7 @@ def unit_test_db():
     # Delete the db file
     os.remove(DB_NAME)
 
+
 @pytest.mark.usefixtures("unit_test_db")
 class TestUnitTestDB:
 
@@ -35,7 +37,7 @@ class TestUnitTestDB:
             "stdout": "Test passed",
             "test": {
                 "test_code": "def test_example(): pass",
-                "new_imports_code": "import pytest"
+                "new_imports_code": "import pytest",
             },
             "language": "python",
             "source_file": "sample source code",
@@ -45,7 +47,9 @@ class TestUnitTestDB:
 
         attempt_id = unit_test_db.insert_attempt(test_result)
         with unit_test_db.Session() as session:
-            attempt = session.query(UnitTestGenerationAttempt).filter_by(id=attempt_id).one()
+            attempt = (
+                session.query(UnitTestGenerationAttempt).filter_by(id=attempt_id).one()
+            )
 
         assert attempt.id == attempt_id
         assert attempt.status == "success"
@@ -69,7 +73,7 @@ class TestUnitTestDB:
             "stdout": "Test passed",
             "test": {
                 "test_code": "def test_example(): pass",
-                "new_imports_code": "import pytest"
+                "new_imports_code": "import pytest",
             },
             "language": "python",
             "source_file": "sample source code",
@@ -94,18 +98,21 @@ class TestUnitTestDB:
         assert "sample new test code" in content
         assert "def test_example(): pass" in content
 
-
     def test_dump_to_report_cli_custom_args(self, unit_test_db, tmp_path, monkeypatch):
         custom_db_path = str(tmp_path / "cli_custom_unit_test_runs.db")
         custom_report_filepath = str(tmp_path / "cli_custom_report.html")
-        monkeypatch.setattr("sys.argv", [
-            "prog",
-            "--path-to-db", custom_db_path,
-            "--report-filepath", custom_report_filepath
-        ])
+        monkeypatch.setattr(
+            "sys.argv",
+            [
+                "prog",
+                "--path-to-db",
+                custom_db_path,
+                "--report-filepath",
+                custom_report_filepath,
+            ],
+        )
         dump_to_report_cli()
         assert os.path.exists(custom_report_filepath)
-
 
     def test_dump_to_report_defaults(self, unit_test_db, tmp_path):
         report_filepath = tmp_path / "default_report.html"

@@ -175,6 +175,7 @@ class TestPromptBuilder:
         result = builder.build_prompt(file="test_generation_prompt")
         assert result == {"system": "", "user": ""}
 
+
 class TestPromptBuilderEndToEnd:
     def test_custom_analyze_test_run_failure(self):
         # Create fake source and test files and tmp files and pass in the paths
@@ -210,16 +211,15 @@ class TestPromptBuilderEndToEnd:
     def test_build_prompt_missing_settings(self, monkeypatch):
         # Mock get_settings to return None for the file
         def mock_get_settings():
-            return type('Settings', (), {'get': lambda x: None})()
-        
-        monkeypatch.setattr('cover_agent.PromptBuilder.get_settings', mock_get_settings)
-        
+            return type("Settings", (), {"get": lambda x: None})()
+
+        monkeypatch.setattr("cover_agent.PromptBuilder.get_settings", mock_get_settings)
+
         builder = PromptBuilder(
             source_file_path="source_path",
             test_file_path="test_path",
-            code_coverage_report="coverage_report"
+            code_coverage_report="coverage_report",
         )
-        
+
         result = builder.build_prompt("nonexistent_file")
         assert result == {"system": "", "user": ""}
-

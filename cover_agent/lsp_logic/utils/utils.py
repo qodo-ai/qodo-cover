@@ -36,13 +36,16 @@ def find_relevant_files_in_repo(repo_root: str, chat_files: list[str]):
             # gitignore_content
             relative_path = os.path.relpath(os.path.join(root, file), repo_root)
             if gitignore_content:
-                if any (relative_path.startswith(pattern) for pattern in gitignore_content):
+                if any(
+                    relative_path.startswith(pattern) for pattern in gitignore_content
+                ):
                     continue
-            if 'venv/' in relative_path:
+            if "venv/" in relative_path:
                 continue
 
             repo_files.append(os.path.join(root, file))
     return repo_files
+
 
 class IgnorantTemporaryDirectory:
     def __init__(self):
@@ -149,7 +152,9 @@ def format_messages(messages, title=None):
                 if isinstance(item, dict):
                     for key, value in item.items():
                         if isinstance(value, dict) and "url" in value:
-                            output.append(f"{role} {key.capitalize()} URL: {value['url']}")
+                            output.append(
+                                f"{role} {key.capitalize()} URL: {value['url']}"
+                            )
                         else:
                             output.append(f"{role} {key}: {value}")
                 else:
@@ -317,7 +322,11 @@ class Spinner:
         if not self.visible:
             return
 
-        print(f"\r{self.text} {next(self.spinner_chars)}\r{self.text} ", end="", flush=True)
+        print(
+            f"\r{self.text} {next(self.spinner_chars)}\r{self.text} ",
+            end="",
+            flush=True,
+        )
 
     def end(self):
         if self.visible:
@@ -371,7 +380,9 @@ def check_pip_install_extra(io, module, prompt, pip_install_cmd, self_update=Fal
         print(printable_shell_command(cmd))  # plain print so it doesn't line-wrap
         return
 
-    if not io.confirm_ask("Run pip install?", default="y", subject=printable_shell_command(cmd)):
+    if not io.confirm_ask(
+        "Run pip install?", default="y", subject=printable_shell_command(cmd)
+    ):
         return
 
     success, output = run_install(cmd)
@@ -414,41 +425,41 @@ def uri_to_path(uri):
 
 def is_forbidden_directory(d_path, language):
     directories_to_ignore = []
-    if language == 'python':
+    if language == "python":
         directories_to_ignore = [
-            'venv',  # Virtual environment
-            'pyenv',  # Python environment
-            '__pycache__/',  # Compiled Python files
-            'dist/',  # Distribution directories
-            'build/',  # Build directories
+            "venv",  # Virtual environment
+            "pyenv",  # Python environment
+            "__pycache__/",  # Compiled Python files
+            "dist/",  # Distribution directories
+            "build/",  # Build directories
         ]
-    elif language == 'javascript' or language == 'typescript':
+    elif language == "javascript" or language == "typescript":
         directories_to_ignore = [
-            'node_modules/',  # Dependencies installed by npm or yarn
-            'dist/',  # Common output directory for built files
-            'build/',  # Another common output directory for built files
-            'coverage/',  # Test coverage reports
-            '.cache/',  # Cache directory (used by some build tools)
-            '.next/',  # Next.js build output
-            '.nuxt/',  # Nuxt.js build output
-            '.DS_Store'  # macOS folder attributes
+            "node_modules/",  # Dependencies installed by npm or yarn
+            "dist/",  # Common output directory for built files
+            "build/",  # Another common output directory for built files
+            "coverage/",  # Test coverage reports
+            ".cache/",  # Cache directory (used by some build tools)
+            ".next/",  # Next.js build output
+            ".nuxt/",  # Nuxt.js build output
+            ".DS_Store",  # macOS folder attributes
         ]
-    elif language == 'java':
+    elif language == "java":
         directories_to_ignore = [
-            'target/',  # Maven build directory
-            'build/',  # Gradle build directory
-            '.gradle/',  # Gradle-specific files and caches
-            '.idea/',  # IntelliJ IDEA settings
-            '.iml',  # IntelliJ IDEA module files
-            '.classpath',  # Eclipse project file
-            '.project',  # Eclipse project file
-            'out/'  # Output directory for IntelliJ IDEA
+            "target/",  # Maven build directory
+            "build/",  # Gradle build directory
+            ".gradle/",  # Gradle-specific files and caches
+            ".idea/",  # IntelliJ IDEA settings
+            ".iml",  # IntelliJ IDEA module files
+            ".classpath",  # Eclipse project file
+            ".project",  # Eclipse project file
+            "out/",  # Output directory for IntelliJ IDEA
         ]
-    elif language == 'rust':
+    elif language == "rust":
         directories_to_ignore = [
-            'target/',  # Default output directory for compiled artifacts
-            'Cargo.lock',  # Lock file for cargo dependencies (ignored for libraries, kept for binaries)
-            '.cargo/',  # Cargo cache directory
+            "target/",  # Default output directory for compiled artifacts
+            "Cargo.lock",  # Lock file for cargo dependencies (ignored for libraries, kept for binaries)
+            ".cargo/",  # Cargo cache directory
         ]
     if any([directory in d_path for directory in directories_to_ignore]):
         return True

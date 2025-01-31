@@ -45,8 +45,8 @@ class UnitTestGenerator:
             coverage_type (str, optional): The type of coverage report. Defaults to "cobertura".
             desired_coverage (int, optional): The desired coverage percentage. Defaults to 90.
             additional_instructions (str, optional): Additional instructions for test generation. Defaults to an empty string.
-            use_report_coverage_feature_flag (bool, optional): Setting this to True considers the coverage of all the files in the coverage report. 
-                                                               This means we consider a test as good if it increases coverage for a different 
+            use_report_coverage_feature_flag (bool, optional): Setting this to True considers the coverage of all the files in the coverage report.
+                                                               This means we consider a test as good if it increases coverage for a different
                                                                file other than the source file. Defaults to False.
 
         Returns:
@@ -118,7 +118,9 @@ class UnitTestGenerator:
         return language_name.lower()
 
     @staticmethod
-    def get_included_files(included_files: list, project_root: str = "", disable_tokens=False) -> str:
+    def get_included_files(
+        included_files: list, project_root: str = "", disable_tokens=False
+    ) -> str:
         if included_files:
             included_files_content = []
             file_names_rel = []
@@ -126,24 +128,34 @@ class UnitTestGenerator:
                 try:
                     with open(file_path, "r") as file:
                         included_files_content.append(file.read())
-                        file_path_rel = os.path.relpath(file_path, project_root) if project_root else file_path
+                        file_path_rel = (
+                            os.path.relpath(file_path, project_root)
+                            if project_root
+                            else file_path
+                        )
                         file_names_rel.append(file_path_rel)
                 except IOError as e:
                     print(f"Error reading file {file_path}: {str(e)}")
             out_str = ""
             if included_files_content:
                 for i, content in enumerate(included_files_content):
-                    out_str += (
-                        f"file_path: `{file_names_rel[i]}`\ncontent:\n```\n{content}\n```\n\n\n"
-                    )
+                    out_str += f"file_path: `{file_names_rel[i]}`\ncontent:\n```\n{content}\n```\n\n\n"
 
             out_str = out_str.strip()
-            if not disable_tokens and get_settings().get("include_files.limit_tokens", False):
+            if not disable_tokens and get_settings().get(
+                "include_files.limit_tokens", False
+            ):
                 encoder = TokenEncoder.get_token_encoder()
                 num_input_tokens = len(encoder.encode(out_str))
                 if num_input_tokens > get_settings().get("include_files.max_tokens"):
-                    print(f"Clipping included files content from {num_input_tokens} to {get_settings().get('include_files.max_tokens')} tokens")
-                    out_str = clip_tokens(out_str, get_settings().get("include_files.max_tokens"), num_input_tokens=num_input_tokens)
+                    print(
+                        f"Clipping included files content from {num_input_tokens} to {get_settings().get('include_files.max_tokens')} tokens"
+                    )
+                    out_str = clip_tokens(
+                        out_str,
+                        get_settings().get("include_files.max_tokens"),
+                        num_input_tokens=num_input_tokens,
+                    )
             return out_str
         return ""
 
@@ -182,7 +194,9 @@ class UnitTestGenerator:
 
         return failed_test_runs_value
 
-    def generate_tests(self, failed_test_runs, language, testing_framework, code_coverage_report):
+    def generate_tests(
+        self, failed_test_runs, language, testing_framework, code_coverage_report
+    ):
         """
         Generate tests using the AI model based on the constructed prompt.
 
@@ -201,8 +215,13 @@ class UnitTestGenerator:
             Exception: If there is an error during test generation, such as a parsing error while processing the AI model response.
         """
         failed_test_runs_value = self.check_for_failed_test_runs(failed_test_runs)
-        response, prompt_token_count, response_token_count, self.prompt = self.agent_completion.generate_tests(
-            failed_test_runs_value, language, testing_framework, code_coverage_report
+        response, prompt_token_count, response_token_count, self.prompt = (
+            self.agent_completion.generate_tests(
+                failed_test_runs_value,
+                language,
+                testing_framework,
+                code_coverage_report,
+            )
         )
 
         self.total_input_token_count += prompt_token_count

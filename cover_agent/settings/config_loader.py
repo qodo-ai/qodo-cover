@@ -58,4 +58,3 @@ class SingletonSettings:
 
 def get_settings():
     return SingletonSettings().settings
-
