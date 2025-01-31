@@ -43,28 +43,6 @@ class TestUnitTestGenerator:
             language = generator.get_code_language("filename")
             assert language == "unknown"
 
-    def test_build_prompt_with_failed_tests(self):
-        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
-            generator = UnitTestGenerator(
-                source_file_path=temp_source_file.name,
-                test_file_path="test_test.py",
-                code_coverage_report_path="coverage.xml",
-                test_command="pytest",
-                llm_model="gpt-3"
-            )
-            failed_test_runs = [
-                {
-                    "code": {"test_code": "def test_example(): assert False"},
-                    "error_message": "AssertionError"
-                }
-            ]
-            language = "python"
-            test_framework = "pytest"
-            code_coverage_report = ""
-            prompt = generator.build_prompt(failed_test_runs, language, test_framework, code_coverage_report)
-            assert "Failed Test:" in prompt['user']
-
-
     def test_generate_tests_invalid_yaml(self):
         with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
             generator = UnitTestGenerator(

@@ -9,6 +9,7 @@ from cover_agent.AICaller import AICaller
 from cover_agent.CustomLogger import CustomLogger
 from cover_agent.FilePreprocessor import FilePreprocessor
 from cover_agent.PromptBuilder import PromptBuilder
+from cover_agent.DefaultAgentCompletion import DefaultAgentCompletion
 from cover_agent.Runner import Runner
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.settings.token_handling import clip_tokens, TokenEncoder
@@ -70,6 +71,20 @@ class UnitTestGenerator:
 
         # Objects to instantiate
         self.ai_caller = AICaller(model=llm_model, api_base=api_base)
+        self.prompt_builder = PromptBuilder(
+            source_file_path=self.source_file_path,
+            test_file_path=self.test_file_path,
+            code_coverage_report="",
+            included_files=self.included_files,
+            additional_instructions=self.additional_instructions,
+            failed_test_runs="",
+            language="",
+            testing_framework="",
+            project_root=self.project_root,
+        )
+        self.agent_completion = DefaultAgentCompletion(
+            builder=self.prompt_builder, caller=self.ai_caller
+        )
 
         # Get the logger instance from CustomLogger
         self.logger = CustomLogger.get_logger(__name__)
@@ -185,42 +200,6 @@ class UnitTestGenerator:
 
         return failed_test_runs_value
 
-    def build_prompt(self, failed_test_runs, language, testing_framework, code_coverage_report) -> dict:
-        """
-        Builds a prompt using the provided information to be used for generating tests.
-
-        This method processes the failed test runs using the check_for_failed_test_runs method and then calls the PromptBuilder class to construct the prompt.
-        The prompt includes details such as the source file path, test file path, code coverage report, included files,
-        additional instructions, failed test runs, and the programming language being used.
-
-        Args:
-            failed_test_runs (list): A list of dictionaries containing information about failed test runs.
-            language (str): The programming language being used.
-            testing_framework (str): The testing framework being used.
-            code_coverage_report (str): The code coverage report.
-
-        Returns:
-            dict: The generated prompt to be used for test generation.
-        """
-
-        # Check for failed test runs
-        failed_test_runs_value = self.check_for_failed_test_runs(failed_test_runs)
-
-        # Call PromptBuilder to build the prompt
-        self.prompt_builder = PromptBuilder(
-            source_file_path=self.source_file_path,
-            test_file_path=self.test_file_path,
-            code_coverage_report=code_coverage_report,
-            included_files=self.included_files,
-            additional_instructions=self.additional_instructions,
-            failed_test_runs=failed_test_runs_value,
-            language=language,
-            testing_framework=testing_framework,
-            project_root=self.project_root,
-        )
-
-        return self.prompt_builder.build_prompt()
-
     def generate_tests(self, failed_test_runs, language, testing_framework, code_coverage_report):
         """
         Generate tests using the AI model based on the constructed prompt.
@@ -239,8 +218,10 @@ class UnitTestGenerator:
         Raises:
             Exception: If there is an error during test generation, such as a parsing error while processing the AI model response.
         """
-        self.prompt = self.build_prompt(failed_test_runs, language, testing_framework, code_coverage_report)
-        response, prompt_token_count, response_token_count =  self.ai_caller.call_model(prompt=self.prompt)
+        failed_test_runs_value = self.check_for_failed_test_runs(failed_test_runs)
+        response, prompt_token_count, response_token_count, self.prompt = self.agent_completion.generate_tests(
+            failed_test_runs_value, language, testing_framework, code_coverage_report
+        )
 
         self.total_input_token_count += prompt_token_count
         self.total_output_token_count += response_token_count

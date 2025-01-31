@@ -161,42 +161,64 @@ class PromptBuilder:
         # print(f"#### user_prompt:\n\n{user_prompt}")
         return {"system": system_prompt, "user": user_prompt}
 
-    def build_prompt_custom(self, file) -> dict:
+    def build_prompt_custom(
+        self,
+        file: str,
+        source_file_name: str = None,
+        test_file_name: str = None,
+        source_file_numbered: str = None,
+        test_file_numbered: str = None,
+        source_file: str = None,
+        test_file: str = None,
+        code_coverage_report: str = None,
+        additional_includes_section: str = None,
+        failed_tests_section: str = None,
+        additional_instructions_text: str = None,
+        language: str = None,
+        max_tests: int = MAX_TESTS_PER_RUN,
+        testing_framework: str = None,
+        stdout: str = None,
+        stderr: str = None,
+        processed_test_file: str = None,
+    ) -> dict:
         """
         Builds a custom prompt by replacing placeholders with actual content from files and settings.
-
+        
         Parameters:
             file (str): The file to retrieve settings for building the prompt.
-
+            Other parameters override instance attributes if provided.
+        
         Returns:
             dict: A dictionary containing the system and user prompts.
         """
+
+        # Use provided values or fallback to instance attributes
         variables = {
-            "source_file_name": self.source_file_name_rel,
-            "test_file_name": self.test_file_name_rel,
-            "source_file_numbered": self.source_file_numbered,
-            "test_file_numbered": self.test_file_numbered,
-            "source_file": self.source_file,
-            "test_file": self.test_file,
-            "code_coverage_report": self.code_coverage_report,
-            "additional_includes_section": self.included_files,
-            "failed_tests_section": self.failed_test_runs,
-            "additional_instructions_text": self.additional_instructions,
-            "language": self.language,
-            "max_tests": MAX_TESTS_PER_RUN,
-            "testing_framework": self.testing_framework,
-            "stdout": self.stdout_from_run,
-            "stderr": self.stderr_from_run,
-            "processed_test_file": self.processed_test_file,
+            "source_file_name": source_file_name or self.source_file_name_rel,
+            "test_file_name": test_file_name or self.test_file_name_rel,
+            "source_file_numbered": source_file_numbered or self.source_file_numbered,
+            "test_file_numbered": test_file_numbered or self.test_file_numbered,
+            "source_file": source_file or self.source_file,
+            "test_file": test_file or self.test_file,
+            "code_coverage_report": code_coverage_report or self.code_coverage_report,
+            "additional_includes_section": additional_includes_section or self.included_files,
+            "failed_tests_section": failed_tests_section or self.failed_test_runs,
+            "additional_instructions_text": additional_instructions_text or self.additional_instructions,
+            "language": language or self.language,
+            "max_tests": max_tests,
+            "testing_framework": testing_framework or self.testing_framework,
+            "stdout": stdout or self.stdout_from_run,
+            "stderr": stderr or self.stderr_from_run,
+            "processed_test_file": processed_test_file or self.processed_test_file,
         }
+
         environment = Environment(undefined=StrictUndefined)
         try:
             settings = get_settings().get(file)
-            if settings is None or not hasattr(settings, "system") or not hasattr(
-                settings, "user"
-            ):
+            if settings is None or not hasattr(settings, "system") or not hasattr(settings, "user"):
                 logging.error(f"Could not find settings for prompt file: {file}")
                 return {"system": "", "user": ""}
+            
             system_prompt = environment.from_string(settings.system).render(variables)
             user_prompt = environment.from_string(settings.user).render(variables)
         except Exception as e:
