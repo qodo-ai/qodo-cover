@@ -67,8 +67,6 @@ class PromptBuilder:
             _read_file(self, file_path)
                 Helper method to read the content of a file.
 
-            build_prompt(self)
-                Replaces placeholders with the actual content of files read during initialization and returns the formatted prompt string.
         """
         self.project_root = project_root
         self.source_file_path = source_file_path
@@ -127,39 +125,6 @@ class PromptBuilder:
                 return f.read()
         except Exception as e:
             return f"Error reading {file_path}: {e}"
-
-    def build_prompt(self) -> dict:
-        variables = {
-            "source_file_name": self.source_file_name_rel,
-            "test_file_name": self.test_file_name_rel,
-            "source_file_numbered": self.source_file_numbered,
-            "test_file_numbered": self.test_file_numbered,
-            "source_file": self.source_file,
-            "test_file": self.test_file,
-            "code_coverage_report": self.code_coverage_report,
-            "additional_includes_section": self.included_files,
-            "failed_tests_section": self.failed_test_runs,
-            "additional_instructions_text": self.additional_instructions,
-            "language": self.language,
-            "max_tests": MAX_TESTS_PER_RUN,
-            "testing_framework": self.testing_framework,
-            "stdout": self.stdout_from_run,
-            "stderr": self.stderr_from_run,
-        }
-        environment = Environment(undefined=StrictUndefined)
-        try:
-            system_prompt = environment.from_string(
-                get_settings().test_generation_prompt.system
-            ).render(variables)
-            user_prompt = environment.from_string(
-                get_settings().test_generation_prompt.user
-            ).render(variables)
-        except Exception as e:
-            logging.error(f"Error rendering prompt: {e}")
-            return {"system": "", "user": ""}
-
-        # print(f"#### user_prompt:\n\n{user_prompt}")
-        return {"system": system_prompt, "user": user_prompt}
 
     def build_prompt_custom(
         self,

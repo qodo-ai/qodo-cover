@@ -52,7 +52,7 @@ class TestPromptBuilder:
         builder.code_coverage_report = "Coverage Report Content"
         builder.included_files = ""
 
-        result = builder.build_prompt()
+        result = builder.build_prompt_custom(file="test_generation_prompt")
         assert "## Additional Includes" not in result["user"]
 
     def test_non_empty_included_files_section_in_prompt(self, monkeypatch):
@@ -69,7 +69,7 @@ class TestPromptBuilder:
         builder.test_file = "Test Content"
         builder.code_coverage_report = "Coverage Report Content"
 
-        result = builder.build_prompt()
+        result = builder.build_prompt_custom(file="test_generation_prompt")
         assert "## Additional Includes" in result["user"]
         assert "Included Files Content" in result["user"]
 
@@ -86,7 +86,7 @@ class TestPromptBuilder:
         builder.test_file = "Test Content"
         builder.code_coverage_report = "Coverage Report Content"
 
-        result = builder.build_prompt()
+        result = builder.build_prompt_custom(file="test_generation_prompt")
         assert "## Additional Instructions" not in result["user"]
 
     def test_empty_failed_test_runs_section_not_in_prompt(self, monkeypatch):
@@ -102,7 +102,7 @@ class TestPromptBuilder:
         builder.test_file = "Test Content"
         builder.code_coverage_report = "Coverage Report Content"
 
-        result = builder.build_prompt()
+        result = builder.build_prompt_custom(file="test_generation_prompt")
         assert "## Previous Iterations Failed Tests" not in result["user"]
 
     def test_non_empty_additional_instructions_section_in_prompt(self, monkeypatch):
@@ -118,7 +118,7 @@ class TestPromptBuilder:
         builder.test_file = "Test Content"
         builder.code_coverage_report = "Coverage Report Content"
 
-        result = builder.build_prompt()
+        result = builder.build_prompt_custom(file="test_generation_prompt")
         assert "## Additional Instructions" in result["user"]
         assert "Additional Instructions Content" in result["user"]
 
@@ -137,7 +137,7 @@ class TestPromptBuilder:
         builder.test_file = "Test Content"
         builder.code_coverage_report = "Coverage Report Content"
 
-        result = builder.build_prompt()
+        result = builder.build_prompt_custom(file="test_generation_prompt")
         assert "## Previous Iterations Failed Tests" in result["user"]
         assert "Failed Test Runs Content" in result["user"]
 
@@ -172,7 +172,7 @@ class TestPromptBuilder:
             test_file_path="test_path",
             code_coverage_report="coverage_report",
         )
-        result = builder.build_prompt()
+        result = builder.build_prompt_custom(file="test_generation_prompt")
         assert result == {"system": "", "user": ""}
 
 class TestPromptBuilderEndToEnd:
