@@ -38,29 +38,11 @@ class TestUnitTestGenerator:
                 test_file_path="test_test.py",
                 code_coverage_report_path="coverage.xml",
                 test_command="pytest",
-                llm_model="gpt-3"
+                llm_model="gpt-3",
+                agent_completion=MagicMock()
             )
             language = generator.get_code_language("filename")
             assert language == "unknown"
 
-    def test_generate_tests_invalid_yaml(self):
-        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
-            generator = UnitTestGenerator(
-                source_file_path=temp_source_file.name,
-                test_file_path="test_test.py",
-                code_coverage_report_path="coverage.xml",
-                test_command="pytest",
-                llm_model="gpt-3"
-            )
-            language = "python"
-            test_framework = "pytest"
-            code_coverage_report = ""
-            generator.build_prompt = lambda x, y, z, w: "Test prompt"
-            with patch.object(generator.ai_caller, 'call_model', return_value=("This is not YAML", 10, 10)):
-                result = generator.generate_tests([], language, test_framework, code_coverage_report)
-                
-                # The eventual call to try_fix_yaml() will end up spitting out the same string but deeming is "YAML."
-                # While this is not a valid YAML, the function will return the original string (for better or for worse).
-                assert result =="This is not YAML"
 
                 

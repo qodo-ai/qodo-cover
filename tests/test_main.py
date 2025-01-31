@@ -36,10 +36,9 @@ class TestMain:
             assert args.max_iterations == 10
 
     @patch("cover_agent.CoverAgent.UnitTestGenerator")
-    @patch("cover_agent.CoverAgent.ReportGenerator")
     @patch("cover_agent.CoverAgent.os.path.isfile")
     def test_main_source_file_not_found(
-        self, mock_isfile, mock_report_generator, mock_unit_cover_agent
+        self, mock_isfile, mock_unit_cover_agent
     ):
         args = argparse.Namespace(
             source_file_path="test_source.py",
@@ -64,7 +63,6 @@ class TestMain:
             str(exc_info.value) == f"Source file not found at {args.source_file_path}"
         )
         mock_unit_cover_agent.assert_not_called()
-        mock_report_generator.generate_report.assert_not_called()
 
     @patch("cover_agent.CoverAgent.os.path.exists")
     @patch("cover_agent.CoverAgent.os.path.isfile")
