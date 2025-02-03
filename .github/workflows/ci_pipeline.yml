@@ -164,15 +164,15 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Download executables (Ubuntu)
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: cover-agent-ubuntu-22.04
         path: dist/ubuntu-22.04
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: cover-agent-windows-latest
         path: dist/windows-latest
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: cover-agent-macos-latest
         path: dist/macos-latest
