@@ -88,7 +88,7 @@ class AICaller:
         }
 
         # Model-specific adjustments
-        if self.model in ["o1-preview", "o1-mini"]:
+        if self.model in ["o1-preview", "o1-mini", "o1", "o3-mini"]:
             stream = False  # o1 doesn't support streaming
             completion_params["temperature"] = 1
             completion_params["stream"] = False  # o1 doesn't support streaming
