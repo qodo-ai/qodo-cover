@@ -11,7 +11,7 @@ RUN_INSTALLER=false
 # Function to display usage
 usage() {
     echo "Usage: $0 [--model model_name] [--run-installer]"
-    echo "  --model model_name      Set the model name (default: gpt-3.5-turbo)"
+    echo "  --model model_name      Set the model name (default: gpt-4o-mini)"
     echo "  --run-installer         Run the installer within a Docker container"
     exit 1
 }
@@ -130,7 +130,7 @@ sh tests_integration/test_with_docker.sh \
   --source-file-path "app.py" \
   --test-file-path "test_app.py" \
   --test-command "pytest --cov=. --cov-report=xml --cov-report=term" \
-  --model "gpt-3.5-turbo" \
+  --model "gpt-4o-mini" \
   $log_db_arg
 
 # React Calculator Example
