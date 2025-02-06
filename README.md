@@ -87,6 +87,7 @@ poetry install
 ```
 
 ### Running the Code
+
 After downloading the executable or installing the Pip package you can run the Cover Agent to generate and validate unit tests. Execute it from the command line by using the following command:
 ```shell
 cover-agent \
