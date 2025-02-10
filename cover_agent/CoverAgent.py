@@ -7,12 +7,10 @@ import wandb
 from typing import List
 
 from cover_agent.CustomLogger import CustomLogger
-from cover_agent.PromptBuilder import adapt_test_command_for_a_single_test_via_ai
 from cover_agent.UnitTestGenerator import UnitTestGenerator
 from cover_agent.UnitTestValidator import UnitTestValidator
 from cover_agent.UnitTestDB import UnitTestDB
 from cover_agent.AICaller import AICaller
-from cover_agent.PromptBuilder import PromptBuilder
 from cover_agent.AgentCompletionABC import AgentCompletionABC
 from cover_agent.DefaultAgentCompletion import DefaultAgentCompletion
 
@@ -41,22 +39,9 @@ class CoverAgent:
         if agent_completion:
             self.agent_completion = agent_completion
         else:
-            # Default to using the DefaultAgentCompletion object with the PromptBuilder and AICaller
+            # 2) Now we only instantiate the AICaller and pass it to DefaultAgentCompletion
             self.ai_caller = AICaller(model=args.model, api_base=args.api_base)
-            self.prompt_builder = PromptBuilder(
-                source_file_path=args.source_file_path,
-                test_file_path=args.test_file_output_path,
-                code_coverage_report="",
-                included_files=UnitTestGenerator.get_included_files(args.included_files, args.project_root),
-                additional_instructions=args.additional_instructions,
-                failed_test_runs="",
-                language="",
-                testing_framework="",
-                project_root=args.project_root,
-            )
-            self.agent_completion = DefaultAgentCompletion(
-                builder=self.prompt_builder, caller=self.ai_caller
-            )
+            self.agent_completion = DefaultAgentCompletion(caller=self.ai_caller)
 
         self.test_gen = UnitTestGenerator(
             source_file_path=args.source_file_path,
@@ -109,8 +94,11 @@ class CoverAgent:
                         f"Failed to adapt test command for running a single test: {test_command}"
                     )
             else:
-                new_command_line = adapt_test_command_for_a_single_test_via_ai(
-                    args, test_file_relative_path, test_command
+                # 3) Replaced call to adapt_test_command_for_a_single_test_via_ai with agent_completion method
+                new_command_line = self.agent_completion.adapt_test_command_for_a_single_test_via_ai(
+                    project_root_dir=args.test_command_dir,
+                    test_file_relative_path=test_file_relative_path,
+                    test_command=test_command,
                 )
         if new_command_line:
             args.test_command_original = test_command

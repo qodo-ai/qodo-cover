@@ -13,7 +13,6 @@ SOURCE_TEST_FILE_LIST = [
     # ["cover_agent/CoverageProcessor.py", "tests/test_CoverageProcessor.py"],
     # ["cover_agent/CustomLogger.py", ""],
     # ["cover_agent/FilePreprocessor.py", "tests/test_FilePreprocessor.py"],
-    # ["cover_agent/PromptBuilder.py", "tests/test_PromptBuilder.py"],
     # ["cover_agent/ReportGenerator.py", "tests/test_ReportGenerator.py"],
     # ["cover_agent/Runner.py", "tests/test_Runner.py"],
     # ["cover_agent/UnitTestDB.py", "tests/test_UnitTestDB.py"],
