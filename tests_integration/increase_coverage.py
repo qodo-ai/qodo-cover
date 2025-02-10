@@ -19,8 +19,9 @@ SOURCE_TEST_FILE_LIST = [
     # ["cover_agent/UnitTestGenerator.py", "tests/test_UnitTestGenerator.py"],
     # ["cover_agent/main.py", "tests/test_main.py"],
     # ["cover_agent/settings/config_loader.py", ""],
-    ["cover_agent/utils.py", "tests/test_load_yaml.py"],
+    # ["cover_agent/utils.py", "tests/test_load_yaml.py"],
     # ["cover_agent/version.py", "tests/test_version.py"],
+    ["cover_agent/AgentCompletionABC.py", "tests/test_AgentCompletionABC.py"],
 ]
 
 
@@ -30,7 +31,10 @@ class Args:
         self.test_file_path = test_file_path
         self.test_file_output_path = ""
         self.code_coverage_report_path = "coverage.xml"
-        self.test_command = f"poetry run pytest --cov=cover_agent --cov-report=xml  --timeout=30 --disable-warnings"
+        self.test_command = (
+            "poetry run pytest --cov=cover_agent --cov-report=xml "
+            "--timeout=30 --disable-warnings"
+        )
         self.test_command_dir = os.getcwd()
         self.included_files = None
         self.coverage_type = "cobertura"
@@ -38,14 +42,18 @@ class Args:
         self.desired_coverage = 100
         self.max_iterations = 5
         self.additional_instructions = "Do not indent the tests"
-        # self.model = "gpt-4o"
-        self.model = "o1-mini"
+        self.model = "gpt-4o"
         self.api_base = "http://localhost:11434"
         self.prompt_only = False
         self.strict_coverage = False
         self.run_tests_multiple_times = 1
         self.use_report_coverage_feature_flag = False
         self.log_db_path = "increase_project_coverage.db"
+
+        # Added to match new CoverAgent references:
+        self.diff_coverage = False
+        self.branch = "main"
+        self.project_root = ""
 
 
 if __name__ == "__main__":

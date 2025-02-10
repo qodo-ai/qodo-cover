@@ -3,7 +3,6 @@ import datetime
 import json
 import logging
 import os
-import re
 
 from diff_cover.diff_cover_tool import main as diff_cover_main
 
@@ -197,7 +196,9 @@ class UnitTestValidator:
                 test_file_content = self._read_file(self.test_file_path)
                 response, prompt_token_count, response_token_count, prompt = (
                     self.agent_completion.analyze_suite_test_headers_indentation(
-                        test_file_content
+                        language=self.language,
+                        test_file_name=self.test_file_path,
+                        test_file=test_file_content,
                     )
                 )
 
@@ -222,7 +223,17 @@ class UnitTestValidator:
                 and counter_attempts < allowed_attempts
             ):
                 response, prompt_token_count, response_token_count, prompt = (
-                    self.agent_completion.analyze_test_insert_line(test_file_content)
+                    self.agent_completion.analyze_suite_test_insert_line(
+                        language=self.language,
+                        test_file_name=self.test_file_path,
+                        test_file_numbered="\n".join(
+                            [
+                                f"{i + 1} {line}"
+                                for i, line in enumerate(self.test_file.split("\n"))
+                            ]
+                        ),
+                        additional_instructions_text="",  # No additional instructions needed
+                    )
                 )
 
                 self.total_input_token_count += prompt_token_count
@@ -631,25 +642,20 @@ class UnitTestValidator:
 
     def extract_error_message(self, fail_details):
         """
-        Extracts the error message from the provided test failure details.
+        Extracts the error message from the provided stderr and stdout outputs.
 
-        Processes test failure information through a language model to analyze and summarize the error.
-        Tracks token usage from both the prompt and response.
+        Updates the PromptBuilder object with the stderr and stdout, builds a custom prompt for analyzing test run failures,
+        calls the language model to analyze the prompt, and loads the response into a dictionary.
 
-            fail_details (dict): Dictionary containing:
-                - stderr (str): Standard error output from the test run
-                - stdout (str): Standard output from the test run  
-                - processed_test_file (str): The processed test file content
+        Returns the error summary from the loaded YAML data or a default error message if unable to summarize.
+        Logs errors encountered during the process.
 
-            str: The extracted and analyzed error message, or empty string if extraction fails
+        Parameters:
+            stderr (str): The standard error output from the test run.
+            stdout (str): The standard output from the test run.
 
-        Raises:
-            Exception: If error occurs during extraction process, it is logged and empty string is returned
-
-        Side Effects:
-            - Updates self.total_input_token_count with prompt tokens used
-            - Updates self.total_output_token_count with response tokens used
-            - Logs errors if extraction fails
+        Returns:
+            str: The error summary extracted from the response or a default error message if extraction fails.
         """
         try:
             # Run the analysis via LLM
