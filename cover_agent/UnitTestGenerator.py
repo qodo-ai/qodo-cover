@@ -217,10 +217,17 @@ class UnitTestGenerator:
         failed_test_runs_value = self.check_for_failed_test_runs(failed_test_runs)
         response, prompt_token_count, response_token_count, self.prompt = (
             self.agent_completion.generate_tests(
-                failed_test_runs_value,
-                language,
-                testing_framework,
-                code_coverage_report,
+                source_file_name=self.source_file_path, # Fix this
+                max_tests=1, # Fix this
+                source_file_numbered=self.source_code, # Fix this
+                code_coverage_report=code_coverage_report,
+                additional_instructions_text=self.additional_instructions, # Fix this
+                additional_includes_section=self.included_files, # Fix this
+                language=language,
+                test_file=self.test_file_path, # Fix this
+                failed_tests_section=failed_test_runs_value,
+                test_file_name=self.test_file_path, # Fix this
+                testing_framework=testing_framework,
             )
         )
 
