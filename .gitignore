@@ -43,3 +43,6 @@ pyvenv.cfg
 pip-log.txt
 pip-delete-this-directory.txt
 *.spec
+
+# Other
+wandb/
