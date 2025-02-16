@@ -13,6 +13,8 @@ from tenacity import (
     wait_fixed,
 )
 
+from cover_agent import NO_SUPPORT_TEMPERATURE_MODELS, USER_MESSAGE_ONLY_MODELS
+
 MODEL_RETRIES = 3
 
 
@@ -43,6 +45,9 @@ class AICaller:
         self.model = model
         self.api_base = api_base
         self.enable_retry = enable_retry
+
+        self.user_message_only_models = USER_MESSAGE_ONLY_MODELS
+        self.no_support_temperature_models = NO_SUPPORT_TEMPERATURE_MODELS
 
     @conditional_retry  # You can access self.enable_retry here
     def call_model(self, prompt: dict, max_tokens=16384, stream=True):
