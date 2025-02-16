@@ -13,7 +13,11 @@ from tenacity import (
     wait_fixed,
 )
 
-from cover_agent import NO_SUPPORT_TEMPERATURE_MODELS, USER_MESSAGE_ONLY_MODELS
+from cover_agent import (
+    NO_SUPPORT_TEMPERATURE_MODELS,
+    USER_MESSAGE_ONLY_MODELS,
+    NO_SUPPORT_STREAMING_MODELS,
+)
 
 MODEL_RETRIES = 3
 
@@ -48,6 +52,7 @@ class AICaller:
 
         self.user_message_only_models = USER_MESSAGE_ONLY_MODELS
         self.no_support_temperature_models = NO_SUPPORT_TEMPERATURE_MODELS
+        self.no_support_streaming_models = NO_SUPPORT_STREAMING_MODELS
 
     @conditional_retry  # You can access self.enable_retry here
     def call_model(self, prompt: dict, max_tokens=16384, stream=True):
@@ -93,9 +98,9 @@ class AICaller:
             completion_params.pop("temperature", None)
 
         # Model-specific adjustments
-        if self.model in ["o1-preview", "o1-mini", "o1", "o3-mini"]:
-            stream = False  # o1 doesn't support streaming
-            completion_params["stream"] = False  # o1 doesn't support streaming
+        if self.model in self.no_support_streaming_models:
+            stream = False
+            completion_params["stream"] = False
             completion_params["max_completion_tokens"] = 2*max_tokens
             # completion_params["reasoning_effort"] = "high"
             completion_params.pop("max_tokens", None)  # Remove 'max_tokens' if present
