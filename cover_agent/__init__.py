@@ -15,3 +15,9 @@ NO_SUPPORT_TEMPERATURE_MODELS = [
     "o3-mini-2025-01-31",
     "o1-preview"
 ]
+
+NO_SUPPORT_STREAMING_MODELS = [
+    "deepseek/deepseek-reasoner",
+    "o1",
+    "o1-2024-12-17",
+]
