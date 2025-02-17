@@ -21,47 +21,46 @@ Those numbers are not a part of the original code.
 {{ source_file_numbered|trim }}
 =========
 
-
 ## Test File
 Here is the file that contains the existing tests, called `{{ test_file_name }}`:
 =========
 {{ test_file| trim }}
 =========
 
-
 ### Test Framework
 The test framework used for running tests is `{{ testing_framework }}`.
 {%- if language == "python" and testing_framework == "pytest" %}
-If the current tests are part of a class and contain a 'self' input, than the generated tests should also include the `self` parameter in the test function signature.
+If the current tests are part of a class and contain a 'self' input, then the generated tests should also include the `self` parameter in the test function signature.
 {%- endif %}
 
 {%- if additional_includes_section|trim %}
-
-
+## Additional Includes
+Here are the additional files needed to provide context for the source code:
+======
 {{ additional_includes_section|trim }}
-{% endif %}
+======
+{% endif -%}
 
-
-{%- if failed_tests_section|trim  %}
-
-
+{%- if failed_tests_section|trim %}
+## Previous Iterations Failed Tests
+Below is a list of failed tests that were generated in previous iterations. Do not generate the same tests again, and take these failed tests into account when generating new tests.
+======
 {{ failed_tests_section|trim }}
+======
+{% endif -%}
 
-{% endif %}
-
-{%- if additional_instructions_text|trim  %}
-
-
+{%- if additional_instructions_text|trim %}
+## Additional Instructions
+======
 {{ additional_instructions_text|trim }}
+======
 {% endif %}
-
 
 ## Code Coverage
 Based on the code coverage report below, your goal is to suggest new test cases for the test file `{{ test_file_name }}` against the source file `{{ source_file_name }}` that would increase the coverage, meaning cover missing lines of code.
 =========
 {{ code_coverage_report|trim }}
 =========
-
 
 ## Response
 The output must be a YAML object equivalent to type $NewTests, according to the following Pydantic definitions:
@@ -74,8 +73,8 @@ class SingleTest(BaseModel):
 {%- else %}
     test_name: str = Field(description=" A short unique test name, that should reflect the test objective")
 {%- endif %}
-    test_code: str = Field(description="A new '{{ testing_framework }}' test function that extends the existing test suite, and tests the behavior described in 'test_behavior'. The test should be a written like its a part of the existing test suite, if there is one, and it can use existing helper functions, setup, or teardown code. Don't iclude new imports here, use 'new_imports_code' section instead.")
-    new_imports_code: str = Field(description="New imports that are required to run the new test function, and are not already imported in the test file. Give an empty string if no new imports are required. If relevant, add new imports as  'import ...' lines.")
+    test_code: str = Field(description="A new '{{ testing_framework }}' test function that extends the existing test suite, and tests the behavior described in 'test_behavior'. The test should be written like it's part of the existing test suite, if there is one, and it can use existing helper functions, setup, or teardown code. Don't include new imports here, use 'new_imports_code' section instead.")
+    new_imports_code: str = Field(description="New imports that are required to run the new test function, and are not already imported in the test file. Give an empty string if no new imports are required. If relevant, add new imports as 'import ...' lines.")
     test_tags: str = Field(description="A single label that best describes the test, out of: ['happy path', 'edge case','other']")
 
 class NewTests(BaseModel):
@@ -83,7 +82,6 @@ class NewTests(BaseModel):
     existing_test_function_signature: str = Field(description="A single line repeating a signature header of one of the existing test functions")
     new_tests: List[SingleTest] = Field(min_items=1, max_items={{ max_tests }}, description="A list of new test functions to append to the existing test suite, aiming to increase the code coverage. Each test should run as-is, without requiring any additional inputs or setup code. Don't introduce new dependencies")
 =====
-
 
 Example output:
 
