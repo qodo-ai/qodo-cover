@@ -1,17 +1,17 @@
 
+
+
+
+<div align="center">
 <div align="center">
 
-# Qodo Cover
-
-<div align="center">
-
-<!-- <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://www.codium.ai/images/cover-agent/cover-agent-dark.png" width="330">
-  <source media="(prefers-color-scheme: light)" srcset="https://www.codium.ai/images/cover-agent/cover-agent-light.png" width="330">
+ <picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://www.qodo.ai/wp-content/uploads/2025/02/QodoCover-Light.png" width="330">
+  <source media="(prefers-color-scheme: light)" srcset="https://www.qodo.ai/wp-content/uploads/2025/02/QodoCover-Dark.png" width="330">
   <img src="https://www.codium.ai/images/cover-agent/cover-agent-light.png" alt="logo" width="330"> 
 
-</picture> -->
-<br/>
+</picture>
+<br/><br/>
 Qodo Cover aims to help efficiently increase code coverage, by automatically generating qualified tests to extend code coverage. Qodo Cover can run in your GitHub CI workflow or locally as a CLI tool.
 </div>
 
