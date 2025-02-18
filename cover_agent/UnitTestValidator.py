@@ -3,7 +3,6 @@ import datetime
 import json
 import logging
 import os
-import re
 
 from diff_cover.diff_cover_tool import main as diff_cover_main
 
@@ -197,7 +196,9 @@ class UnitTestValidator:
                 test_file_content = self._read_file(self.test_file_path)
                 response, prompt_token_count, response_token_count, prompt = (
                     self.agent_completion.analyze_suite_test_headers_indentation(
-                        test_file_content
+                        language=self.language,
+                        test_file_name=self.test_file_path,
+                        test_file=test_file_content,
                     )
                 )
 
@@ -222,7 +223,17 @@ class UnitTestValidator:
                 and counter_attempts < allowed_attempts
             ):
                 response, prompt_token_count, response_token_count, prompt = (
-                    self.agent_completion.analyze_test_insert_line(test_file_content)
+                    self.agent_completion.analyze_suite_test_insert_line(
+                        language=self.language,
+                        test_file_name=self.test_file_path,
+                        test_file_numbered="\n".join(
+                            [
+                                f"{i + 1} {line}"
+                                for i, line in enumerate(self.test_file.split("\n"))
+                            ]
+                        ),
+                        additional_instructions_text="",  # No additional instructions needed
+                    )
                 )
 
                 self.total_input_token_count += prompt_token_count
