@@ -7,14 +7,14 @@ import wandb
 from typing import List
 
 from cover_agent.CustomLogger import CustomLogger
-from cover_agent.PromptBuilder import adapt_test_command_for_a_single_test_via_ai
+from cover_agent.PromptBuilder import PromptBuilder, adapt_test_command_for_a_single_test_via_ai
 from cover_agent.UnitTestGenerator import UnitTestGenerator
 from cover_agent.UnitTestValidator import UnitTestValidator
 from cover_agent.UnitTestDB import UnitTestDB
 from cover_agent.AICaller import AICaller
-from cover_agent.PromptBuilder import PromptBuilder
 from cover_agent.AgentCompletionABC import AgentCompletionABC
 from cover_agent.DefaultAgentCompletion import DefaultAgentCompletion
+import cover_agent.utils
 
 
 class CoverAgent:
@@ -47,7 +47,7 @@ class CoverAgent:
                 source_file_path=args.source_file_path,
                 test_file_path=args.test_file_output_path,
                 code_coverage_report="",
-                included_files=UnitTestGenerator.get_included_files(args.included_files, args.project_root),
+                included_files=cover_agent.utils.get_included_files(args.included_files, args.project_root),
                 additional_instructions=args.additional_instructions,
                 failed_test_runs="",
                 language="",
