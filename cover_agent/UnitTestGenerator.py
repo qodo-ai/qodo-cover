@@ -78,6 +78,9 @@ class UnitTestGenerator:
         with open(self.source_file_path, "r") as f:
             self.source_code = f.read()
 
+        with open(self.test_file_path, "r") as f:
+            self.test_code = f.read()
+
     def get_code_language(self, source_file_path):
         """
         Get the programming language based on the file extension of the provided source file path.
@@ -178,7 +181,7 @@ class UnitTestGenerator:
                 additional_instructions_text=self.additional_instructions,
                 additional_includes_section=self.included_files,
                 language=language,
-                test_file=os.path.relpath(self.test_file_path, self.project_root),
+                test_file=self.test_code,
                 failed_tests_section=failed_test_runs_value,
                 test_file_name=self.test_file_path, # Fix this
                 testing_framework=testing_framework,

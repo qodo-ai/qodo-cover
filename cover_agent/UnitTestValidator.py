@@ -197,7 +197,9 @@ class UnitTestValidator:
                 test_file_content = self._read_file(self.test_file_path)
                 response, prompt_token_count, response_token_count, prompt = (
                     self.agent_completion.analyze_suite_test_headers_indentation(
-                        test_file_content
+                        language=self.language,
+                        test_file_name=os.path.relpath(self.test_file_path, self.project_root),
+                        test_file=test_file_content
                     )
                 )
 
@@ -222,7 +224,12 @@ class UnitTestValidator:
                 and counter_attempts < allowed_attempts
             ):
                 response, prompt_token_count, response_token_count, prompt = (
-                    self.agent_completion.analyze_test_insert_line(test_file_content)
+                    self.agent_completion.analyze_test_insert_line(
+                        language=self.language,
+                        test_file_numbered="\n".join(f"{i + 1} {line}" for i, line in enumerate(self._read_file(self.test_file_path).split("\n"))),
+                        additional_instructions_text=self.additional_instructions,
+                        test_file_name=os.path.relpath(self.test_file_path, self.project_root),
+                    )
                 )
 
                 self.total_input_token_count += prompt_token_count
@@ -240,9 +247,9 @@ class UnitTestValidator:
                 counter_attempts += 1
 
             if not relevant_line_number_to_insert_tests_after:
-                raise Exception(
-                    "Failed to analyze the relevant line number to insert new tests"
-                )
+                raise Exception("Failed to analyze the relevant line number to insert new tests")
+            if not relevant_line_number_to_insert_imports_after:
+                raise Exception("Failed to analyze the relevant line number to insert new imports")
 
             self.test_headers_indentation = test_headers_indentation
             self.relevant_line_number_to_insert_tests_after = (
@@ -650,9 +657,12 @@ class UnitTestValidator:
             # Run the analysis via LLM
             response, prompt_token_count, response_token_count, prompt = (
                 self.agent_completion.analyze_test_failure(
+                    source_file_name=os.path.relpath(self.source_file_path, self.project_root),
+                    source_file=self._read_file(self.source_file_path),
+                    processed_test_file=fail_details["processed_test_file"],
                     stderr=fail_details["stderr"],
                     stdout=fail_details["stdout"],
-                    processed_test_file=fail_details["processed_test_file"],
+                    test_file_name=os.path.relpath(self.test_file_path, self.project_root),
                 )
             )
             self.total_input_token_count += prompt_token_count
