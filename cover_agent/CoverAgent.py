@@ -44,15 +44,15 @@ class CoverAgent:
             # Default to using the DefaultAgentCompletion object with the PromptBuilder and AICaller
             self.ai_caller = AICaller(model=args.model, api_base=args.api_base, max_tokens=8192)
             self.prompt_builder = PromptBuilder(
-                source_file_path=args.source_file_path,
-                test_file_path=args.test_file_output_path,
+                source_file_path="",
+                test_file_path="",
                 code_coverage_report="",
-                included_files=cover_agent.utils.get_included_files(args.included_files, args.project_root),
-                additional_instructions=args.additional_instructions,
+                included_files="",
+                additional_instructions="",
                 failed_test_runs="",
                 language="",
                 testing_framework="",
-                project_root=args.project_root,
+                project_root="",
             )
             self.agent_completion = DefaultAgentCompletion(
                 builder=self.prompt_builder, caller=self.ai_caller

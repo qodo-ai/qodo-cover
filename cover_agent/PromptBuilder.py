@@ -89,29 +89,25 @@ class PromptBuilder:
             testing_framework (str, optional): Testing framework being used. Defaults to "NOT KNOWN"
             project_root (str, optional): Root directory of the project. Defaults to ""
         """
-        self.project_root = project_root
-        self.source_file_path = source_file_path
-        self.test_file_path = test_file_path
-        self.source_file_name_rel = os.path.relpath(source_file_path, project_root)
-        self.test_file_name_rel = os.path.relpath(test_file_path, project_root)
-        self.source_file = self._read_file(source_file_path)
-        self.test_file = self._read_file(test_file_path)
-        self.code_coverage_report = code_coverage_report
-        self.language = language
-        self.testing_framework = testing_framework
+        self.project_root = ""
+        self.source_file_path = ""
+        self.test_file_path = ""
+        self.source_file_name_rel = ""
+        self.test_file_name_rel = ""
+        self.source_file = ""
+        self.test_file = ""
+        self.code_coverage_report = ""
+        self.language = ""
+        self.testing_framework = ""
 
         # Add line numbers to each line in 'source_file' and 'test_file'.
-        self.source_file_numbered = "\n".join(
-            f"{i + 1} {line}" for i, line in enumerate(self.source_file.split("\n"))
-        )
-        self.test_file_numbered = "\n".join(
-            f"{i + 1} {line}" for i, line in enumerate(self.test_file.split("\n"))
-        )
+        self.source_file_numbered = ""
+        self.test_file_numbered = ""
 
         # Store optional sections directly as raw strings
-        self.included_files = included_files
-        self.additional_instructions = additional_instructions
-        self.failed_test_runs = failed_test_runs
+        self.included_files = ""
+        self.additional_instructions = ""
+        self.failed_test_runs = ""
 
         # Defaults for run outputs / processed tests
         self.stdout_from_run = ""
