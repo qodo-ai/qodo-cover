@@ -47,41 +47,41 @@ if [ -n "$LOG_DB_PATH" ]; then
     log_db_arg="--log-db-path $LOG_DB_PATH"
 fi
 
-# # C Calculator Example
-# sh tests_integration/test_with_docker.sh \
-#   --docker-image "embeddeddevops/c_cli:latest" \
-#   --source-file-path "calc.c" \
-#   --test-file-path "test_calc.c" \
-#   --code-coverage-report-path "coverage_filtered.info" \
-#   --test-command "sh build_and_test_with_coverage.sh" \
-#   --coverage-type "lcov" \
-#   --max-iterations "4" \
-#   --desired-coverage "50" \
-#   --model $MODEL \
-#   $log_db_arg
+# C Calculator Example
+sh tests_integration/test_with_docker.sh \
+  --docker-image "embeddeddevops/c_cli:latest" \
+  --source-file-path "calc.c" \
+  --test-file-path "test_calc.c" \
+  --code-coverage-report-path "coverage_filtered.info" \
+  --test-command "sh build_and_test_with_coverage.sh" \
+  --coverage-type "lcov" \
+  --max-iterations "4" \
+  --desired-coverage "50" \
+  --model $MODEL \
+  $log_db_arg
 
-# # C++ Calculator Example
-# sh tests_integration/test_with_docker.sh \
-#   --docker-image "embeddeddevops/cpp_cli:latest" \
-#   --source-file-path "calculator.cpp" \
-#   --test-file-path "test_calculator.cpp" \
-#   --code-coverage-report-path "coverage.xml" \
-#   --test-command "sh build_and_test_with_coverage.sh" \
-#   --coverage-type "cobertura" \
-#   --model $MODEL \
-#   $log_db_arg
+# C++ Calculator Example
+sh tests_integration/test_with_docker.sh \
+  --docker-image "embeddeddevops/cpp_cli:latest" \
+  --source-file-path "calculator.cpp" \
+  --test-file-path "test_calculator.cpp" \
+  --code-coverage-report-path "coverage.xml" \
+  --test-command "sh build_and_test_with_coverage.sh" \
+  --coverage-type "cobertura" \
+  --model $MODEL \
+  $log_db_arg
 
-# # C# Calculator Web Service
-# sh tests_integration/test_with_docker.sh \
-#   --docker-image "embeddeddevops/csharp_webservice:latest" \
-#   --source-file-path "CalculatorApi/CalculatorController.cs" \
-#   --test-file-path "CalculatorApi.Tests/CalculatorControllerTests.cs" \
-#   --code-coverage-report-path "CalculatorApi.Tests/TestResults/coverage.cobertura.xml" \
-#   --test-command "dotnet test --collect:'XPlat Code Coverage' CalculatorApi.Tests/ && find . -name 'coverage.cobertura.xml' -exec mv {} CalculatorApi.Tests/TestResults/coverage.cobertura.xml \;" \
-#   --coverage-type "cobertura" \
-#   --desired-coverage "50" \
-#   --model $MODEL \
-#   $log_db_arg
+# C# Calculator Web Service
+sh tests_integration/test_with_docker.sh \
+  --docker-image "embeddeddevops/csharp_webservice:latest" \
+  --source-file-path "CalculatorApi/CalculatorController.cs" \
+  --test-file-path "CalculatorApi.Tests/CalculatorControllerTests.cs" \
+  --code-coverage-report-path "CalculatorApi.Tests/TestResults/coverage.cobertura.xml" \
+  --test-command "dotnet test --collect:'XPlat Code Coverage' CalculatorApi.Tests/ && find . -name 'coverage.cobertura.xml' -exec mv {} CalculatorApi.Tests/TestResults/coverage.cobertura.xml \;" \
+  --coverage-type "cobertura" \
+  --desired-coverage "50" \
+  --model $MODEL \
+  $log_db_arg
 
 # Go Webservice Example
 sh tests_integration/test_with_docker.sh \

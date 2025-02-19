@@ -19,35 +19,12 @@ class PromptBuilder:
     formatting content, and replacing placeholders with actual content to generate
     system and user prompts for AI interaction.
 
-    Attributes:
-        project_root (str): Root directory of the project
-        source_file_path (str): Path to source code file
-        test_file_path (str): Path to test file
-        source_file_name_rel (str): Relative path to source file from project root
-        test_file_name_rel (str): Relative path to test file from project root
-        source_file (str): Content of source file
-        test_file (str): Content of test file
-        source_file_numbered (str): Source file content with line numbers
-        test_file_numbered (str): Test file content with line numbers
-        code_coverage_report (str): Code coverage report content
-        included_files (str): Additional included files content (raw, no extra formatting)
-        additional_instructions (str): Additional instructions (raw, no extra formatting)
-        failed_test_runs (str): Failed test runs history (raw, no extra formatting)
-        language (str): Programming language being used
-        testing_framework (str): Testing framework being used
-        stdout_from_run (str): Standard output from test runs
-        stderr_from_run (str): Standard error from test runs
-        processed_test_file (str): Processed test file content
-
     Methods:
         __init__(source_file_path: str, test_file_path: str, code_coverage_report: str,
                  included_files: str = "", additional_instructions: str = "",
                  failed_test_runs: str = "", language: str = "python",
                  testing_framework: str = "NOT KNOWN", project_root: str = ""):
             Initializes the PromptBuilder with file paths, settings, and raw content.
-
-        _read_file(file_path: str) -> str:
-            Reads and returns contents of a file.
 
         build_prompt(file: str, source_file_name: str = None, test_file_name: str = None,
                      source_file_numbered: str = None, test_file_numbered: str = None,
@@ -60,75 +37,14 @@ class PromptBuilder:
             Builds and returns a dictionary containing system and user prompts.
     """
 
-    def __init__(
-        self,
-        source_file_path: str,
-        test_file_path: str,
-        code_coverage_report: str,
-        included_files: str = "",
-        additional_instructions: str = "",
-        failed_test_runs: str = "",
-        language: str = "python",
-        testing_framework: str = "NOT KNOWN",
-        project_root: str = "",
-    ):
+    def __init__(self):
         """
         Initialize a new PromptBuilder instance.
 
         Processes file paths and content, adds line numbers, and stores optional
         sections as raw strings.
-
-        Args:
-            source_file_path (str): Path to the source code file
-            test_file_path (str): Path to the test file
-            code_coverage_report (str): Coverage report content
-            included_files (str, optional): Additional files to include (raw). Defaults to ""
-            additional_instructions (str, optional): Extra instructions for the prompt (raw). Defaults to ""
-            failed_test_runs (str, optional): History of failed test runs (raw). Defaults to ""
-            language (str, optional): Programming language being used. Defaults to "python"
-            testing_framework (str, optional): Testing framework being used. Defaults to "NOT KNOWN"
-            project_root (str, optional): Root directory of the project. Defaults to ""
         """
-        self.project_root = ""
-        self.source_file_path = ""
-        self.test_file_path = ""
-        self.source_file_name_rel = ""
-        self.test_file_name_rel = ""
-        self.source_file = ""
-        self.test_file = ""
-        self.code_coverage_report = ""
-        self.language = ""
-        self.testing_framework = ""
-
-        # Add line numbers to each line in 'source_file' and 'test_file'.
-        self.source_file_numbered = ""
-        self.test_file_numbered = ""
-
-        # Store optional sections directly as raw strings
-        self.included_files = ""
-        self.additional_instructions = ""
-        self.failed_test_runs = ""
-
-        # Defaults for run outputs / processed tests
-        self.stdout_from_run = ""
-        self.stderr_from_run = ""
-        self.processed_test_file = ""
-
-    def _read_file(self, file_path: str) -> str:
-        """
-        Helper method to read file contents.
-
-        Args:
-            file_path (str): Path to the file to be read.
-
-        Returns:
-            str: The content of the file, or an error message if reading fails.
-        """
-        try:
-            with open(file_path, "r") as f:
-                return f.read()
-        except Exception as e:
-            return f"Error reading {file_path}: {e}"
+        pass
 
     def build_prompt(
         self,
@@ -176,34 +92,23 @@ class PromptBuilder:
             dict: A dictionary containing the rendered system and user prompts.
         """
 
-        # Use provided values or fallback to instance attributes
         variables = {
-            "source_file_name": source_file_name or self.source_file_name_rel,
-            "test_file_name": test_file_name or self.test_file_name_rel,
-            "source_file_numbered": source_file_numbered or self.source_file_numbered,
-            "test_file_numbered": test_file_numbered or self.test_file_numbered,
-            "source_file": source_file or self.source_file,
-            "test_file": test_file or self.test_file,
-            "code_coverage_report": code_coverage_report or self.code_coverage_report,
-            "additional_includes_section": (
-                additional_includes_section
-                if additional_includes_section
-                else self.included_files
-            ),
-            "failed_tests_section": (
-                failed_tests_section if failed_tests_section else self.failed_test_runs
-            ),
-            "additional_instructions_text": (
-                additional_instructions_text
-                if additional_instructions_text
-                else self.additional_instructions
-            ),
-            "language": language or self.language,
+            "source_file_name": source_file_name,
+            "test_file_name": test_file_name,
+            "source_file_numbered": source_file_numbered,
+            "test_file_numbered": test_file_numbered,
+            "source_file": source_file,
+            "test_file": test_file,
+            "code_coverage_report": code_coverage_report,
+            "additional_includes_section": additional_includes_section,
+            "failed_tests_section": failed_tests_section,
+            "additional_instructions_text": additional_instructions_text,
+            "language": language,
             "max_tests": max_tests,
-            "testing_framework": testing_framework or self.testing_framework,
-            "stdout": stdout or self.stdout_from_run,
-            "stderr": stderr or self.stderr_from_run,
-            "processed_test_file": processed_test_file or self.processed_test_file,
+            "testing_framework": testing_framework,
+            "stdout": stdout,
+            "stderr": stderr,
+            "processed_test_file": processed_test_file,
         }
 
         environment = Environment(undefined=StrictUndefined)
