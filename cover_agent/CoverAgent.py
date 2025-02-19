@@ -231,13 +231,18 @@ class CoverAgent:
             )
 
             # Loop through each new test and validate it
-            for generated_test in generated_tests_dict.get("new_tests", []):
-                # Validate the test and record the result
-                test_result = self.test_validator.validate_test(generated_test)
+            try:
+                for generated_test in generated_tests_dict.get("new_tests", []):
+                    # Validate the test and record the result
+                    test_result = self.test_validator.validate_test(generated_test)
 
-                # Insert the test result into the database
-                test_result["prompt"] = self.test_gen.prompt["user"]
-                self.test_db.insert_attempt(test_result)
+                    # Insert the test result into the database
+                    test_result["prompt"] = self.test_gen.prompt["user"]
+                    self.test_db.insert_attempt(test_result)
+            except AttributeError as e:
+                self.logger.error(
+                    f"Failed to validate the test {generated_test} within {generated_tests_dict}. Error: {e}"
+                )
 
             # Increment the iteration count
             iteration_count += 1
