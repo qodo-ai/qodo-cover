@@ -32,7 +32,7 @@ def conditional_retry(func):
 
 
 class AICaller:
-    def __init__(self, model: str, api_base: str = "", enable_retry=True):
+    def __init__(self, model: str, api_base: str = "", enable_retry=True, max_tokens=16384):
         """
         Initializes an instance of the AICaller class.
 
@@ -43,15 +43,15 @@ class AICaller:
         self.model = model
         self.api_base = api_base
         self.enable_retry = enable_retry
+        self.max_tokens = max_tokens
 
     @conditional_retry  # You can access self.enable_retry here
-    def call_model(self, prompt: dict, max_tokens=16384, stream=True):
+    def call_model(self, prompt: dict, stream=True):
         """
         Call the language model with the provided prompt and retrieve the response.
 
         Parameters:
             prompt (dict): The prompt to be sent to the language model.
-            max_tokens (int, optional): The maximum number of tokens to generate in the response. Defaults to 16384.
             stream (bool, optional): Whether to stream the response or not. Defaults to True.
 
         Returns:
@@ -84,7 +84,7 @@ class AICaller:
             "messages": messages,
             "stream": stream,  # Use the stream parameter passed to the method
             "temperature": 0.2,
-            "max_tokens": max_tokens,
+            "max_tokens": self.max_tokens,
         }
 
         # Model-specific adjustments
@@ -92,7 +92,7 @@ class AICaller:
             stream = False  # o1 doesn't support streaming
             completion_params["temperature"] = 1
             completion_params["stream"] = False  # o1 doesn't support streaming
-            completion_params["max_completion_tokens"] = 2*max_tokens
+            completion_params["max_completion_tokens"] = 2*self.max_tokens
             # completion_params["reasoning_effort"] = "high"
             completion_params.pop("max_tokens", None)  # Remove 'max_tokens' if present
 

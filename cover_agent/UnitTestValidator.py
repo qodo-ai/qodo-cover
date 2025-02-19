@@ -207,9 +207,7 @@ class UnitTestValidator:
                 self.total_input_token_count += prompt_token_count
                 self.total_output_token_count += response_token_count
                 tests_dict = load_yaml(response)
-                test_headers_indentation = tests_dict.get(
-                    "test_headers_indentation", None
-                )
+                test_headers_indentation = tests_dict.get("test_headers_indentation", None)
                 counter_attempts += 1
 
             if test_headers_indentation is None:

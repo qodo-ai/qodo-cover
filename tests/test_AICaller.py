@@ -18,9 +18,7 @@ class TestAICaller:
 
         ai_caller = AICaller("test-model", "test-api", enable_retry=False)
         # Explicitly provide the default value of max_tokens
-        response, prompt_tokens, response_tokens = ai_caller.call_model(
-            prompt, max_tokens=4096
-        )
+        response, prompt_tokens, response_tokens = ai_caller.call_model(prompt)
 
         # Assertions to check if the returned values are as expected
         assert response == "Hello world!"
@@ -28,7 +26,7 @@ class TestAICaller:
         assert response_tokens == 10
 
         # Check if call_model was called correctly
-        mock_call_model.assert_called_once_with(prompt, max_tokens=4096)
+        mock_call_model.assert_called_once_with(prompt)
 
     @patch("cover_agent.AICaller.litellm.completion")
     def test_call_model_with_error(self, mock_completion, ai_caller):
