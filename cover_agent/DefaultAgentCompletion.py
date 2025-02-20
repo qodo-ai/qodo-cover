@@ -28,29 +28,42 @@ class DefaultAgentCompletion(AgentCompletionABC):
 
     def _build_prompt(self, file: str, **kwargs) -> dict:
         """
-        Internal helper that builds {"system": ..., "user": ...} for the model,
+        Internal helper that builds {"system": ..., "user": ...} for the model
         by loading Jinja2 templates from TOML-based settings.
 
         The `file` argument corresponds to the name/key in your TOML file,
         e.g. "analyze_test_against_context". All other variables are passed
         in via **kwargs. The TOML's system/user templates may reference these
         variables using Jinja2 syntax, e.g. {{ language }} or {{ test_file_content }}.
+
+        Raises:
+            ValueError: If the TOML config does not contain valid 'system' and 'user' keys.
+            RuntimeError: If an error occurs while rendering the templates.
         """
+        from jinja2 import Environment, StrictUndefined
+
         environment = Environment(undefined=StrictUndefined)
 
         try:
             # 1. Fetch the prompt config from your TOML-based settings
             settings = get_settings().get(file)
             if not settings or not hasattr(settings, "system") or not hasattr(settings, "user"):
-                self.logger.error(f"Could not find valid system/user prompt settings for: {file}")
-                return {"system": "", "user": ""}
+                msg = f"Could not find valid system/user prompt settings for: {file}"
+                self.logger.error(msg)
+                raise ValueError(msg)
 
             # 2. Render system & user templates with the passed-in kwargs
             system_prompt = environment.from_string(settings.system).render(**kwargs)
             user_prompt   = environment.from_string(settings.user).render(**kwargs)
+
+        except ValueError:
+            # Re-raise the ValueError above so callers can catch it if needed.
+            raise
         except Exception as e:
-            self.logger.error(f"Error rendering prompt for '{file}': {e}")
-            return {"system": "", "user": ""}
+            # Any other rendering or environment errors will be re-raised as RuntimeError
+            error_msg = f"Error rendering prompt for '{file}': {e}"
+            self.logger.error(error_msg)
+            raise RuntimeError(error_msg)
 
         return {"system": system_prompt, "user": user_prompt}
 
