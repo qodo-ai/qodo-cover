@@ -17,13 +17,13 @@ class DefaultAgentCompletion(AgentCompletionABC):
         max_tests: int,
         source_file_numbered: str,
         code_coverage_report: str,
-        additional_instructions_text: str,
-        additional_includes_section: str,
         language: str,
         test_file: str,
-        failed_tests_section: str,
         test_file_name: str,
         testing_framework: str,
+        additional_instructions_text: str = None,
+        additional_includes_section: str = None,
+        failed_tests_section: str = None,
     ) -> Tuple[str, int, int, str]:
         """
         Generates additional unit tests to improve test coverage.
@@ -108,8 +108,8 @@ class DefaultAgentCompletion(AgentCompletionABC):
         self,
         language: str,
         test_file_numbered: str,
-        additional_instructions_text: str,
         test_file_name: str,
+        additional_instructions_text: str = None,
     ) -> Tuple[str, int, int, str]:
         """
         Determines where to insert new test cases.
