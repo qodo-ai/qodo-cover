@@ -183,7 +183,7 @@ class UnitTestGenerator:
                 language=language,
                 test_file=self.test_code,
                 failed_tests_section=failed_test_runs_value,
-                test_file_name=self.test_file_path, # Fix this
+                test_file_name=os.path.relpath(self.test_file_path, self.project_root),
                 testing_framework=testing_framework,
             )
         )
