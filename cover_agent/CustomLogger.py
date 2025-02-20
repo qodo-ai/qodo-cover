@@ -58,6 +58,6 @@ class CustomLogger:
             logger.addHandler(stream_handler)
 
             # Prevent log messages from being propagated to the root logger
-            logger.propagate = False
+            # logger.propagate = False
 
         return logger

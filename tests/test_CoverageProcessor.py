@@ -1,4 +1,5 @@
 import pytest
+import logging
 import xml.etree.ElementTree as ET
 from cover_agent.CoverageProcessor import CoverageProcessor
 
@@ -173,16 +174,18 @@ class TestCoverageProcessor:
         ), "Expected package name to be 'com.example'"
         assert class_name == "MyClass", "Expected class name to be 'MyClass'"
 
-    def test_verify_report_update_file_not_updated(self, mocker):
+    def test_verify_report_update_file_not_updated(self, mocker, caplog):
         mocker.patch("os.path.exists", return_value=True)
         mocker.patch("os.path.getmtime", return_value=1234567.0)
 
         processor = CoverageProcessor("fake_path", "app.py", "cobertura")
-        with pytest.raises(
-            AssertionError,
-            match="Fatal: The coverage report file was not updated after the test command.",
-        ):
+        
+        print("Logger name is:", processor.logger.name)
+
+        with caplog.at_level(logging.WARNING, logger=processor.logger.name):
             processor.verify_report_update(1234567890)
+
+        assert "The coverage report file was not updated after the test command." in caplog.text
 
     def test_verify_report_update_file_not_exist(self, mocker):
         mocker.patch("os.path.exists", return_value=False)
