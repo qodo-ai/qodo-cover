@@ -403,35 +403,37 @@ class UnitTestValidator:
             test_code_indented = "\n" + test_code_indented.strip("\n") + "\n"
             exit_code = 0
             if test_code_indented and relevant_line_number_to_insert_tests_after:
-                # Step 1: Insert the generated test to the relevant line in the test file
+                # Step 1: Insert imports first, then insert the generated test code
                 additional_imports_lines = ""
                 original_content_lines = original_content.split("\n")
-                test_code_lines = test_code_indented.split("\n")
-                # insert the test code at the relevant line
-                processed_test_lines = (
-                    original_content_lines[:relevant_line_number_to_insert_tests_after]
-                    + test_code_lines
-                    + original_content_lines[
-                        relevant_line_number_to_insert_tests_after:
-                    ]
-                )
-                # insert the additional imports at line 'relevant_line_number_to_insert_imports_after'
-                processed_test = "\n".join(processed_test_lines)
+
+                # Insert the additional imports at line 'relevant_line_number_to_insert_imports_after'
+                inserted_lines_count = 0
                 if (
                     relevant_line_number_to_insert_imports_after
                     and additional_imports
-                    and additional_imports not in processed_test
+                    and additional_imports not in original_content
                 ):
                     additional_imports_lines = additional_imports.split("\n")
-                    processed_test_lines = (
-                        processed_test_lines[
-                            :relevant_line_number_to_insert_imports_after
-                        ]
+                    inserted_lines_count = len(additional_imports_lines)
+                    original_content_lines = (
+                        original_content_lines[:relevant_line_number_to_insert_imports_after]
                         + additional_imports_lines
-                        + processed_test_lines[
-                            relevant_line_number_to_insert_imports_after:
-                        ]
+                        + original_content_lines[relevant_line_number_to_insert_imports_after:]
                     )
+
+                # Offset the test insertion point by however many lines we just inserted
+                updated_test_insertion_point = relevant_line_number_to_insert_tests_after
+                if inserted_lines_count > 0:
+                    updated_test_insertion_point += inserted_lines_count
+
+                # Now insert the test code at 'updated_test_insertion_point'
+                test_code_lines = test_code_indented.split("\n")
+                processed_test_lines = (
+                    original_content_lines[:updated_test_insertion_point]
+                    + test_code_lines
+                    + original_content_lines[updated_test_insertion_point:]
+                )
                 processed_test = "\n".join(processed_test_lines)
                 with open(self.test_file_path, "w") as test_file:
                     test_file.write(processed_test)
