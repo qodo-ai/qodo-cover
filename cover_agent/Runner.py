@@ -21,7 +21,7 @@ class Runner:
         command_start_time = int(round(time.time() * 1000))
 
         max_allowed_runtime_seconds = get_settings().get(
-            "tests.max_allowed_runtime_seconds", 30
+            "tests.max_allowed_runtime_seconds", 3600
         )
         # Ensure the command is executed with shell=True for string commands
         try:
