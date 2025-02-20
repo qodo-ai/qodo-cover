@@ -1,6 +1,10 @@
 from cover_agent.AgentCompletionABC import AgentCompletionABC
-from cover_agent.PromptBuilder import PromptBuilder
 from cover_agent.AICaller import AICaller
+from cover_agent.CustomLogger import CustomLogger
+from cover_agent.PromptBuilder import PromptBuilder
+from cover_agent.settings.config_loader import get_settings
+
+from jinja2 import Environment, StrictUndefined
 from typing import Tuple
 
 
@@ -22,6 +26,35 @@ class DefaultAgentCompletion(AgentCompletionABC):
         """
         self.builder = builder
         self.caller = caller
+        self.logger = CustomLogger.get_logger(__name__)
+
+    def _build_prompt(self, file: str, **kwargs) -> dict:
+        """
+        Internal helper that builds {"system": ..., "user": ...} for the model,
+        by loading Jinja2 templates from TOML-based settings.
+
+        The `file` argument corresponds to the name/key in your TOML file,
+        e.g. "analyze_test_against_context". All other variables are passed
+        in via **kwargs. The TOML's system/user templates may reference these
+        variables using Jinja2 syntax, e.g. {{ language }} or {{ test_file_content }}.
+        """
+        environment = Environment(undefined=StrictUndefined)
+
+        try:
+            # 1. Fetch the prompt config from your TOML-based settings
+            settings = get_settings().get(file)
+            if not settings or not hasattr(settings, "system") or not hasattr(settings, "user"):
+                self.logging.error(f"Could not find valid system/user prompt settings for: {file}")
+                return {"system": "", "user": ""}
+
+            # 2. Render system & user templates with the passed-in kwargs
+            system_prompt = environment.from_string(settings.system).render(**kwargs)
+            user_prompt   = environment.from_string(settings.user).render(**kwargs)
+        except Exception as e:
+            self.logging.error(f"Error rendering prompt for '{file}': {e}")
+            return {"system": "", "user": ""}
+
+        return {"system": system_prompt, "user": user_prompt}
 
     def generate_tests(
         self,
@@ -64,7 +97,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
                 - The output token count (int),
                 - The final constructed prompt sent to the AI (str).
         """
-        prompt = self.builder.build_prompt(
+        prompt = self._build_prompt(
             file="test_generation_prompt",
             source_file_name=source_file_name,
             max_tests=max_tests,
@@ -117,7 +150,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
                 - The output token count (int),
                 - The final constructed prompt (str).
         """
-        prompt = self.builder.build_prompt(
+        prompt = self._build_prompt(
             file="analyze_test_run_failure",
             source_file_name=source_file_name,
             source_file=source_file,
@@ -157,7 +190,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
                 - The output token count (int),
                 - The final constructed prompt (str).
         """
-        prompt = self.builder.build_prompt(
+        prompt = self._build_prompt(
             file="analyze_suite_test_insert_line",
             language=language,
             test_file_numbered=test_file_numbered,
@@ -199,7 +232,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
                 - The output token count (int),
                 - The final constructed prompt (str).
         """
-        prompt = self.builder.build_prompt(
+        prompt = self._build_prompt(
             file="analyze_test_against_context",
             language=language,
             test_file_content=test_file_content,
@@ -234,7 +267,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
                 - The output token count (int),
                 - The final constructed prompt (str).
         """
-        prompt = self.builder.build_prompt(
+        prompt = self._build_prompt(
             file="analyze_suite_test_headers_indentation",
             language=language,
             test_file_name=test_file_name,
@@ -268,7 +301,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
                 - The output token count (int),
                 - The final constructed prompt (str).
         """
-        prompt = self.builder.build_prompt(
+        prompt = self._build_prompt(
             file="adapt_test_command_for_a_single_test_via_ai",
             test_file_relative_path=test_file_relative_path,
             test_command=test_command,
