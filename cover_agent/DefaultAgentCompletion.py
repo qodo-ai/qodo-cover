@@ -1,7 +1,6 @@
 from cover_agent.AgentCompletionABC import AgentCompletionABC
 from cover_agent.AICaller import AICaller
 from cover_agent.CustomLogger import CustomLogger
-from cover_agent.PromptBuilder import PromptBuilder
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.utils import load_yaml
 
@@ -12,17 +11,16 @@ from typing import Tuple
 class DefaultAgentCompletion(AgentCompletionABC):
     """
     A default implementation of AgentCompletionABC that relies on TOML-based
-    prompt templates for each method. It uses a PromptBuilder to construct the
+    prompt templates for each method. It uses _build_prompt() to construct the
     prompt from the appropriate TOML file, then calls an AI model via AICaller
     to get the response.
     """
 
-    def __init__(self, builder: PromptBuilder, caller: AICaller):
+    def __init__(self, caller: AICaller):
         """
         Initializes the DefaultAgentCompletion.
 
         Args:
-            builder (PromptBuilder): A utility class for building prompts from TOML templates.
             caller (AICaller): A class responsible for sending the prompt to an AI model and returning the response.
         """
         self.caller = caller

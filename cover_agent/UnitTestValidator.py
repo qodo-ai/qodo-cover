@@ -636,20 +636,18 @@ class UnitTestValidator:
 
     def extract_error_message(self, fail_details):
         """
-        Extracts the error message from the provided stderr and stdout outputs.
+        Extracts the error message from the provided fail details.
 
-        Updates the PromptBuilder object with the stderr and stdout, builds a custom prompt for analyzing test run failures,
-        calls the language model to analyze the prompt, and loads the response into a dictionary.
-
-        Returns the error summary from the loaded YAML data or a default error message if unable to summarize.
+        Uses the agent completion to analyze test run failures by examining the source file,
+        processed test file, stderr, and stdout. Returns a summarized error message from the analysis.
         Logs errors encountered during the process.
 
         Parameters:
-            stderr (str): The standard error output from the test run.
-            stdout (str): The standard output from the test run.
+            fail_details (dict): Dictionary containing test failure details including stderr, stdout,
+                               and processed test file contents.
 
         Returns:
-            str: The error summary extracted from the response or a default error message if extraction fails.
+            str: The error summary extracted from the response or an empty string if extraction fails.
         """
         try:
             # Run the analysis via LLM

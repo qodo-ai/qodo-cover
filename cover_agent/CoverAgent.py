@@ -7,7 +7,6 @@ import wandb
 from typing import List
 
 from cover_agent.CustomLogger import CustomLogger
-from cover_agent.PromptBuilder import PromptBuilder
 from cover_agent.UnitTestGenerator import UnitTestGenerator
 from cover_agent.UnitTestValidator import UnitTestValidator
 from cover_agent.UnitTestDB import UnitTestDB
@@ -41,12 +40,9 @@ class CoverAgent:
         if agent_completion:
             self.agent_completion = agent_completion
         else:
-            # Default to using the DefaultAgentCompletion object with the PromptBuilder and AICaller
+            # Default to using the DefaultAgentCompletion object with AICaller
             self.ai_caller = AICaller(model=args.model, api_base=args.api_base, max_tokens=8192)
-            self.prompt_builder = PromptBuilder()
-            self.agent_completion = DefaultAgentCompletion(
-                builder=self.prompt_builder, caller=self.ai_caller
-            )
+            self.agent_completion = DefaultAgentCompletion(caller=self.ai_caller)
 
         self.test_gen = UnitTestGenerator(
             source_file_path=args.source_file_path,
