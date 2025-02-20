@@ -211,7 +211,7 @@ class UnitTestValidator:
                 counter_attempts += 1
 
             if test_headers_indentation is None:
-                raise Exception("Failed to analyze the test headers indentation")
+                raise Exception(f"Failed to analyze the test headers indentation. YAML response: {response}. tests_dict: {tests_dict}")
 
             relevant_line_number_to_insert_tests_after = None
             relevant_line_number_to_insert_imports_after = None
@@ -245,9 +245,9 @@ class UnitTestValidator:
                 counter_attempts += 1
 
             if not relevant_line_number_to_insert_tests_after:
-                raise Exception("Failed to analyze the relevant line number to insert new tests")
+                raise Exception(f"Failed to analyze the relevant line number to insert new tests. tests_dict: {tests_dict}")
             if not relevant_line_number_to_insert_imports_after:
-                raise Exception("Failed to analyze the relevant line number to insert new imports")
+                raise Exception(f"Failed to analyze the relevant line number to insert new imports. tests_dict: {tests_dict}")
 
             self.test_headers_indentation = test_headers_indentation
             self.relevant_line_number_to_insert_tests_after = (
