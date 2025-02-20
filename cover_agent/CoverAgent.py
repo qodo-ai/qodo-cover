@@ -33,9 +33,6 @@ class CoverAgent:
         self._validate_paths()
         self._duplicate_test_file()
 
-        # To run only a single test file, we need to modify the test command
-        self.parse_command_to_run_only_a_single_test(args)
-
         # Configure the AgentCompletion object
         if agent_completion:
             self.agent_completion = agent_completion
@@ -77,6 +74,9 @@ class CoverAgent:
             num_attempts=args.run_tests_multiple_times,
             agent_completion=self.agent_completion,
         )
+
+        # To run only a single test file, we need to modify the test command
+        self.parse_command_to_run_only_a_single_test(args)
 
     def parse_command_to_run_only_a_single_test(self, args):
         test_command = args.test_command
