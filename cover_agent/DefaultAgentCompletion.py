@@ -3,9 +3,11 @@ from cover_agent.PromptBuilder import PromptBuilder
 from cover_agent.AICaller import AICaller
 from typing import Tuple
 
-
 class DefaultAgentCompletion(AgentCompletionABC):
-    """Default implementation using PromptBuilder and AICaller."""
+    """
+    Default implementation of `AgentCompletionABC`, using `PromptBuilder` to construct prompts
+    and `AICaller` to invoke LLM calls for test generation, analysis, and adaptation.
+    """
 
     def __init__(self, builder: PromptBuilder, caller: AICaller):
         self.builder = builder
@@ -26,27 +28,30 @@ class DefaultAgentCompletion(AgentCompletionABC):
         failed_tests_section: str = None,
     ) -> Tuple[str, int, int, str]:
         """
-        Generates additional unit tests to improve test coverage.
-
+        Generates a prompt and invokes an LLM call to create additional unit tests.
+        
+        This function constructs a prompt with the existing test cases, source file,
+        and coverage report, then calls the LLM to generate new tests to improve test coverage.
+        
         Args:
-            source_file_name (str): Name of the source file under test.
-            max_tests (int): Maximum number of tests to generate.
-            source_file_numbered (str): The source code with line numbers added.
-            code_coverage_report (str): Coverage details, highlighting untested lines.
-            additional_instructions_text (str): Extra instructions for the AI.
-            additional_includes_section (str): Additional includes/imports for context.
-            language (str): Programming language (e.g. "python", "java").
-            test_file (str): Content of the current test file.
-            failed_tests_section (str): Data about failed tests (if any).
-            test_file_name (str): Name of the test file.
-            testing_framework (str): The testing framework in use (e.g., "pytest", "junit").
+            source_file_name (str): The name of the source file under test.
+            max_tests (int): The maximum number of new tests to generate.
+            source_file_numbered (str): The source file content with line numbers.
+            code_coverage_report (str): The report detailing uncovered lines.
+            language (str): The programming language of the code.
+            test_file (str): The existing test file content.
+            test_file_name (str): The name of the test file.
+            testing_framework (str): The test framework being used.
+            additional_instructions_text (str, optional): Additional user-provided instructions.
+            additional_includes_section (str, optional): Additional includes for context.
+            failed_tests_section (str, optional): Previously failed test cases.
 
         Returns:
             Tuple[str, int, int, str]:
-                - AI-generated test code as a string
-                - The count of input tokens
-                - The count of output tokens
-                - The generated prompt (for reference)
+                - Generated test cases (YAML string)
+                - Input token count
+                - Output token count
+                - The generated prompt string
         """
         prompt = self.builder.build_prompt(
             file="test_generation_prompt",
@@ -75,22 +80,26 @@ class DefaultAgentCompletion(AgentCompletionABC):
         test_file_name: str,
     ) -> Tuple[str, int, int, str]:
         """
-        Analyzes the output of a failed test to determine the cause of failure.
-
+        Generates a prompt and invokes an LLM call to analyze test failures.
+        
+        This function constructs a prompt containing the test execution output, error logs,
+        and relevant files, then calls the LLM to determine the root cause of failures
+        and suggest fixes.
+        
         Args:
-            source_file_name (str): Name of the source file under test.
-            source_file (str): Raw source file content.
-            processed_test_file (str): Preprocessed test file content.
+            source_file_name (str): The name of the source file under test.
+            source_file (str): The content of the source file.
+            processed_test_file (str): The processed test file content.
             stdout (str): Standard output from the test run.
-            stderr (str): Standard error from the test run.
-            test_file_name (str): Name of the failing test file.
-
+            stderr (str): Error output from the test run.
+            test_file_name (str): The name of the test file.
+        
         Returns:
             Tuple[str, int, int, str]:
-                - AI-generated analysis
-                - The count of input tokens
-                - The count of output tokens
-                - The generated prompt
+                - Failure analysis result (YAML string)
+                - Input token count
+                - Output token count
+                - The generated prompt string
         """
         prompt = self.builder.build_prompt(
             file="analyze_test_run_failure",
@@ -104,102 +113,6 @@ class DefaultAgentCompletion(AgentCompletionABC):
         response, prompt_tokens, completion_tokens = self.caller.call_model(prompt)
         return response, prompt_tokens, completion_tokens, prompt
 
-    def analyze_test_insert_line(
-        self,
-        language: str,
-        test_file_numbered: str,
-        test_file_name: str,
-        additional_instructions_text: str = None,
-    ) -> Tuple[str, int, int, str]:
-        """
-        Determines where to insert new test cases.
-
-        Args:
-            language (str): The programming language for the test file.
-            test_file_numbered (str): The test file content with line numbers.
-            additional_instructions_text (str): Any extra AI instructions.
-            test_file_name (str): Name of the test file.
-
-        Returns:
-            Tuple[str, int, int, str]:
-                - AI-generated suggestion for insertion
-                - The count of input tokens
-                - The count of output tokens
-                - The generated prompt
-        """
-        prompt = self.builder.build_prompt(
-            file="analyze_suite_test_insert_line",
-            language=language,
-            test_file_numbered=test_file_numbered,
-            additional_instructions_text=additional_instructions_text,
-            test_file_name=test_file_name,
-        )
-        response, prompt_tokens, completion_tokens = self.caller.call_model(prompt)
-        return response, prompt_tokens, completion_tokens, prompt
-
-    def analyze_test_against_context(
-        self,
-        language: str,
-        test_file_content: str,
-        test_file_name_rel: str,
-        context_files_names_rel: str,
-    ) -> Tuple[str, int, int, str]:
-        """
-        Validates whether a generated test is appropriate for its corresponding source code.
-
-        Args:
-            language (str): Programming language for the test file.
-            test_file_content (str): The actual content of the test file.
-            test_file_name_rel (str): The relative path/name of the test file.
-            context_files_names_rel (str): Names of context files to consider.
-
-        Returns:
-            Tuple[str, int, int, str]:
-                - AI-generated validation or analysis
-                - The count of input tokens
-                - The count of output tokens
-                - The generated prompt
-        """
-        prompt = self.builder.build_prompt(
-            file="analyze_test_against_context",
-            language=language,
-            test_file_content=test_file_content,
-            test_file_name_rel=test_file_name_rel,
-            context_files_names_rel=context_files_names_rel,
-        )
-        response, prompt_tokens, completion_tokens = self.caller.call_model(prompt)
-        return response, prompt_tokens, completion_tokens, prompt
-
-    def analyze_suite_test_headers_indentation(
-        self,
-        language: str,
-        test_file_name: str,
-        test_file: str,
-    ) -> Tuple[str, int, int, str]:
-        """
-        Determines the indentation style used in test suite headers.
-
-        Args:
-            language (str): Programming language of the test file.
-            test_file_name (str): The name of the test file.
-            test_file (str): Raw content of the test file.
-
-        Returns:
-            Tuple[str, int, int, str]:
-                - AI-generated indentation analysis
-                - The count of input tokens
-                - The count of output tokens
-                - The generated prompt
-        """
-        prompt = self.builder.build_prompt(
-            file="analyze_suite_test_headers_indentation",
-            language=language,
-            test_file_name=test_file_name,
-            test_file=test_file,
-        )
-        response, prompt_tokens, completion_tokens = self.caller.call_model(prompt)
-        return response, prompt_tokens, completion_tokens, prompt
-    
     def adapt_test_command_for_a_single_test_via_ai(
         self,
         test_file_relative_path: str,
@@ -207,22 +120,24 @@ class DefaultAgentCompletion(AgentCompletionABC):
         project_root_dir: str,
     ) -> Tuple[str, int, int, str]:
         """
-        Adapts the test command line to run only a single test file.
-
-        This method modifies the provided test command so that it targets only one
-        specific test file, preserving other flags or parameters where possible.
-
+        Generates a prompt and invokes an LLM call to modify a test command to run a single test file.
+        
+        This function constructs a prompt that guides the LLM to adapt an
+        existing test command so it runs only a specific test file while
+        preserving all other parameters. The prompt is then sent to the LLM
+        to retrieve the modified command.
+        
         Args:
-            test_file_relative_path (str): The relative path to the specific test file to run.
-            test_command (str): The original command line that runs all tests.
-            project_root_dir (str): The project's root directory.
-
+            test_file_relative_path (str): The relative path to the test file.
+            test_command (str): The original test execution command.
+            project_root_dir (str): The root directory of the project.
+        
         Returns:
             Tuple[str, int, int, str]:
-                - AI-generated command line (string) tailored to the specified test file
-                - The count of input tokens (int)
-                - The count of output tokens (int)
-                - The generated prompt (string)
+                - Modified test command (YAML string)
+                - Input token count
+                - Output token count
+                - The generated prompt string
         """
         prompt = self.builder.build_prompt(
             file="adapt_test_command_for_a_single_test_via_ai",
