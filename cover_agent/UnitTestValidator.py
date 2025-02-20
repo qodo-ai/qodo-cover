@@ -404,17 +404,25 @@ class UnitTestValidator:
             exit_code = 0
             if test_code_indented and relevant_line_number_to_insert_tests_after:
                 # Step 1: Insert imports first, then insert the generated test code
-                additional_imports_lines = ""
+                additional_imports_lines = []
                 original_content_lines = original_content.split("\n")
 
-                # Insert the additional imports at line 'relevant_line_number_to_insert_imports_after'
+                # Build a deduplicated list of import lines
+                if additional_imports:
+                    raw_import_lines = additional_imports.split("\n")
+                    for line in raw_import_lines:
+                        # Only add if it's not already present (stripped match) in the file
+                        if line.strip() and all(
+                            line.strip() != existing.strip()
+                            for existing in original_content_lines
+                        ):
+                            additional_imports_lines.append(line)
+
                 inserted_lines_count = 0
                 if (
                     relevant_line_number_to_insert_imports_after
-                    and additional_imports
-                    and additional_imports not in original_content
+                    and additional_imports_lines
                 ):
-                    additional_imports_lines = additional_imports.split("\n")
                     inserted_lines_count = len(additional_imports_lines)
                     original_content_lines = (
                         original_content_lines[:relevant_line_number_to_insert_imports_after]
