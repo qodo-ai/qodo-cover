@@ -25,7 +25,6 @@ class DefaultAgentCompletion(AgentCompletionABC):
             builder (PromptBuilder): A utility class for building prompts from TOML templates.
             caller (AICaller): A class responsible for sending the prompt to an AI model and returning the response.
         """
-        self.builder = builder
         self.caller = caller
         self.logger = CustomLogger.get_logger(__name__)
 
@@ -113,7 +112,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
             failed_tests_section=failed_tests_section,
         )
         response, prompt_tokens, completion_tokens = self.caller.call_model(prompt)
-        return response, prompt_tokens, completion_tokens, str(prompt)
+        return response, prompt_tokens, completion_tokens, prompt["user"]
 
     def analyze_test_failure(
         self,
@@ -161,7 +160,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
             test_file_name=test_file_name,
         )
         response, prompt_tokens, completion_tokens = self.caller.call_model(prompt)
-        return response, prompt_tokens, completion_tokens, str(prompt)
+        return response, prompt_tokens, completion_tokens, prompt["user"]
 
     def analyze_test_insert_line(
         self,
@@ -199,7 +198,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
             additional_instructions_text=additional_instructions_text,
         )
         response, prompt_tokens, completion_tokens = self.caller.call_model(prompt)
-        return response, prompt_tokens, completion_tokens, str(prompt)
+        return response, prompt_tokens, completion_tokens, prompt["user"]
 
     def analyze_test_against_context(
         self,
@@ -241,7 +240,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
             context_files_names_rel=context_files_names_rel,
         )
         response, prompt_tokens, completion_tokens = self.caller.call_model(prompt)
-        return response, prompt_tokens, completion_tokens, str(prompt)
+        return response, prompt_tokens, completion_tokens, prompt["user"]
 
     def analyze_suite_test_headers_indentation(
         self,
@@ -275,7 +274,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
             test_file=test_file,
         )
         response, prompt_tokens, completion_tokens = self.caller.call_model(prompt)
-        return response, prompt_tokens, completion_tokens, str(prompt)
+        return response, prompt_tokens, completion_tokens, prompt["user"]
 
     def adapt_test_command_for_a_single_test_via_ai(
         self,
@@ -323,4 +322,4 @@ class DefaultAgentCompletion(AgentCompletionABC):
                 f"Failed parsing YAML for adapt_test_command. response_yaml: {response_str}. Error: {e}"
             )
 
-        return new_command_line, prompt_tokens, completion_tokens, str(prompt)
+        return new_command_line, prompt_tokens, completion_tokens, prompt["user"]

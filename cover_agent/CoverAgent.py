@@ -7,7 +7,7 @@ import wandb
 from typing import List
 
 from cover_agent.CustomLogger import CustomLogger
-from cover_agent.PromptBuilder import PromptBuilder, adapt_test_command_for_a_single_test_via_ai
+from cover_agent.PromptBuilder import PromptBuilder
 from cover_agent.UnitTestGenerator import UnitTestGenerator
 from cover_agent.UnitTestValidator import UnitTestValidator
 from cover_agent.UnitTestDB import UnitTestDB
