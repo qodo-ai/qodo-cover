@@ -184,9 +184,9 @@ class AgentCompletionABC(ABC):
         Returns:
             Tuple[str, int, int, str]:
                 A 4-element tuple containing:
-                - The AI-generated modified command line (string),
-                - The input token count (int),
-                - The output token count (int),
+                - The AI-generated single-test command line (string) or None upon failure.
+                - The input token count (int).
+                - The output token count (int).
                 - The final constructed prompt (string).
         """
         pass
