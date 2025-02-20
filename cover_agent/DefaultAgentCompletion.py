@@ -29,41 +29,33 @@ class DefaultAgentCompletion(AgentCompletionABC):
         self.caller = caller
         self.logger = CustomLogger.get_logger(__name__)
 
-    def _build_prompt(self, file: str, **kwargs) -> str:
+    def _build_prompt(self, file: str, **kwargs) -> dict:
         """
-        Internal helper that builds and returns a single string representing both 
-        the system and user prompts by loading Jinja2 templates from TOML-based 
-        settings.
+        Internal helper that builds {"system": ..., "user": ...} for the model,
+        by loading Jinja2 templates from TOML-based settings.
 
         The `file` argument corresponds to the name/key in your TOML file,
         e.g. "analyze_test_against_context". All other variables are passed
         in via **kwargs. The TOML's system/user templates may reference these
         variables using Jinja2 syntax, e.g. {{ language }} or {{ test_file_content }}.
-
-        Returns:
-            str: The combined prompt string, structured as:
-
-                [system]
-                <system prompt>
-
-                [user]
-                <user prompt>
         """
         environment = Environment(undefined=StrictUndefined)
 
         try:
+            # 1. Fetch the prompt config from your TOML-based settings
             settings = get_settings().get(file)
             if not settings or not hasattr(settings, "system") or not hasattr(settings, "user"):
                 self.logger.error(f"Could not find valid system/user prompt settings for: {file}")
-                return "[system]\n\n[user]\n"
+                return {"system": "", "user": ""}
 
+            # 2. Render system & user templates with the passed-in kwargs
             system_prompt = environment.from_string(settings.system).render(**kwargs)
-            user_prompt = environment.from_string(settings.user).render(**kwargs)
+            user_prompt   = environment.from_string(settings.user).render(**kwargs)
         except Exception as e:
             self.logger.error(f"Error rendering prompt for '{file}': {e}")
-            return "[system]\n\n[user]\n"
+            return {"system": "", "user": ""}
 
-        return f"[system]\n{system_prompt}\n\n[user]\n{user_prompt}"
+        return {"system": system_prompt, "user": user_prompt}
 
     def generate_tests(
         self,
@@ -121,7 +113,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
             failed_tests_section=failed_tests_section,
         )
         response, prompt_tokens, completion_tokens = self.caller.call_model(prompt)
-        return response, prompt_tokens, completion_tokens, prompt
+        return response, prompt_tokens, completion_tokens, str(prompt)
 
     def analyze_test_failure(
         self,
@@ -169,7 +161,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
             test_file_name=test_file_name,
         )
         response, prompt_tokens, completion_tokens = self.caller.call_model(prompt)
-        return response, prompt_tokens, completion_tokens, prompt
+        return response, prompt_tokens, completion_tokens, str(prompt)
 
     def analyze_test_insert_line(
         self,
@@ -207,7 +199,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
             additional_instructions_text=additional_instructions_text,
         )
         response, prompt_tokens, completion_tokens = self.caller.call_model(prompt)
-        return response, prompt_tokens, completion_tokens, prompt
+        return response, prompt_tokens, completion_tokens, str(prompt)
 
     def analyze_test_against_context(
         self,
@@ -249,7 +241,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
             context_files_names_rel=context_files_names_rel,
         )
         response, prompt_tokens, completion_tokens = self.caller.call_model(prompt)
-        return response, prompt_tokens, completion_tokens, prompt
+        return response, prompt_tokens, completion_tokens, str(prompt)
 
     def analyze_suite_test_headers_indentation(
         self,
@@ -283,7 +275,7 @@ class DefaultAgentCompletion(AgentCompletionABC):
             test_file=test_file,
         )
         response, prompt_tokens, completion_tokens = self.caller.call_model(prompt)
-        return response, prompt_tokens, completion_tokens, prompt
+        return response, prompt_tokens, completion_tokens, str(prompt)
 
     def adapt_test_command_for_a_single_test_via_ai(
         self,
@@ -331,4 +323,4 @@ class DefaultAgentCompletion(AgentCompletionABC):
                 f"Failed parsing YAML for adapt_test_command. response_yaml: {response_str}. Error: {e}"
             )
 
-        return new_command_line, prompt_tokens, completion_tokens, prompt
+        return new_command_line, prompt_tokens, completion_tokens, str(prompt)
