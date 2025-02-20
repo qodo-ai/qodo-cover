@@ -5,7 +5,7 @@ set -o pipefail  # Exit if any command in a pipeline fails
 set -x  # Print commands and their arguments as they are executed
 
 # Default model name
-MODEL="claude-3-5-sonnet-20241022"
+MODEL="gpt-4o-2024-11-20"
 RUN_INSTALLER=false
 
 # Function to display usage
