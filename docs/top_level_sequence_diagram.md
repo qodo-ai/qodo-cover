@@ -3,80 +3,96 @@ Cover Agent consists of many classes but the fundamental flow lives within the C
 
 ```mermaid
 sequenceDiagram
-    participant User
-    participant CoverAgent
-    participant CustomLogger
-    participant UnitTestGenerator
-    participant CoverageProcessor
-    participant AICaller
-    participant PromptBuilder
+    participant U as User
+    participant M as main.py (CLI)
+    participant CA as CoverAgent
+    participant UTV as UnitTestValidator
+    participant UTG as UnitTestGenerator
+    participant CP as CoverageProcessor
+    participant R as Runner
+    participant AC as AgentCompletion (DefaultAgentCompletion)
+    participant AI as AICaller (LLM)
+    participant DB as UnitTestDB
+    participant RG as ReportGenerator
 
-    User->>CoverAgent: Initialize with args
-    CoverAgent->>CustomLogger: Get logger instance
-    CoverAgent->>CoverAgent: _validate_paths()
-    CoverAgent->>CoverAgent: _duplicate_test_file()
-    CoverAgent->>UnitTestGenerator: Initialize UnitTestGenerator
-    UnitTestGenerator->>AICaller: Initialize AICaller
-    UnitTestGenerator->>CustomLogger: Get logger instance
-    UnitTestGenerator->>CoverageProcessor: run_coverage()
-    CoverageProcessor-->>UnitTestGenerator: Return coverage metrics
+    %% 1. User runs the CLI
+    U->>M: python cover_agent/main.py [args]
+    M->>CA: parse_args() <br/> → new CoverAgent(args)
 
-    CoverAgent->>UnitTestGenerator: initial_test_suite_analysis()
-    
-    loop Analyze test suite headers indentation
-        UnitTestGenerator->>PromptBuilder: build_prompt(analyze_suite_test_headers_indentation)
-        PromptBuilder-->>UnitTestGenerator: Return prompt
-        note right of UnitTestGenerator: Request in prompt: <br/>1. Programming language of the test file <br/>2. Testing framework needed to run tests <br/>3. Number of tests in the file <br/>4. Indentation of the test headers
-        PromptBuilder-->>AICaller: Construct and return full prompt
-        UnitTestGenerator->>AICaller: Call model with prompt
-        note right of AICaller: Analyze test file and provide YAML object with: <br />1. Programming language <br />2. Testing framework <br />3. Number of tests <br />4. Indentation of the test headers
-        AICaller-->>UnitTestGenerator: Return analysis results
-        UnitTestGenerator->>UnitTestGenerator: Parse YAML response
-        UnitTestGenerator->>UnitTestGenerator: Extract test_headers_indentation
-        note right of UnitTestGenerator: Store test_headers_indentation
-    end
+    %% 2. CoverAgent initialization
+    CA->>CA: _validate_paths()
+    CA->>CA: _duplicate_test_file()
+    CA->>CA: parse_command_to_run_only_a_single_test()
 
-    loop Analyze test insert lines
-        UnitTestGenerator->>PromptBuilder: build_prompt(analyze_suite_test_insert_line)
-        PromptBuilder-->>UnitTestGenerator: Return prompt
-        note right of UnitTestGenerator: Request in prompt: <br/>1. Programming language of the test file <br/>2. Testing framework needed to run tests <br/>3. Number of tests in the file <br/>4. Line number to insert new tests <br/>5. Line number to insert new imports
-        PromptBuilder-->>AICaller: Construct and return full prompt
-        UnitTestGenerator->>AICaller: Call model with prompt
-        note right of AICaller: Analyze test file and provide YAML object with: <br />1. Programming language <br />2. Testing framework <br />3. Number of tests <br />4. Relevant line number to insert tests <br />5. Relevant line number to insert imports
-        AICaller-->>UnitTestGenerator: Return analysis results
-        note right of UnitTestGenerator: Process analysis results
-        UnitTestGenerator->>UnitTestGenerator: Parse YAML response
-        UnitTestGenerator->>UnitTestGenerator: Extract relevant_line_number_to_insert_tests_after
-        UnitTestGenerator->>UnitTestGenerator: Extract relevant_line_number_to_insert_imports_after
-        note right of UnitTestGenerator: Store relevant_line_numbers
-    end
+    note over CA: Creates supporting objects
+    CA->>UTG: new UnitTestGenerator(...)
+    CA->>UTV: new UnitTestValidator(...)
 
-    loop Test generation and validation
-        CoverAgent->>UnitTestGenerator: generate_tests()
-        UnitTestGenerator->>PromptBuilder: build_prompt(test_generation_prompt)
-        PromptBuilder-->>UnitTestGenerator: Return prompt
-        note right of UnitTestGenerator: Request in prompt: <br/>1. Analyze source file <br/>2. Analyze test file <br/>3. Generate new unit tests to increase coverage <br/>4. Follow provided guidelines for test generation: <br />a. Carefully analyze the provided code <br />b. Understand its purpose, inputs, outputs, and key logic <br />c. Brainstorm necessary test cases <br />d. Review tests for full coverage <br />e. Ensure consistency with existing test suite
-        PromptBuilder-->>AICaller: Construct and return full prompt
-        UnitTestGenerator->>AICaller: Call model to generate tests
-        note right of AICaller: Instructions: <br/>1. Analyze provided files <br/>2. Generate new tests <br/>3. Provide YAML object with new tests including: <br />a. Test behavior <br />b. Lines to cover <br />c. Test name <br />d. Test code <br />e. New imports <br />f. Test tags
-        AICaller-->>UnitTestGenerator: Return generated tests
+    %% 3. CoverAgent.run()
+    CA->>CA: run()
 
-        UnitTestGenerator->>UnitTestGenerator: validate_test()
-        note right of UnitTestGenerator: Append and run generated tests
-        note right of UnitTestGenerator: Check test results
+    %% 3a. init() phase
+    note over CA: init()
+    CA->>UTV: initial_test_suite_analysis()
+    UTV->>AC: analyze_suite_test_headers_indentation(...)
+    AC->>AI: call_model()
+    AI-->>AC: returns analysis response (YAML)
+    AC-->>UTV: indentation & other info
 
-        alt Test failed
-            UnitTestGenerator->>UnitTestGenerator: Rollback test file
-            UnitTestGenerator->>UnitTestGenerator: Append failure details
-        else Coverage not increased
-            UnitTestGenerator->>UnitTestGenerator: Rollback test file
-            UnitTestGenerator->>UnitTestGenerator: Append failure details
-        else Test passed and coverage increased
-            UnitTestGenerator->>CoverageProcessor: run_coverage()
-            CoverageProcessor-->>UnitTestGenerator: Return updated coverage metrics
+    UTV->>AC: analyze_test_insert_line(...)
+    AC->>AI: call_model()
+    AI-->>AC: returns insert-line info (YAML)
+    AC-->>UTV: line numbers to insert tests/imports
+
+    note over UTV: store indentation<br/>and insertion lines
+
+    %% 3b. get initial coverage
+    UTV->>UTV: get_coverage()
+    UTV->>UTV: run_coverage()
+    UTV->>R: run_command(test_command)
+    R-->>UTV: stdout, stderr, exit_code, time_of_test
+    UTV->>CP: process_coverage_report(time_of_test)
+    CP-->>UTV: coverage lines + coverage pct
+
+    %% 4. run_test_gen()
+    note over CA: Loop until coverage >= desired or<br/>we reach max iterations
+    CA->>UTG: generate_tests()
+
+    UTG->>AC: generate_tests(...)
+    AC->>AI: call_model()
+    AI-->>AC: returns new tests (YAML)
+    AC-->>UTG: parse new_tests[]
+
+    %% 5. For each generated test, validate
+    loop For each new test
+        CA->>UTV: validate_test(new_test)
+        UTV->>R: run_command(test_command)
+        R-->>UTV: returns exit_code, stderr, stdout
+
+        alt Test fails or coverage not increased
+            UTV->>UTV: rollback test file
+            UTV->>UTV: record failure
+        else Test passes & coverage improved
+            UTV->>CP: run_coverage() → coverage
+            CP-->>UTV: updated coverage
         end
+
+        %% record each attempt in DB
+        UTV->>DB: insert_attempt(test_result)
     end
 
-    CoverAgent->>CustomLogger: Log final results
-    note right of CoverAgent: Generate report
+    %% 6. Check coverage again to decide next iteration
+    CA->>UTV: get_coverage()
+    UTV->>UTV: run_coverage()
+    UTV->>CP: process_coverage_report(...)
+    CP-->>UTV: coverage lines + coverage pct
+
+    note over CA: If coverage < desired then loop else done
+
+    %% 7. Once done, generate HTML report
+    CA->>DB: dump_to_report(report_filepath)
+    DB->>RG: generate_report(results)
+    RG-->>DB: returns
+
+    note over CA: end
 ```
