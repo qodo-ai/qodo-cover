@@ -41,6 +41,35 @@ class CoverAgent:
             self.ai_caller = AICaller(model=args.model, api_base=args.api_base, max_tokens=8192)
             self.agent_completion = DefaultAgentCompletion(caller=self.ai_caller)
 
+        # To run only a single test file, we need to modify the test command
+        test_command = args.test_command
+        new_command_line = None
+        if hasattr(args, "run_each_test_separately") and args.run_each_test_separately:
+            test_file_relative_path = os.path.relpath(
+                args.test_file_output_path, args.project_root
+            )
+            if "pytest" in test_command:
+                try:
+                    ind1 = test_command.index("pytest")
+                    ind2 = test_command[ind1:].index("--")
+                    new_command_line = f"{test_command[:ind1]}pytest {test_file_relative_path} {test_command[ind1 + ind2:]}"
+                except ValueError:
+                    print(
+                        f"Failed to adapt test command for running a single test: {test_command}"
+                    )
+            else:
+                new_command_line, _, _, _ = self.agent_completion.adapt_test_command_for_a_single_test_via_ai(
+                    test_file_relative_path=test_file_relative_path, 
+                    test_command=test_command,
+                    project_root_dir=self.args.test_command_dir, 
+                )
+        if new_command_line:
+            args.test_command_original = test_command
+            args.test_command = new_command_line
+            print(
+                f"Converting test command: `{test_command}`\n to run only a single test: `{new_command_line}`"
+            )
+
         self.test_gen = UnitTestGenerator(
             source_file_path=args.source_file_path,
             test_file_path=args.test_file_output_path,
@@ -74,38 +103,6 @@ class CoverAgent:
             num_attempts=args.run_tests_multiple_times,
             agent_completion=self.agent_completion,
         )
-
-        # To run only a single test file, we need to modify the test command
-        self.parse_command_to_run_only_a_single_test(args)
-
-    def parse_command_to_run_only_a_single_test(self, args):
-        test_command = args.test_command
-        new_command_line = None
-        if hasattr(args, "run_each_test_separately") and args.run_each_test_separately:
-            test_file_relative_path = os.path.relpath(
-                args.test_file_output_path, args.project_root
-            )
-            if "pytest" in test_command:
-                try:
-                    ind1 = test_command.index("pytest")
-                    ind2 = test_command[ind1:].index("--")
-                    new_command_line = f"{test_command[:ind1]}pytest {test_file_relative_path} {test_command[ind1 + ind2:]}"
-                except ValueError:
-                    print(
-                        f"Failed to adapt test command for running a single test: {test_command}"
-                    )
-            else:
-                new_command_line = self.agent_completion.adapt_test_command_for_a_single_test_via_ai(
-                    test_file_relative_path=test_file_relative_path, 
-                    test_command=test_command,
-                    project_root_dir=self.args.test_command_dir, 
-                )
-        if new_command_line:
-            args.test_command_original = test_command
-            args.test_command = new_command_line
-            print(
-                f"Converting test command: `{test_command}`\n to run only a single test: `{new_command_line}`"
-            )
 
     def _validate_paths(self):
         """
