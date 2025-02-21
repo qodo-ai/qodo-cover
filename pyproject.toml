@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cover-agent"
-version = "0.3.3" # Placeholder. Will be replaced by dynamic versioning.
+version = "0.0.0" # Placeholder. Will be replaced by dynamic versioning.
 description = "Cover Agent Tool"
 authors = ["QodoAI <tal.r@codium.ai>"]
 license = "Apache 2.0"
@@ -55,7 +55,7 @@ cover-agent-full-repo = "cover_agent.main_full_repo:main"
 generate-report = "cover_agent.UnitTestDB:dump_to_report_cli"
 
 [tool.poetry-dynamic-versioning]
-enable = false
+enable = true
 
 [tool.poetry-dynamic-versioning.from-file]
 source = "cover_agent/version.txt"
