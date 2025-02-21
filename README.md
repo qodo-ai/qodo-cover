@@ -1,17 +1,17 @@
 
+
+
+
+<div align="center">
 <div align="center">
 
-# Qodo Cover
-
-<div align="center">
-
-<!-- <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://www.codium.ai/images/cover-agent/cover-agent-dark.png" width="330">
-  <source media="(prefers-color-scheme: light)" srcset="https://www.codium.ai/images/cover-agent/cover-agent-light.png" width="330">
+ <picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://www.qodo.ai/wp-content/uploads/2025/02/QodoCover-Light.png" width="330">
+  <source media="(prefers-color-scheme: light)" srcset="https://www.qodo.ai/wp-content/uploads/2025/02/QodoCover-Dark.png" width="330">
   <img src="https://www.codium.ai/images/cover-agent/cover-agent-light.png" alt="logo" width="330"> 
 
-</picture> -->
-<br/>
+</picture>
+<br/><br/>
 Qodo Cover aims to help efficiently increase code coverage, by automatically generating qualified tests to extend code coverage. Qodo Cover can run in your GitHub CI workflow or locally as a CLI tool.
 </div>
 
@@ -44,7 +44,6 @@ See more details [here](docs/repo_coverage.md).
 
 # Qodo-Cover
 Welcome to Qodo-Cover. This focused project utilizes Generative AI to automate and enhance the generation of tests (currently mostly unit tests), aiming to streamline development workflows. Qodo-Cover can run via a terminal, and is planned to be integrated into popular CI platforms.
-[![Test generation xxx](https://www.codium.ai/wp-content/uploads/2024/05/CodiumAI-CoverAgent-v240519-small-loop.gif)](https://youtu.be/fIYkSEJ4eqE?feature=shared)
 
 We invite the community to collaborate and help extend the capabilities of Qodo Cover, continuing its development as a cutting-edge solution in the automated unit test generation domain. We also wish to inspire researchers to leverage this open-source tool to explore new test-generation techniques.
 

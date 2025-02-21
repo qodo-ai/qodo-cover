@@ -5,7 +5,7 @@ set -o pipefail  # Exit if any command in a pipeline fails
 set -x  # Print commands and their arguments as they are executed
 
 # Default model name
-MODEL="gpt-4o"
+MODEL="gpt-4o-2024-11-20"
 RUN_INSTALLER=false
 
 # Function to display usage
@@ -89,6 +89,7 @@ sh tests_integration/test_with_docker.sh \
   --source-file-path "app.go" \
   --test-file-path "app_test.go" \
   --test-command "go test -coverprofile=coverage.out && gocov convert coverage.out | gocov-xml > coverage.xml" \
+  --max-iterations "4" \
   --model $MODEL \
   $log_db_arg
 

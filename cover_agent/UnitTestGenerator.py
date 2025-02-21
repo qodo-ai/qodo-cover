@@ -1,17 +1,13 @@
-from wandb.sdk.data_types.trace_tree import Trace
-import datetime
 import json
-import logging
 import os
-import re
 
 from cover_agent.CustomLogger import CustomLogger
 from cover_agent.FilePreprocessor import FilePreprocessor
 from cover_agent.AgentCompletionABC import AgentCompletionABC
 from cover_agent.settings.config_loader import get_settings
-from cover_agent.settings.token_handling import clip_tokens, TokenEncoder
 from cover_agent.utils import load_yaml
 
+MAX_TESTS_PER_RUN = 4
 
 class UnitTestGenerator:
     def __init__(
@@ -41,7 +37,7 @@ class UnitTestGenerator:
             agent_completion (AgentCompletionABC): The agent completion object to be used for test generation.
             api_base (str, optional): The base API url to use in case model is set to Ollama or Hugging Face. Defaults to an empty string.
             test_command_dir (str, optional): The directory where the test command should be executed. Defaults to the current working directory.
-            included_files (list, optional): A list of paths to included files. Defaults to None.
+            included_files (str, optional): Additional files to include (raw). Defaults to ""
             coverage_type (str, optional): The type of coverage report. Defaults to "cobertura".
             desired_coverage (int, optional): The desired coverage percentage. Defaults to 90.
             additional_instructions (str, optional): Additional instructions for test generation. Defaults to an empty string.
@@ -59,7 +55,7 @@ class UnitTestGenerator:
         self.code_coverage_report_path = code_coverage_report_path
         self.test_command = test_command
         self.test_command_dir = test_command_dir
-        self.included_files = self.get_included_files(included_files, project_root)
+        self.included_files = included_files
         self.coverage_type = coverage_type
         self.additional_instructions = additional_instructions
         self.language = self.get_code_language(source_file_path)
@@ -81,6 +77,9 @@ class UnitTestGenerator:
         # Read self.source_file_path into a string
         with open(self.source_file_path, "r") as f:
             self.source_code = f.read()
+
+        with open(self.test_file_path, "r") as f:
+            self.test_code = f.read()
 
     def get_code_language(self, source_file_path):
         """
@@ -116,48 +115,6 @@ class UnitTestGenerator:
 
         # Return the language name in lowercase
         return language_name.lower()
-
-    @staticmethod
-    def get_included_files(
-        included_files: list, project_root: str = "", disable_tokens=False
-    ) -> str:
-        if included_files:
-            included_files_content = []
-            file_names_rel = []
-            for file_path in included_files:
-                try:
-                    with open(file_path, "r") as file:
-                        included_files_content.append(file.read())
-                        file_path_rel = (
-                            os.path.relpath(file_path, project_root)
-                            if project_root
-                            else file_path
-                        )
-                        file_names_rel.append(file_path_rel)
-                except IOError as e:
-                    print(f"Error reading file {file_path}: {str(e)}")
-            out_str = ""
-            if included_files_content:
-                for i, content in enumerate(included_files_content):
-                    out_str += f"file_path: `{file_names_rel[i]}`\ncontent:\n```\n{content}\n```\n\n\n"
-
-            out_str = out_str.strip()
-            if not disable_tokens and get_settings().get(
-                "include_files.limit_tokens", False
-            ):
-                encoder = TokenEncoder.get_token_encoder()
-                num_input_tokens = len(encoder.encode(out_str))
-                if num_input_tokens > get_settings().get("include_files.max_tokens"):
-                    print(
-                        f"Clipping included files content from {num_input_tokens} to {get_settings().get('include_files.max_tokens')} tokens"
-                    )
-                    out_str = clip_tokens(
-                        out_str,
-                        get_settings().get("include_files.max_tokens"),
-                        num_input_tokens=num_input_tokens,
-                    )
-            return out_str
-        return ""
 
     def check_for_failed_test_runs(self, failed_test_runs):
         """
@@ -217,10 +174,17 @@ class UnitTestGenerator:
         failed_test_runs_value = self.check_for_failed_test_runs(failed_test_runs)
         response, prompt_token_count, response_token_count, self.prompt = (
             self.agent_completion.generate_tests(
-                failed_test_runs_value,
-                language,
-                testing_framework,
-                code_coverage_report,
+                source_file_name=os.path.relpath(self.source_file_path, self.project_root),
+                max_tests=MAX_TESTS_PER_RUN,
+                source_file_numbered="\n".join(f"{i + 1} {line}" for i, line in enumerate(self.source_code.split("\n"))),
+                code_coverage_report=code_coverage_report,
+                additional_instructions_text=self.additional_instructions,
+                additional_includes_section=self.included_files,
+                language=language,
+                test_file=self.test_code,
+                failed_tests_section=failed_test_runs_value,
+                test_file_name=os.path.relpath(self.test_file_path, self.project_root),
+                testing_framework=testing_framework,
             )
         )
 
@@ -248,19 +212,3 @@ class UnitTestGenerator:
             tests_dict = []
 
         return tests_dict
-
-    def to_dict(self):
-        return {
-            "source_file_path": self.source_file_path,
-            "test_file_path": self.test_file_path,
-            "code_coverage_report_path": self.code_coverage_report_path,
-            "test_command": self.test_command,
-            "llm_model": self.llm_model,
-            "test_command_dir": self.test_command_dir,
-            "included_files": self.included_files,
-            "coverage_type": self.coverage_type,
-            "additional_instructions": self.additional_instructions,
-        }
-
-    def to_json(self):
-        return json.dumps(self.to_dict())

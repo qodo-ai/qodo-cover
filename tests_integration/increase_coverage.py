@@ -13,15 +13,15 @@ SOURCE_TEST_FILE_LIST = [
     # ["cover_agent/CoverageProcessor.py", "tests/test_CoverageProcessor.py"],
     # ["cover_agent/CustomLogger.py", ""],
     # ["cover_agent/FilePreprocessor.py", "tests/test_FilePreprocessor.py"],
-    # ["cover_agent/PromptBuilder.py", "tests/test_PromptBuilder.py"],
     # ["cover_agent/ReportGenerator.py", "tests/test_ReportGenerator.py"],
     # ["cover_agent/Runner.py", "tests/test_Runner.py"],
     # ["cover_agent/UnitTestDB.py", "tests/test_UnitTestDB.py"],
     # ["cover_agent/UnitTestGenerator.py", "tests/test_UnitTestGenerator.py"],
     # ["cover_agent/main.py", "tests/test_main.py"],
     # ["cover_agent/settings/config_loader.py", ""],
-    ["cover_agent/utils.py", "tests/test_load_yaml.py"],
+    # ["cover_agent/utils.py", "tests/test_load_yaml.py"],
     # ["cover_agent/version.py", "tests/test_version.py"],
+    # ["cover_agent/DefaultAgentCompletion.py", "tests/test_DefaultAgentCompletion.py"],
 ]
 
 
@@ -38,15 +38,19 @@ class Args:
         self.report_filepath = "test_results.html"
         self.desired_coverage = 100
         self.max_iterations = 5
-        self.additional_instructions = "Do not indent the tests"
-        # self.model = "gpt-4o"
-        self.model = "o1-mini"
+        self.additional_instructions = ""
+        self.model = "claude-3-5-sonnet-20241022"
+        # self.model = "o1-mini"
         self.api_base = "http://localhost:11434"
         self.prompt_only = False
         self.strict_coverage = False
         self.run_tests_multiple_times = 1
         self.use_report_coverage_feature_flag = False
         self.log_db_path = "increase_project_coverage.db"
+        self.project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        self.branch = "main"
+        self.diff_coverage = False
+        self.run_each_test_separately = False
 
 
 if __name__ == "__main__":

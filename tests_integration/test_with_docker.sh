@@ -7,6 +7,7 @@ set -x
 MODEL=""
 API_BASE=""
 OPENAI_API_KEY="${OPENAI_API_KEY:-}"
+ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}"
 DOCKERFILE=""
 DOCKER_IMAGE=""
 SOURCE_FILE_PATH=""
@@ -73,9 +74,12 @@ else
   docker tag "$DOCKER_IMAGE" cover-agent-image
 fi
 
-ARGS=""
 if [ -n "$OPENAI_API_KEY" ]; then
   ARGS="$ARGS -e OPENAI_API_KEY=$OPENAI_API_KEY"
+fi
+
+if [ -n "$ANTHROPIC_API_KEY" ]; then
+  ARGS="$ARGS -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY"
 fi
 
 if [ -n "$LOG_DB_PATH" ]; then
@@ -121,8 +125,12 @@ if [ -n "$LOG_DB_PATH" ]; then
   COMMAND="$COMMAND --log-db-path \"/$LOG_DB_NAME\""
 fi
 
-if [ -n "$OPENAI_API_KEY" ]; then
+if [ -n "$OPENAI_API_KEY" ] && [ -n "$ANTHROPIC_API_KEY" ]; then
+  docker exec -e OPENAI_API_KEY="$OPENAI_API_KEY" -e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" "$CONTAINER_ID" bash -c "$COMMAND"
+elif [ -n "$OPENAI_API_KEY" ]; then
   docker exec -e OPENAI_API_KEY="$OPENAI_API_KEY" "$CONTAINER_ID" bash -c "$COMMAND"
+elif [ -n "$ANTHROPIC_API_KEY" ]; then
+  docker exec -e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" "$CONTAINER_ID" bash -c "$COMMAND"
 else
   docker exec "$CONTAINER_ID" bash -c "$COMMAND"
 fi

@@ -2,16 +2,16 @@
 These working examples attempt to add more tests for the code written in this repository. In or order to properly run these examples you will need to set up your development environment by running `poetry install`. See the main README (development section) for more details.
 
 ## Example 1: Running a folder, and targeting a specific file inside it
-With this example, we run the `tests/test_PromptBuilder.py` file on the entire `cover_agent` folder.
-However, in post-processing we will only extract at the coverage of the `PromptBuilder.py` file, so effectively we are targeting only that file.
+With this example, we run the `tests/test_AICaller.py` file on the entire `cover_agent` folder.
+However, in post-processing we will only extract at the coverage of the `AICaller.py` file, so effectively we are targeting only that file.
 
 ```shell
 cover-agent \
 --model "gpt-4o" \
---source-file-path "cover_agent/PromptBuilder.py" \
---test-file-path "tests/test_PromptBuilder.py" \
+--source-file-path "cover_agent/AICaller.py" \
+--test-file-path "tests/test_AICaller.py" \
 --code-coverage-report-path "coverage.xml" \
---test-command "poetry run pytest tests/test_PromptBuilder.py --cov=cover_agent --cov-report=xml --cov-report=term --log-cli-level=INFO --timeout=10" \
+--test-command "poetry run pytest tests/test_AICaller.py --cov=cover_agent --cov-report=xml --cov-report=term --log-cli-level=INFO --timeout=10" \
 --coverage-type "cobertura" \
 --desired-coverage 90 \
 --max-iterations 5
@@ -19,14 +19,14 @@ cover-agent \
 
 ## Example 2: Running only on a specific module
 
-With this example, we run the `tests/test_PromptBuilder.py` file only on the `PromptBuilder` module, using a more elaborate test command:
+With this example, we run the `tests/test_AICaller.py` file only on the `AICaller` module, using a more elaborate test command:
 ```shell
 cover-agent \
 --model="gpt-4o" \
---source-file-path "cover_agent/PromptBuilder.py" \
---test-file-path "tests/test_PromptBuilder.py" \
+--source-file-path "cover_agent/AICaller.py" \
+--test-file-path "tests/test_AICaller.py" \
 --code-coverage-report-path "tests/coverage_prompt_builder.xml" \
---test-command "poetry run  pytest --cov=cover_agent.PromptBuilder --cov-report=xml:tests/coverage_prompt_builder.xml --cov-report=term tests/test_PromptBuilder.py --timeout=10" \
+--test-command "poetry run  pytest --cov=cover_agent.AICaller --cov-report=xml:tests/coverage_prompt_builder.xml --cov-report=term tests/test_AICaller.py --timeout=10" \
 --coverage-type "cobertura" \
 --desired-coverage 90 \
 --max-iterations 5
