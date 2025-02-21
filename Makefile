@@ -19,7 +19,7 @@ build:
 
 # Initial global pip packages needed for running PyInstaller
 setup-installer:
-	pip install poetry wandb tree_sitter diff-cover --break-system-packages
+	pip install poetry wandb tree_sitter diff-cover
 
 # Build an executable using Pyinstaller
 installer:
