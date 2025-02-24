@@ -3,4 +3,4 @@ limit_tokens=true
 max_tokens=20000
 
 [tests]
-max_allowed_runtime_seconds=3600
+max_allowed_runtime_seconds=30

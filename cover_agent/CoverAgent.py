@@ -13,7 +13,6 @@ from cover_agent.UnitTestDB import UnitTestDB
 from cover_agent.AICaller import AICaller
 from cover_agent.AgentCompletionABC import AgentCompletionABC
 from cover_agent.DefaultAgentCompletion import DefaultAgentCompletion
-import cover_agent.utils
 
 
 class CoverAgent:
@@ -106,6 +105,7 @@ class CoverAgent:
             comparison_branch=args.branch,
             num_attempts=args.run_tests_multiple_times,
             agent_completion=self.agent_completion,
+            max_run_time=args.max_run_time,
         )
 
     def _validate_paths(self):
