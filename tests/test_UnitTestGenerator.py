@@ -40,8 +40,11 @@ class TestUnitTestGenerator:
             )
 
     def test_get_code_language_no_extension(self):
-        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file, \
-             tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_test_file:
+        with tempfile.NamedTemporaryFile(
+            suffix=".py", delete=False
+        ) as temp_source_file, tempfile.NamedTemporaryFile(
+            suffix=".py", delete=False
+        ) as temp_test_file:
             generator = UnitTestGenerator(
                 source_file_path=temp_source_file.name,
                 test_file_path=temp_test_file.name,

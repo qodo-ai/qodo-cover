@@ -96,8 +96,8 @@ class TestUnitValidator:
                 "stdout": "test_example failed",
                 "processed_test_file": "",
                 "test_file_name": "test_test.py",
-                "source_file_name": temp_source_file.name, 
-                "source_file": ""
+                "source_file_name": temp_source_file.name,
+                "source_file": "",
             }
             error_message = generator.extract_error_message(fail_details)
 
@@ -105,13 +105,27 @@ class TestUnitValidator:
                 error_message.strip()
                 == "error_summary: Test failed due to assertion error in test_example"
             )
-            mock_agent_completion_call_args = mock_agent_completion.analyze_test_failure.call_args[1]
+            mock_agent_completion_call_args = (
+                mock_agent_completion.analyze_test_failure.call_args[1]
+            )
             assert fail_details["stderr"] == mock_agent_completion_call_args["stderr"]
             assert fail_details["stdout"] == mock_agent_completion_call_args["stdout"]
-            assert fail_details["processed_test_file"] == mock_agent_completion_call_args["processed_test_file"]
-            assert fail_details["test_file_name"] == mock_agent_completion_call_args["test_file_name"]
-            assert fail_details["source_file_name"] in mock_agent_completion_call_args["source_file_name"]
-            assert fail_details["source_file"] == mock_agent_completion_call_args["source_file"]
+            assert (
+                fail_details["processed_test_file"]
+                == mock_agent_completion_call_args["processed_test_file"]
+            )
+            assert (
+                fail_details["test_file_name"]
+                == mock_agent_completion_call_args["test_file_name"]
+            )
+            assert (
+                fail_details["source_file_name"]
+                in mock_agent_completion_call_args["source_file_name"]
+            )
+            assert (
+                fail_details["source_file"]
+                == mock_agent_completion_call_args["source_file"]
+            )
 
     def test_validate_test_pass_no_coverage_increase_with_prompt(self):
         with tempfile.NamedTemporaryFile(

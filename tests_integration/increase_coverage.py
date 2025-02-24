@@ -47,7 +47,9 @@ class Args:
         self.run_tests_multiple_times = 1
         self.use_report_coverage_feature_flag = False
         self.log_db_path = "increase_project_coverage.db"
-        self.project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        self.project_root = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..")
+        )
         self.branch = "main"
         self.diff_coverage = False
         self.run_each_test_separately = False

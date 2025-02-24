@@ -1,8 +1,8 @@
 """
-This file provides the implementation of the JSON-RPC client, that launches and 
+This file provides the implementation of the JSON-RPC client, that launches and
 communicates with the language server.
 
-The initial implementation of this file was obtained from 
+The initial implementation of this file was obtained from
 https://github.com/predragnikolic/OLSP under the MIT License with the following terms:
 
 MIT License

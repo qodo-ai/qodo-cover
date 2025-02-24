@@ -38,7 +38,9 @@ class CoverAgent:
             self.agent_completion = agent_completion
         else:
             # Default to using the DefaultAgentCompletion object with AICaller
-            self.ai_caller = AICaller(model=args.model, api_base=args.api_base, max_tokens=8192)
+            self.ai_caller = AICaller(
+                model=args.model, api_base=args.api_base, max_tokens=8192
+            )
             self.agent_completion = DefaultAgentCompletion(caller=self.ai_caller)
 
         # To run only a single test file, we need to modify the test command
@@ -58,10 +60,12 @@ class CoverAgent:
                         f"Failed to adapt test command for running a single test: {test_command}"
                     )
             else:
-                new_command_line, _, _, _ = self.agent_completion.adapt_test_command_for_a_single_test_via_ai(
-                    test_file_relative_path=test_file_relative_path, 
-                    test_command=test_command,
-                    project_root_dir=self.args.test_command_dir, 
+                new_command_line, _, _, _ = (
+                    self.agent_completion.adapt_test_command_for_a_single_test_via_ai(
+                        test_file_relative_path=test_file_relative_path,
+                        test_command=test_command,
+                        project_root_dir=self.args.test_command_dir,
+                    )
                 )
         if new_command_line:
             args.test_command_original = test_command
