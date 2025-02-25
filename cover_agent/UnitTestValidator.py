@@ -295,7 +295,9 @@ class UnitTestValidator:
             f'Running build/test command to generate coverage report: "{self.test_command}"'
         )
         stdout, stderr, exit_code, time_of_test_command = Runner.run_command(
-            command=self.test_command, max_run_time=self.max_run_time, cwd=self.test_command_dir
+            command=self.test_command,
+            max_run_time=self.max_run_time,
+            cwd=self.test_command_dir,
         )
         assert (
             exit_code == 0
