@@ -482,7 +482,7 @@ class UnitTestValidator:
                     )
                     stdout, stderr, exit_code, time_of_test_command = (
                         Runner.run_command(
-                            command=self.test_command, cwd=self.test_command_dir
+                            command=self.test_command, cwd=self.test_command_dir, max_run_time=self.max_run_time
                         )
                     )
                     if exit_code != 0:
