@@ -6,12 +6,22 @@ from cover_agent.AICaller import AICaller
 
 
 class TestAICaller:
+    """
+    Test suite for the AICaller class.
+    """
+
     @pytest.fixture
     def ai_caller(self):
+        """
+        Fixture to create an instance of AICaller for testing.
+        """
         return AICaller("test-model", "test-api", enable_retry=False)
 
     @patch("cover_agent.AICaller.AICaller.call_model")
     def test_call_model_simplified(self, mock_call_model):
+        """
+        Test the call_model method with a simplified scenario.
+        """
         # Set up the mock to return a predefined response
         mock_call_model.return_value = ("Hello world!", 2, 10)
         prompt = {"system": "", "user": "Hello, world!"}
@@ -30,6 +40,9 @@ class TestAICaller:
 
     @patch("cover_agent.AICaller.litellm.completion")
     def test_call_model_with_error(self, mock_completion, ai_caller):
+        """
+        Test the call_model method when an exception is raised.
+        """
         # Set up mock to raise an exception
         mock_completion.side_effect = Exception("Test exception")
         prompt = {"system": "", "user": "Hello, world!"}
@@ -41,6 +54,9 @@ class TestAICaller:
 
     @patch("cover_agent.AICaller.litellm.completion")
     def test_call_model_error_streaming(self, mock_completion, ai_caller):
+        """
+        Test the call_model method when an exception is raised during streaming.
+        """
         # Set up mock to raise an exception
         mock_completion.side_effect = ["results"]
         prompt = {"system": "", "user": "Hello, world!"}
@@ -57,6 +73,9 @@ class TestAICaller:
     @patch.dict(os.environ, {"WANDB_API_KEY": "test_key"})
     @patch("cover_agent.AICaller.Trace.log")
     def test_call_model_wandb_logging(self, mock_log, mock_completion, ai_caller):
+        """
+        Test the call_model method with W&B logging enabled.
+        """
         mock_completion.return_value = [
             {"choices": [{"delta": {"content": "response"}}]}
         ]
@@ -74,6 +93,9 @@ class TestAICaller:
 
     @patch("cover_agent.AICaller.litellm.completion")
     def test_call_model_api_base(self, mock_completion, ai_caller):
+        """
+        Test the call_model method with a different API base.
+        """
         mock_completion.return_value = [
             {"choices": [{"delta": {"content": "response"}}]}
         ]
@@ -91,6 +113,9 @@ class TestAICaller:
 
     @patch("cover_agent.AICaller.litellm.completion")
     def test_call_model_with_system_key(self, mock_completion, ai_caller):
+        """
+        Test the call_model method with a system key in the prompt.
+        """
         mock_completion.return_value = [
             {"choices": [{"delta": {"content": "response"}}]}
         ]
@@ -106,6 +131,9 @@ class TestAICaller:
             assert response_tokens == 10
 
     def test_call_model_missing_keys(self, ai_caller):
+        """
+        Test the call_model method when the prompt is missing required keys.
+        """
         prompt = {"user": "Hello, world!"}
         with pytest.raises(KeyError) as exc_info:
             ai_caller.call_model(prompt)
@@ -116,6 +144,9 @@ class TestAICaller:
 
     @patch("cover_agent.AICaller.litellm.completion")
     def test_call_model_o1_preview(self, mock_completion, ai_caller):
+        """
+        Test the call_model method with the 'o1-preview' model.
+        """
         ai_caller.model = "o1-preview"
         prompt = {"system": "System message", "user": "Hello, world!"}
         # Mock the response
@@ -133,6 +164,9 @@ class TestAICaller:
 
     @patch("cover_agent.AICaller.litellm.completion")
     def test_call_model_streaming_response(self, mock_completion, ai_caller):
+        """
+        Test the call_model method with a streaming response.
+        """
         prompt = {"system": "", "user": "Hello, world!"}
         # Mock the response to be an iterable of chunks
         mock_chunk = Mock()
@@ -155,6 +189,9 @@ class TestAICaller:
     def test_call_model_wandb_logging_exception(
         self, mock_log, mock_completion, ai_caller
     ):
+        """
+        Test the call_model method with W&B logging and handle logging exceptions.
+        """
         mock_completion.return_value = [
             {"choices": [{"delta": {"content": "response"}}]}
         ]
