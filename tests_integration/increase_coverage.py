@@ -8,20 +8,22 @@ from cover_agent.CoverAgent import CoverAgent
 
 # List of source/test files to iterate over:
 SOURCE_TEST_FILE_LIST = [
+    # ["cover_agent/AgentCompletionABC.py", "tests/test_AgentCompletionABC.py"],
     # ["cover_agent/AICaller.py", "tests/test_AICaller.py"],
     # ["cover_agent/CoverAgent.py", "tests/test_CoverAgent.py"],
-    # ["cover_agent/CoverageProcessor.py", "tests/test_CoverageProcessor.py"],
+    ["cover_agent/CoverageProcessor.py", "tests/test_CoverageProcessor.py"],
     # ["cover_agent/CustomLogger.py", ""],
+    # ["cover_agent/DefaultAgentCompletion.py", "tests/test_DefaultAgentCompletion.py"],
     # ["cover_agent/FilePreprocessor.py", "tests/test_FilePreprocessor.py"],
+    # ["cover_agent/main.py", "tests/test_main.py"],
     # ["cover_agent/ReportGenerator.py", "tests/test_ReportGenerator.py"],
     # ["cover_agent/Runner.py", "tests/test_Runner.py"],
-    # ["cover_agent/UnitTestDB.py", "tests/test_UnitTestDB.py"],
-    # ["cover_agent/UnitTestGenerator.py", "tests/test_UnitTestGenerator.py"],
-    # ["cover_agent/main.py", "tests/test_main.py"],
     # ["cover_agent/settings/config_loader.py", ""],
+    # ["cover_agent/UnitTestDB.py", "tests/test_UnitTestDB.py"],
+    ["cover_agent/UnitTestGenerator.py", "tests/test_UnitTestGenerator.py"],
+    ["cover_agent/UnitTestValidator.py", "tests/test_UnitTestValidator.py"],
     # ["cover_agent/utils.py", "tests/test_load_yaml.py"],
     # ["cover_agent/version.py", "tests/test_version.py"],
-    # ["cover_agent/DefaultAgentCompletion.py", "tests/test_DefaultAgentCompletion.py"],
 ]
 
 
@@ -37,9 +39,9 @@ class Args:
         self.coverage_type = "cobertura"
         self.report_filepath = "test_results.html"
         self.desired_coverage = 100
-        self.max_iterations = 5
+        self.max_iterations = 3
         self.additional_instructions = ""
-        self.model = "claude-3-5-sonnet-20241022"
+        self.model = "claude-3-7-sonnet-20250219"
         # self.model = "o1-mini"
         self.api_base = "http://localhost:11434"
         self.prompt_only = False
@@ -53,6 +55,7 @@ class Args:
         self.branch = "main"
         self.diff_coverage = False
         self.run_each_test_separately = False
+        self.max_run_time = 30
 
 
 if __name__ == "__main__":

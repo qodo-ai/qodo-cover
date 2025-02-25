@@ -6,6 +6,7 @@ import os
 import pytest
 import tempfile
 
+from unittest.mock import mock_open
 import unittest
 
 
@@ -285,3 +286,54 @@ class TestCoverAgent:
         os.remove(temp_source_file.name)
         os.remove(temp_test_file.name)
         os.remove(temp_output_file.name)
+
+    @patch("cover_agent.CoverAgent.os.path.isfile", return_value=True)
+    @patch("cover_agent.CoverAgent.os.path.isdir", return_value=True)
+    @patch("cover_agent.CoverAgent.shutil.copy")
+    @patch("builtins.open", new_callable=mock_open, read_data="# Test content")
+    def test_run_each_test_separately_with_pytest(self, mock_open_file, mock_copy, mock_isdir, mock_isfile):
+        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file, \
+             tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_test_file, \
+             tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_output_file:
+            
+            # Create a relative path for the test file
+            rel_path = "tests/test_output.py"
+            
+            args = argparse.Namespace(
+                source_file_path=temp_source_file.name,
+                test_file_path=temp_test_file.name,
+                project_root="/project/root",
+                test_file_output_path="/project/root/" + rel_path,
+                code_coverage_report_path="coverage_report.xml",
+                test_command="pytest --cov=myapp --cov-report=xml",
+                test_command_dir=os.getcwd(),
+                included_files=None,
+                coverage_type="cobertura",
+                report_filepath="test_results.html",
+                desired_coverage=90,
+                max_iterations=10,
+                additional_instructions="",
+                model="openai/test-model",
+                api_base="openai/test-api",
+                use_report_coverage_feature_flag=False,
+                log_db_path="",
+                diff_coverage=False,
+                branch="main",
+                run_tests_multiple_times=1,
+                run_each_test_separately=True,
+                max_run_time=30,
+            )
+            
+            # Initialize CoverAgent
+            agent = CoverAgent(args)
+            
+            # Verify the test command was modified correctly
+            assert hasattr(args, "test_command_original")
+            assert args.test_command_original == "pytest --cov=myapp --cov-report=xml"
+            assert args.test_command == "pytest tests/test_output.py --cov=myapp --cov-report=xml"
+            
+            # Clean up temporary files
+            os.remove(temp_source_file.name)
+            os.remove(temp_test_file.name)
+            os.remove(temp_output_file.name)
+
