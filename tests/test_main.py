@@ -128,3 +128,25 @@ class TestMain:
 
         mock_cover_agent.assert_called_once_with(args)
         mock_agent_instance.run.assert_called_once()
+
+    def test_parse_args_with_max_run_time(self):
+        with patch(
+            "sys.argv",
+            [
+                "program.py",
+                "--source-file-path",
+                "test_source.py",
+                "--test-file-path",
+                "test_file.py",
+                "--code-coverage-report-path",
+                "coverage_report.xml",
+                "--test-command",
+                "pytest",
+                "--max-iterations",
+                "10",
+                "--max-run-time",
+                "45",
+            ],
+        ):
+            args = parse_args()
+            assert args.max_run_time == 45
