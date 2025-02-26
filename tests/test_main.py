@@ -6,7 +6,14 @@ from cover_agent.main import parse_args, main
 
 
 class TestMain:
+    """
+    Test suite for the main functionalities of the cover_agent module.
+    """
+
     def test_parse_args(self):
+        """
+        Test the parse_args function to ensure it correctly parses command-line arguments.
+        """
         with patch(
             "sys.argv",
             [
@@ -24,6 +31,7 @@ class TestMain:
             ],
         ):
             args = parse_args()
+            # Assert that all arguments are parsed correctly
             assert args.source_file_path == "test_source.py"
             assert args.test_file_path == "test_file.py"
             assert args.code_coverage_report_path == "coverage_report.xml"
@@ -38,6 +46,9 @@ class TestMain:
     @patch("cover_agent.CoverAgent.UnitTestGenerator")
     @patch("cover_agent.CoverAgent.os.path.isfile")
     def test_main_source_file_not_found(self, mock_isfile, mock_unit_cover_agent):
+        """
+        Test the main function to ensure it raises a FileNotFoundError when the source file is not found.
+        """
         args = argparse.Namespace(
             source_file_path="test_source.py",
             test_file_path="test_file.py",
@@ -57,6 +68,7 @@ class TestMain:
             with pytest.raises(FileNotFoundError) as exc_info:
                 main()
 
+        # Assert that the correct exception message is raised
         assert (
             str(exc_info.value) == f"Source file not found at {args.source_file_path}"
         )
@@ -68,6 +80,9 @@ class TestMain:
     def test_main_test_file_not_found(
         self, mock_unit_cover_agent, mock_isfile, mock_exists
     ):
+        """
+        Test the main function to ensure it raises a FileNotFoundError when the test file is not found.
+        """
         args = argparse.Namespace(
             source_file_path="test_source.py",
             test_file_path="test_file.py",
@@ -89,12 +104,16 @@ class TestMain:
             with pytest.raises(FileNotFoundError) as exc_info:
                 main()
 
+        # Assert that the correct exception message is raised
         assert str(exc_info.value) == f"Test file not found at {args.test_file_path}"
 
     @patch("cover_agent.main.CoverAgent")
     @patch("cover_agent.main.parse_args")
     @patch("cover_agent.main.os.path.isfile")
     def test_main_calls_agent_run(self, mock_isfile, mock_parse_args, mock_cover_agent):
+        """
+        Test the main function to ensure it correctly initializes and runs the CoverAgent.
+        """
         args = argparse.Namespace(
             source_file_path="test_source.py",
             test_file_path="test_file.py",
@@ -126,10 +145,14 @@ class TestMain:
 
         main()
 
+        # Assert that the CoverAgent is initialized and run correctly
         mock_cover_agent.assert_called_once_with(args)
         mock_agent_instance.run.assert_called_once()
 
     def test_parse_args_with_max_run_time(self):
+        """
+        Test the parse_args function to ensure it correctly parses the max-run-time argument.
+        """
         with patch(
             "sys.argv",
             [
@@ -149,4 +172,5 @@ class TestMain:
             ],
         ):
             args = parse_args()
+            # Assert that the max_run_time argument is parsed correctly
             assert args.max_run_time == 45

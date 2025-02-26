@@ -3,9 +3,16 @@ from cover_agent.ReportGenerator import ReportGenerator
 
 
 class TestReportGeneration:
+    """
+    Test suite for the ReportGenerator class.
+    This class contains tests to validate the functionality of the report generation.
+    """
+
     @pytest.fixture
     def sample_results(self):
-        # Sample data mimicking the structure expected by the ReportGenerator
+        """
+        Fixture providing sample data mimicking the structure expected by the ReportGenerator.
+        """
         return [
             {
                 "status": "pass",
@@ -25,7 +32,9 @@ class TestReportGeneration:
 
     @pytest.fixture
     def expected_output(self):
-        # Simplified expected output for validation
+        """
+        Fixture providing simplified expected output for validation.
+        """
         expected_start = "<!DOCTYPE html>"
         expected_table_header = "<th>Status</th>"
         expected_row_content = "test_current_date"
@@ -33,10 +42,16 @@ class TestReportGeneration:
         return expected_start, expected_table_header, expected_row_content, expected_end
 
     def test_generate_report(self, sample_results, expected_output, tmp_path):
+        """
+        Test the generate_report method of ReportGenerator.
+
+        This test verifies that the generated HTML report contains key parts of the expected output.
+        """
         # Temporary path for generating the report
         report_path = tmp_path / "test_report.html"
         ReportGenerator.generate_report(sample_results, str(report_path))
 
+        # Read the generated report content
         with open(report_path, "r") as file:
             content = file.read()
 
@@ -53,9 +68,16 @@ class TestReportGeneration:
         assert expected_output[3] in content  # Check if the HTML closes properly
 
     def test_generate_partial_diff_basic(self):
+        """
+        Test the generate_partial_diff method of ReportGenerator.
+
+        This test verifies that the generated diff output correctly highlights added, removed, and unchanged lines.
+        """
         original = "line1\nline2\nline3"
         processed = "line1\nline2 modified\nline3\nline4"
         diff_output = ReportGenerator.generate_partial_diff(original, processed)
+
+        # Verify that the diff output contains the expected changes
         assert '<span class="diff-added">+line2 modified</span>' in diff_output
         assert '<span class="diff-added">+line4</span>' in diff_output
         assert '<span class="diff-removed">-line2</span>' in diff_output

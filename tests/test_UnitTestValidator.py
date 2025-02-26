@@ -1,9 +1,9 @@
+# Import necessary modules and classes
 from cover_agent.CoverageProcessor import CoverageProcessor
 from cover_agent.ReportGenerator import ReportGenerator
 from cover_agent.Runner import Runner
 from cover_agent.UnitTestValidator import UnitTestValidator
-from unittest.mock import patch, mock_open
-from unittest.mock import MagicMock
+from unittest.mock import patch, mock_open, MagicMock
 
 import datetime
 import os
@@ -12,6 +12,8 @@ import tempfile
 
 
 class TestUnitValidator:
+    """Test suite for the UnitTestValidator class."""
+
     def test_extract_error_message_exception_handling(self):
         """Ensure exception handling works when calling agent_completion for error extraction."""
         with tempfile.NamedTemporaryFile(
@@ -40,9 +42,11 @@ class TestUnitValidator:
             }
             error_message = generator.extract_error_message(fail_details)
 
-            assert error_message == ""  # Should return an empty string on failure
+            # Should return an empty string on failure
+            assert error_message == ""
 
     def test_run_coverage_with_report_coverage_flag(self):
+        """Test running coverage with the report coverage feature flag enabled."""
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file:
@@ -131,6 +135,7 @@ class TestUnitValidator:
             )
 
     def test_validate_test_pass_no_coverage_increase_with_prompt(self):
+        """Test validation of a test that passes but does not increase coverage."""
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file:
@@ -216,6 +221,7 @@ class TestUnitValidator:
             mock_agent_completion.analyze_test_insert_line.assert_called_once()
 
     def test_post_process_coverage_report_with_report_coverage_flag(self):
+        """Test post-processing of the coverage report with the report coverage feature flag enabled."""
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file:
@@ -241,6 +247,7 @@ class TestUnitValidator:
                 assert coverage_percentages == {"test.py": 1.0}
 
     def test_post_process_coverage_report_with_diff_coverage(self):
+        """Test post-processing of the coverage report with diff coverage enabled."""
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file:
@@ -263,6 +270,7 @@ class TestUnitValidator:
                 assert percentage_covered == 0.8
 
     def test_post_process_coverage_report_without_flags(self):
+        """Test post-processing of the coverage report without any feature flags."""
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file:
@@ -284,6 +292,7 @@ class TestUnitValidator:
                 assert percentage_covered == 0.7
 
     def test_generate_diff_coverage_report_success(self):
+        """Test successful generation of the diff coverage report."""
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file:
@@ -313,6 +322,7 @@ class TestUnitValidator:
                 )
 
     def test_generate_diff_coverage_report_failure(self):
+        """Test failure in generating the diff coverage report."""
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file:

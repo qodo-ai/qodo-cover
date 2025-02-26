@@ -3,6 +3,7 @@ import tempfile
 import textwrap
 from cover_agent.FilePreprocessor import FilePreprocessor
 
+
 class TestFilePreprocessor:
     """
     Test suite for the FilePreprocessor class.

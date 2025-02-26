@@ -328,18 +328,24 @@ class TestCoverAgent:
     @patch("cover_agent.CoverAgent.os.path.isdir", return_value=True)
     @patch("cover_agent.CoverAgent.shutil.copy")
     @patch("builtins.open", new_callable=mock_open, read_data="# Test content")
-    def test_run_each_test_separately_with_pytest(self, mock_open_file, mock_copy, mock_isdir, mock_isfile):
+    def test_run_each_test_separately_with_pytest(
+        self, mock_open_file, mock_copy, mock_isdir, mock_isfile
+    ):
         """
         Test the behavior when running each test separately with pytest.
         Ensures that the test command is modified correctly.
         """
-        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file, \
-             tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_test_file, \
-             tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_output_file:
-            
+        with tempfile.NamedTemporaryFile(
+            suffix=".py", delete=False
+        ) as temp_source_file, tempfile.NamedTemporaryFile(
+            suffix=".py", delete=False
+        ) as temp_test_file, tempfile.NamedTemporaryFile(
+            suffix=".py", delete=False
+        ) as temp_output_file:
+
             # Create a relative path for the test file
             rel_path = "tests/test_output.py"
-            
+
             args = argparse.Namespace(
                 source_file_path=temp_source_file.name,
                 test_file_path=temp_test_file.name,
@@ -364,17 +370,19 @@ class TestCoverAgent:
                 run_each_test_separately=True,
                 max_run_time=30,
             )
-            
+
             # Initialize CoverAgent
             agent = CoverAgent(args)
-            
+
             # Verify the test command was modified correctly
             assert hasattr(args, "test_command_original")
             assert args.test_command_original == "pytest --cov=myapp --cov-report=xml"
-            assert args.test_command == "pytest tests/test_output.py --cov=myapp --cov-report=xml"
-            
+            assert (
+                args.test_command
+                == "pytest tests/test_output.py --cov=myapp --cov-report=xml"
+            )
+
             # Clean up temporary files
             os.remove(temp_source_file.name)
             os.remove(temp_test_file.name)
             os.remove(temp_output_file.name)
-

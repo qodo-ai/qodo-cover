@@ -11,6 +11,10 @@ DATABASE_URL = f"sqlite:///{DB_NAME}"
 
 @pytest.fixture(scope="class")
 def unit_test_db():
+    """
+    Fixture to set up and tear down the UnitTestDB instance for testing.
+    Creates an empty database file before tests and removes it after tests.
+    """
     # Create an empty DB file for testing
     with open(DB_NAME, "w"):
         pass
@@ -27,8 +31,15 @@ def unit_test_db():
 
 @pytest.mark.usefixtures("unit_test_db")
 class TestUnitTestDB:
+    """
+    Test class for UnitTestDB functionalities.
+    """
 
     def test_insert_attempt(self, unit_test_db):
+        """
+        Test the insert_attempt method of UnitTestDB.
+        Verifies that the attempt is correctly inserted into the database.
+        """
         test_result = {
             "status": "success",
             "reason": "",
@@ -45,12 +56,14 @@ class TestUnitTestDB:
             "processed_test_file": "sample new test code",
         }
 
+        # Insert the test result into the database
         attempt_id = unit_test_db.insert_attempt(test_result)
         with unit_test_db.Session() as session:
             attempt = (
                 session.query(UnitTestGenerationAttempt).filter_by(id=attempt_id).one()
             )
 
+        # Assertions to verify the inserted attempt
         assert attempt.id == attempt_id
         assert attempt.status == "success"
         assert attempt.reason == ""
@@ -65,6 +78,10 @@ class TestUnitTestDB:
         assert attempt.processed_test_file == "sample new test code"
 
     def test_dump_to_report(self, unit_test_db, tmp_path):
+        """
+        Test the dump_to_report method of UnitTestDB.
+        Verifies that the report is generated and contains the correct content.
+        """
         test_result = {
             "status": "success",
             "reason": "Test passed successfully",
@@ -81,6 +98,7 @@ class TestUnitTestDB:
             "processed_test_file": "sample new test code",
         }
 
+        # Insert the test result into the database
         unit_test_db.insert_attempt(test_result)
 
         # Generate the report and save it to a temporary file
@@ -99,6 +117,10 @@ class TestUnitTestDB:
         assert "def test_example(): pass" in content
 
     def test_dump_to_report_cli_custom_args(self, unit_test_db, tmp_path, monkeypatch):
+        """
+        Test the dump_to_report_cli function with custom command-line arguments.
+        Verifies that the report is generated at the specified location.
+        """
         custom_db_path = str(tmp_path / "cli_custom_unit_test_runs.db")
         custom_report_filepath = str(tmp_path / "cli_custom_report.html")
         monkeypatch.setattr(
@@ -115,6 +137,10 @@ class TestUnitTestDB:
         assert os.path.exists(custom_report_filepath)
 
     def test_dump_to_report_defaults(self, unit_test_db, tmp_path):
+        """
+        Test the dump_to_report function with default arguments.
+        Verifies that the report is generated at the default location.
+        """
         report_filepath = tmp_path / "default_report.html"
         dump_to_report(report_filepath=str(report_filepath))
         assert os.path.exists(report_filepath)

@@ -42,6 +42,7 @@ class TestCoverageProcessor:
     """
     Test suite for the CoverageProcessor class.
     """
+
     @pytest.fixture
     def processor(self):
         """
@@ -653,24 +654,23 @@ class TestCoverageProcessor:
         # Mock the parse_json_diff_coverage_report method
         mock_parse_json = mocker.patch(
             "cover_agent.CoverageProcessor.CoverageProcessor.parse_json_diff_coverage_report",
-            return_value=([1, 3, 5], [2, 4, 6], 0.5)
+            return_value=([1, 3, 5], [2, 4, 6], 0.5),
         )
-        
+
         # Create processor with diff_cover_json type
         processor = CoverageProcessor(
-            "fake_path", 
-            "app.py", 
+            "fake_path",
+            "app.py",
             "diff_cover_json",
-            diff_coverage_report_path="diff_coverage.json"
+            diff_coverage_report_path="diff_coverage.json",
         )
-        
+
         # Call parse_coverage_report
         result = processor.parse_coverage_report()
-        
+
         # Verify the correct method was called and results returned
         mock_parse_json.assert_called_once()
         assert result == ([1, 3, 5], [2, 4, 6], 0.5)
-
 
     def test_parse_json_diff_coverage_report(self, mocker):
         """
@@ -682,43 +682,46 @@ class TestCoverageProcessor:
                 "path/to/app.py": {
                     "covered_lines": [1, 3, 5],
                     "violation_lines": [2, 4, 6],
-                    "percent_covered": 50.0
+                    "percent_covered": 50.0,
                 }
             }
         }
-        
+
         # Mock open and json.load
         mock_open = mocker.patch("builtins.open", mocker.mock_open())
         mocker.patch("json.load", return_value=mock_json_data)
-        
+
         # Create processor with diff_coverage_report_path
         processor = CoverageProcessor(
-            "fake_path", 
-            "path/to/app.py", 
+            "fake_path",
+            "path/to/app.py",
             "diff_cover_json",
-            diff_coverage_report_path="diff_coverage.json"
+            diff_coverage_report_path="diff_coverage.json",
         )
-        
+
         # Call the method
-        covered_lines, missed_lines, coverage_pct = processor.parse_json_diff_coverage_report()
-        
+        covered_lines, missed_lines, coverage_pct = (
+            processor.parse_json_diff_coverage_report()
+        )
+
         # Verify results
         assert covered_lines == [1, 3, 5]
         assert missed_lines == [2, 4, 6]
         assert coverage_pct == 0.5
-        
+
         # Test with file not found in report
         processor = CoverageProcessor(
-            "fake_path", 
-            "path/to/nonexistent.py", 
+            "fake_path",
+            "path/to/nonexistent.py",
             "diff_cover_json",
-            diff_coverage_report_path="diff_coverage.json"
+            diff_coverage_report_path="diff_coverage.json",
         )
-        
-        covered_lines, missed_lines, coverage_pct = processor.parse_json_diff_coverage_report()
-        
+
+        covered_lines, missed_lines, coverage_pct = (
+            processor.parse_json_diff_coverage_report()
+        )
+
         # Verify default values returned
         assert covered_lines == []
         assert missed_lines == []
         assert coverage_pct == 0.0
-
