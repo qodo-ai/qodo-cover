@@ -182,89 +182,53 @@ class CoverAgent:
 
         return failed_test_runs, language, test_framework, coverage_report
 
-    def run_test_gen(
-        self,
-        failed_test_runs: List,
-        language: str,
-        test_framework: str,
-        coverage_report: str,
-    ):
-        """
-        Run the test generation process.
+    def _generate_and_validate_tests(self, failed_test_runs, language, test_framework, coverage_report):
+        """Generate new tests and validate them using list comprehension."""
+        self.log_coverage()
+        generated_tests_dict = self.test_gen.generate_tests(
+            failed_test_runs, language, test_framework, coverage_report
+        )
 
-        This method performs the following steps:
+        try:
+            test_results = [
+                self.test_validator.validate_test(test)
+                for test in generated_tests_dict.get("new_tests", [])
+            ]
+            
+            # Insert results into database
+            for result in test_results:
+                result["prompt"] = self.test_gen.prompt
+                self.test_db.insert_attempt(result)
+                
+        except AttributeError as e:
+            self.logger.error(f"Failed to validate the tests within {generated_tests_dict}. Error: {e}")
 
-        1. Loop until desired coverage is reached or maximum iterations are met.
-        2. Generate new tests.
-        3. Loop through each new test and validate it.
-        4. Insert the test result into the database.
-        5. Increment the iteration count.
-        6. Check if the desired coverage has been reached.
-        7. If the desired coverage has been reached, log the final coverage.
-        8. If the maximum iteration limit is reached, log a failure message if strict coverage is specified.
-        9. Provide metrics on total token usage.
-        10. Generate a report.
-        11. Finish the Weights & Biases run if it was initialized.
-        """
-        # Initialize variables to track progress
-        iteration_count = 0
+    def _check_iteration_progress(self):
+        """Check coverage progress and return info needed for next iteration."""
+        failed_runs, lang, framework, report = self.test_validator.get_coverage()
+        target_reached = self.test_validator.current_coverage >= (self.test_validator.desired_coverage / 100)
+        return failed_runs, lang, framework, report, target_reached
 
-        # Loop until desired coverage is reached or maximum iterations are met
-        while iteration_count < self.args.max_iterations:
-            # Log the current coverage
-            self.log_coverage()
+    def _finalize_test_generation(self, iteration_count):
+        """Handle final logging, reporting and cleanup."""
+        current_coverage = round(self.test_validator.current_coverage * 100, 2)
+        desired_coverage = self.test_validator.desired_coverage
 
-            # Generate new tests
-            generated_tests_dict = self.test_gen.generate_tests(
-                failed_test_runs, language, test_framework, coverage_report
-            )
-
-            # Loop through each new test and validate it
-            try:
-                for generated_test in generated_tests_dict.get("new_tests", []):
-                    # Validate the test and record the result
-                    test_result = self.test_validator.validate_test(generated_test)
-
-                    # Insert the test result into the database
-                    test_result["prompt"] = self.test_gen.prompt
-                    self.test_db.insert_attempt(test_result)
-            except AttributeError as e:
-                self.logger.error(
-                    f"Failed to validate the test {generated_test} within {generated_tests_dict}. Error: {e}"
-                )
-
-            # Increment the iteration count
-            iteration_count += 1
-
-            # Check if the desired coverage has been reached
-            failed_test_runs, language, test_framework, coverage_report = (
-                self.test_validator.get_coverage()
-            )
-            if self.test_validator.current_coverage >= (
-                self.test_validator.desired_coverage / 100
-            ):
-                break
-
-        # Log the final coverage
-        if self.test_validator.current_coverage >= (
-            self.test_validator.desired_coverage / 100
-        ):
+        if self.test_validator.current_coverage >= (desired_coverage / 100):
             self.logger.info(
-                f"Reached above target coverage of {self.test_validator.desired_coverage}% (Current Coverage: {round(self.test_validator.current_coverage * 100, 2)}%) in {iteration_count} iterations."
+                f"Reached above target coverage of {desired_coverage}% (Current Coverage: {current_coverage}%) in {iteration_count} iterations."
             )
         elif iteration_count == self.args.max_iterations:
-            if self.args.diff_coverage:
-                failure_message = f"Reached maximum iteration limit without achieving desired diff coverage. Current Coverage: {round(self.test_validator.current_coverage * 100, 2)}%"
-            else:
-                failure_message = f"Reached maximum iteration limit without achieving desired coverage. Current Coverage: {round(self.test_validator.current_coverage * 100, 2)}%"
+            coverage_type = "diff coverage" if self.args.diff_coverage else "coverage"
+            failure_message = f"Reached maximum iteration limit without achieving desired {coverage_type}. Current Coverage: {current_coverage}%"
+            
             if self.args.strict_coverage:
-                # User requested strict coverage (similar to "--cov-fail-under in pytest-cov"). Fail with exist code 2.
                 self.logger.error(failure_message)
                 sys.exit(2)
             else:
                 self.logger.info(failure_message)
 
-        # Provide metrics on total token usage
+        # Log token usage
         self.logger.info(
             f"Total number of input tokens used for LLM model {self.args.model}: {self.test_gen.total_input_token_count + self.test_validator.total_input_token_count}"
         )
@@ -272,10 +236,8 @@ class CoverAgent:
             f"Total number of output tokens used for LLM model {self.args.model}: {self.test_gen.total_output_token_count + self.test_validator.total_output_token_count}"
         )
 
-        # Generate a report
+        # Generate report and cleanup
         self.test_db.dump_to_report(self.args.report_filepath)
-
-        # Finish the Weights & Biases run if it was initialized
         if "WANDB_API_KEY" in os.environ:
             wandb.finish()
 
@@ -291,5 +253,17 @@ class CoverAgent:
         self.logger.info(f"Desired Coverage: {self.test_validator.desired_coverage}%")
 
     def run(self):
+        """Main execution loop for test generation."""
+        iteration_count = 0
         failed_test_runs, language, test_framework, coverage_report = self.init()
-        self.run_test_gen(failed_test_runs, language, test_framework, coverage_report)
+
+        while iteration_count < self.args.max_iterations:
+            self._generate_and_validate_tests(failed_test_runs, language, test_framework, coverage_report)
+            
+            failed_test_runs, language, test_framework, coverage_report, target_reached = self._check_iteration_progress()
+            if target_reached:
+                break
+                
+            iteration_count += 1
+
+        self._finalize_test_generation(iteration_count)
