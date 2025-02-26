@@ -205,7 +205,7 @@ class CoverAgent:
 
         return failed_test_runs, language, test_framework, coverage_report
 
-    def _generate_and_validate_tests(self, failed_test_runs, language, test_framework, coverage_report):
+    def generate_and_validate_tests(self, failed_test_runs, language, test_framework, coverage_report):
         """
         Generate new tests and validate their effectiveness.
         
@@ -234,7 +234,7 @@ class CoverAgent:
         except AttributeError as e:
             self.logger.error(f"Failed to validate the tests within {generated_tests_dict}. Error: {e}")
 
-    def _check_iteration_progress(self):
+    def check_iteration_progress(self):
         """
         Evaluate current progress towards coverage goals.
         
@@ -246,7 +246,7 @@ class CoverAgent:
         target_reached = self.test_validator.current_coverage >= (self.test_validator.desired_coverage / 100)
         return failed_runs, lang, framework, report, target_reached
 
-    def _finalize_test_generation(self, iteration_count):
+    def finalize_test_generation(self, iteration_count):
         """
         Complete the test generation process and produce final reports.
         
@@ -315,12 +315,12 @@ class CoverAgent:
         failed_test_runs, language, test_framework, coverage_report = self.init()
 
         while iteration_count < self.args.max_iterations:
-            self._generate_and_validate_tests(failed_test_runs, language, test_framework, coverage_report)
+            self.generate_and_validate_tests(failed_test_runs, language, test_framework, coverage_report)
             
-            failed_test_runs, language, test_framework, coverage_report, target_reached = self._check_iteration_progress()
+            failed_test_runs, language, test_framework, coverage_report, target_reached = self.check_iteration_progress()
             if target_reached:
                 break
                 
             iteration_count += 1
 
-        self._finalize_test_generation(iteration_count)
+        self.finalize_test_generation(iteration_count)
