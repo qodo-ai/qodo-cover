@@ -62,6 +62,7 @@ class TestFilePreprocessor:
             tmp.close()
             preprocessor = FilePreprocessor(tmp.name)
             input_text = "Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt."
+            processed_text = preprocessor.process_file(input_text)
             expected_output = textwrap.indent(input_text, "    ")
             assert (
                 processed_text == expected_output
