@@ -16,15 +16,28 @@ from cover_agent.DefaultAgentCompletion import DefaultAgentCompletion
 
 
 class CoverAgent:
+    """
+    A class that manages the generation and validation of unit tests to achieve desired code coverage.
+    
+    This agent coordinates between test generation and validation components, handles file management,
+    and tracks the progress of coverage improvements over multiple iterations.
+    """
+    
     def __init__(self, args, agent_completion: AgentCompletionABC = None):
         """
-        Initialize the CoverAgent class with the provided arguments and run the test generation process.
+        Initialize the CoverAgent with configuration and set up test generation environment.
 
         Parameters:
-            args (Namespace): The parsed command-line arguments containing necessary information for test generation.
+            args (Namespace): Command-line arguments containing:
+                - paths for source and test files
+                - project configuration
+                - coverage requirements
+                - test execution settings
+            agent_completion (AgentCompletionABC, optional): Custom completion agent for test generation.
+                                                           Defaults to DefaultAgentCompletion.
 
-        Returns:
-            None
+        Raises:
+            FileNotFoundError: If required source files or directories are not found.
         """
         self.args = args
         self.logger = CustomLogger.get_logger(__name__)
@@ -36,21 +49,24 @@ class CoverAgent:
         if agent_completion:
             self.agent_completion = agent_completion
         else:
-            # Default to using the DefaultAgentCompletion object with AICaller
+            # Create default AI caller with specified model and parameters
             self.ai_caller = AICaller(
                 model=args.model, api_base=args.api_base, max_tokens=8192
             )
             self.agent_completion = DefaultAgentCompletion(caller=self.ai_caller)
 
-        # To run only a single test file, we need to modify the test command
+        # Modify test command for single test execution if needed
         test_command = args.test_command
         new_command_line = None
         if hasattr(args, "run_each_test_separately") and args.run_each_test_separately:
+            # Calculate relative path for test file
             test_file_relative_path = os.path.relpath(
                 args.test_file_output_path, args.project_root
             )
+            # Handle pytest commands specifically
             if "pytest" in test_command:
                 try:
+                    # Modify pytest command to target single test file
                     ind1 = test_command.index("pytest")
                     ind2 = test_command[ind1:].index("--")
                     new_command_line = f"{test_command[:ind1]}pytest {test_file_relative_path} {test_command[ind1 + ind2:]}"
@@ -59,6 +75,7 @@ class CoverAgent:
                         f"Failed to adapt test command for running a single test: {test_command}"
                     )
             else:
+                # Use AI to adapt non-pytest test commands
                 new_command_line, _, _, _ = (
                     self.agent_completion.adapt_test_command_for_a_single_test_via_ai(
                         test_file_relative_path=test_file_relative_path,
@@ -66,6 +83,8 @@ class CoverAgent:
                         project_root_dir=self.args.test_command_dir,
                     )
                 )
+
+        # Update test command if successfully modified
         if new_command_line:
             args.test_command_original = test_command
             args.test_command = new_command_line
@@ -73,6 +92,7 @@ class CoverAgent:
                 f"Converting test command: `{test_command}`\n to run only a single test: `{new_command_line}`"
             )
 
+        # Initialize test generator with configuration
         self.test_gen = UnitTestGenerator(
             source_file_path=args.source_file_path,
             test_file_path=args.test_file_output_path,
@@ -88,6 +108,7 @@ class CoverAgent:
             agent_completion=self.agent_completion,
         )
 
+        # Initialize test validator with configuration
         self.test_validator = UnitTestValidator(
             source_file_path=args.source_file_path,
             test_file_path=args.test_file_output_path,
@@ -110,10 +131,13 @@ class CoverAgent:
 
     def _validate_paths(self):
         """
-        Validate the paths provided in the arguments.
+        Validate all required file paths and initialize the test database.
+        
+        This method ensures that source files, test files, and project directories exist.
+        It also sets up the SQLite database for logging test runs.
 
         Raises:
-            FileNotFoundError: If the source file or test file is not found at the specified paths.
+            FileNotFoundError: If any required files or directories are missing.
         """
         # Ensure the source file exists
         if not os.path.isfile(self.args.source_file_path):
@@ -142,13 +166,10 @@ class CoverAgent:
 
     def _duplicate_test_file(self):
         """
-        Initialize the CoverAgent class with the provided arguments and run the test generation process.
-
-        Parameters:
-            args (Namespace): The parsed command-line arguments containing necessary information for test generation.
-
-        Returns:
-            None
+        Create a copy of the test file at the output location if specified.
+        
+        If no output path is provided, uses the original test file path.
+        This allows for non-destructive test generation without modifying the original file.
         """
         # If the test file output path is set, copy the test file there
         if self.args.test_file_output_path != "":
@@ -159,12 +180,14 @@ class CoverAgent:
 
     def init(self):
         """
-        Prepare for test generation process
+        Initialize the test generation environment and perform initial analysis.
+        
+        Sets up Weights & Biases logging if configured and performs initial test suite analysis
+        to establish baseline coverage metrics.
 
-        1. Initialize the Weights & Biases run if the WANDS_API_KEY environment variable is set.
-        2. Initialize variables to track progress.
-        3. Run the initial test suite analysis.
-
+        Returns:
+            tuple: Contains failed test runs, language detection results, test framework info,
+                  and initial coverage report.
         """
         # Check if user has exported the WANDS_API_KEY environment variable
         if "WANDB_API_KEY" in os.environ:
@@ -183,7 +206,15 @@ class CoverAgent:
         return failed_test_runs, language, test_framework, coverage_report
 
     def _generate_and_validate_tests(self, failed_test_runs, language, test_framework, coverage_report):
-        """Generate new tests and validate them using list comprehension."""
+        """
+        Generate new tests and validate their effectiveness.
+        
+        Parameters:
+            failed_test_runs (list): Previously failed test executions
+            language (str): Detected programming language
+            test_framework (str): Identified testing framework
+            coverage_report (dict): Current coverage metrics
+        """
         self.log_coverage()
         generated_tests_dict = self.test_gen.generate_tests(
             failed_test_runs, language, test_framework, coverage_report
@@ -204,13 +235,30 @@ class CoverAgent:
             self.logger.error(f"Failed to validate the tests within {generated_tests_dict}. Error: {e}")
 
     def _check_iteration_progress(self):
-        """Check coverage progress and return info needed for next iteration."""
+        """
+        Evaluate current progress towards coverage goals.
+        
+        Returns:
+            tuple: Contains updated test results, language info, framework details,
+                  coverage report, and boolean indicating if target is reached.
+        """
         failed_runs, lang, framework, report = self.test_validator.get_coverage()
         target_reached = self.test_validator.current_coverage >= (self.test_validator.desired_coverage / 100)
         return failed_runs, lang, framework, report, target_reached
 
     def _finalize_test_generation(self, iteration_count):
-        """Handle final logging, reporting and cleanup."""
+        """
+        Complete the test generation process and produce final reports.
+        
+        Parameters:
+            iteration_count (int): Number of iterations performed
+            
+        Side effects:
+            - Logs final coverage statistics
+            - Generates report file
+            - Closes Weights & Biases logging if enabled
+            - May exit program if strict coverage requirements not met
+        """
         current_coverage = round(self.test_validator.current_coverage * 100, 2)
         desired_coverage = self.test_validator.desired_coverage
 
@@ -242,6 +290,7 @@ class CoverAgent:
             wandb.finish()
 
     def log_coverage(self):
+        """Log current coverage metrics, differentiating between diff coverage and full coverage."""
         if self.args.diff_coverage:
             self.logger.info(
                 f"Current Diff Coverage: {round(self.test_validator.current_coverage * 100, 2)}%"
@@ -253,7 +302,15 @@ class CoverAgent:
         self.logger.info(f"Desired Coverage: {self.test_validator.desired_coverage}%")
 
     def run(self):
-        """Main execution loop for test generation."""
+        """
+        Execute the main test generation loop until coverage goals are met or iterations exhausted.
+        
+        The process involves:
+        1. Initializing the environment
+        2. Repeatedly generating and validating tests
+        3. Checking progress after each iteration
+        4. Finalizing and reporting results
+        """
         iteration_count = 0
         failed_test_runs, language, test_framework, coverage_report = self.init()
 
