@@ -74,8 +74,9 @@ class CoverageProcessor:
         file_mod_time_ms = int(round(os.path.getmtime(self.file_path) * 1000))
 
         if not file_mod_time_ms > time_of_test_command:
-            self.logger.warning(f"The coverage report file was not updated after the test command. file_mod_time_ms: {file_mod_time_ms}, time_of_test_command: {time_of_test_command}. {file_mod_time_ms > time_of_test_command}")
-        
+            self.logger.warning(
+                f"The coverage report file was not updated after the test command. file_mod_time_ms: {file_mod_time_ms}, time_of_test_command: {time_of_test_command}. {file_mod_time_ms > time_of_test_command}"
+            )
 
     def parse_coverage_report(self) -> Tuple[list, list, float]:
         """

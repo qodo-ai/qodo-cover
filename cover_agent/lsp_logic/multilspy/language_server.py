@@ -1,6 +1,6 @@
 """
-This file contains the main interface and the public API for multilspy. 
-The abstract class LanguageServer provides a factory method, creator that is 
+This file contains the main interface and the public API for multilspy.
+The abstract class LanguageServer provides a factory method, creator that is
 intended for creating instantiations of language specific clients.
 The details of Language Specific configuration are not exposed to the user.
 """

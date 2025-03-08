@@ -38,7 +38,9 @@ def conditional_retry(func):
 
 
 class AICaller:
-    def __init__(self, model: str, api_base: str = "", enable_retry=True, max_tokens=16384):
+    def __init__(
+        self, model: str, api_base: str = "", enable_retry=True, max_tokens=16384
+    ):
         """
         Initializes an instance of the AICaller class.
 
@@ -101,7 +103,7 @@ class AICaller:
         if self.model in self.no_support_streaming_models:
             stream = False
             completion_params["stream"] = False
-            completion_params["max_completion_tokens"] = 2*max_tokens
+            completion_params["max_completion_tokens"] = 2 * self.max_tokens
             # completion_params["reasoning_effort"] = "high"
             completion_params.pop("max_tokens", None)  # Remove 'max_tokens' if present
 

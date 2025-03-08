@@ -9,6 +9,7 @@ from cover_agent.utils import load_yaml
 
 MAX_TESTS_PER_RUN = 4
 
+
 class UnitTestGenerator:
     def __init__(
         self,
@@ -174,9 +175,14 @@ class UnitTestGenerator:
         failed_test_runs_value = self.check_for_failed_test_runs(failed_test_runs)
         response, prompt_token_count, response_token_count, self.prompt = (
             self.agent_completion.generate_tests(
-                source_file_name=os.path.relpath(self.source_file_path, self.project_root),
+                source_file_name=os.path.relpath(
+                    self.source_file_path, self.project_root
+                ),
                 max_tests=MAX_TESTS_PER_RUN,
-                source_file_numbered="\n".join(f"{i + 1} {line}" for i, line in enumerate(self.source_code.split("\n"))),
+                source_file_numbered="\n".join(
+                    f"{i + 1} {line}"
+                    for i, line in enumerate(self.source_code.split("\n"))
+                ),
                 code_coverage_report=code_coverage_report,
                 additional_instructions_text=self.additional_instructions,
                 additional_includes_section=self.included_files,

@@ -72,6 +72,12 @@ def parse_args():
         help="The maximum number of iterations. Default: %(default)s.",
     )
     parser.add_argument(
+        "--max-run-time",
+        type=int,
+        default=30,
+        help="Maximum time (in seconds) allowed for test execution. Overrides the value in configuration.toml if provided. Defaults to 30 seconds.",
+    )
+    parser.add_argument(
         "--additional-instructions",
         default="",
         help="Any additional instructions you wish to append at the end of the prompt. Default: %(default)s.",

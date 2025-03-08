@@ -24,6 +24,7 @@ class UnitTestValidator:
         code_coverage_report_path: str,
         test_command: str,
         llm_model: str,
+        max_run_time: int,
         agent_completion: AgentCompletionABC,
         test_command_dir: str = os.getcwd(),
         included_files: list = None,
@@ -45,6 +46,7 @@ class UnitTestValidator:
             code_coverage_report_path (str): The path to the code coverage report file.
             test_command (str): The command to run tests.
             llm_model (str): The language model to be used for test generation.
+            max_run_time (int): The maximum time in seconds to run the test command.
             agent_completion (AgentCompletionABC): The agent completion object to use for test generation.
             api_base (str, optional): The base API url to use in case model is set to Ollama or Hugging Face. Defaults to an empty string.
             test_command_dir (str, optional): The directory where the test command should be executed. Defaults to the current working directory.
@@ -81,6 +83,7 @@ class UnitTestValidator:
         self.comparison_branch = comparison_branch
         self.num_attempts = num_attempts
         self.agent_completion = agent_completion
+        self.max_run_time = max_run_time
 
         # Get the logger instance from CustomLogger
         self.logger = CustomLogger.get_logger(__name__)
@@ -198,8 +201,10 @@ class UnitTestValidator:
                 response, prompt_token_count, response_token_count, prompt = (
                     self.agent_completion.analyze_suite_test_headers_indentation(
                         language=self.language,
-                        test_file_name=os.path.relpath(self.test_file_path, self.project_root),
-                        test_file=test_file_content
+                        test_file_name=os.path.relpath(
+                            self.test_file_path, self.project_root
+                        ),
+                        test_file=test_file_content,
                     )
                 )
 
@@ -207,11 +212,15 @@ class UnitTestValidator:
                 self.total_input_token_count += prompt_token_count
                 self.total_output_token_count += response_token_count
                 tests_dict = load_yaml(response)
-                test_headers_indentation = tests_dict.get("test_headers_indentation", None)
+                test_headers_indentation = tests_dict.get(
+                    "test_headers_indentation", None
+                )
                 counter_attempts += 1
 
             if test_headers_indentation is None:
-                raise Exception(f"Failed to analyze the test headers indentation. YAML response: {response}. tests_dict: {tests_dict}")
+                raise Exception(
+                    f"Failed to analyze the test headers indentation. YAML response: {response}. tests_dict: {tests_dict}"
+                )
 
             relevant_line_number_to_insert_tests_after = None
             relevant_line_number_to_insert_imports_after = None
@@ -224,9 +233,16 @@ class UnitTestValidator:
                 response, prompt_token_count, response_token_count, prompt = (
                     self.agent_completion.analyze_test_insert_line(
                         language=self.language,
-                        test_file_numbered="\n".join(f"{i + 1} {line}" for i, line in enumerate(self._read_file(self.test_file_path).split("\n"))),
+                        test_file_numbered="\n".join(
+                            f"{i + 1} {line}"
+                            for i, line in enumerate(
+                                self._read_file(self.test_file_path).split("\n")
+                            )
+                        ),
                         additional_instructions_text=self.additional_instructions,
-                        test_file_name=os.path.relpath(self.test_file_path, self.project_root),
+                        test_file_name=os.path.relpath(
+                            self.test_file_path, self.project_root
+                        ),
                     )
                 )
 
@@ -245,9 +261,13 @@ class UnitTestValidator:
                 counter_attempts += 1
 
             if not relevant_line_number_to_insert_tests_after:
-                raise Exception(f"Failed to analyze the relevant line number to insert new tests. tests_dict: {tests_dict}")
+                raise Exception(
+                    f"Failed to analyze the relevant line number to insert new tests. tests_dict: {tests_dict}"
+                )
             if not relevant_line_number_to_insert_imports_after:
-                raise Exception(f"Failed to analyze the relevant line number to insert new imports. tests_dict: {tests_dict}")
+                raise Exception(
+                    f"Failed to analyze the relevant line number to insert new imports. tests_dict: {tests_dict}"
+                )
 
             self.test_headers_indentation = test_headers_indentation
             self.relevant_line_number_to_insert_tests_after = (
@@ -275,7 +295,9 @@ class UnitTestValidator:
             f'Running build/test command to generate coverage report: "{self.test_command}"'
         )
         stdout, stderr, exit_code, time_of_test_command = Runner.run_command(
-            command=self.test_command, cwd=self.test_command_dir
+            command=self.test_command,
+            max_run_time=self.max_run_time,
+            cwd=self.test_command_dir,
         )
         assert (
             exit_code == 0
@@ -425,13 +447,19 @@ class UnitTestValidator:
                 ):
                     inserted_lines_count = len(additional_imports_lines)
                     original_content_lines = (
-                        original_content_lines[:relevant_line_number_to_insert_imports_after]
+                        original_content_lines[
+                            :relevant_line_number_to_insert_imports_after
+                        ]
                         + additional_imports_lines
-                        + original_content_lines[relevant_line_number_to_insert_imports_after:]
+                        + original_content_lines[
+                            relevant_line_number_to_insert_imports_after:
+                        ]
                     )
 
                 # Offset the test insertion point by however many lines we just inserted
-                updated_test_insertion_point = relevant_line_number_to_insert_tests_after
+                updated_test_insertion_point = (
+                    relevant_line_number_to_insert_tests_after
+                )
                 if inserted_lines_count > 0:
                     updated_test_insertion_point += inserted_lines_count
 
@@ -454,7 +482,9 @@ class UnitTestValidator:
                     )
                     stdout, stderr, exit_code, time_of_test_command = (
                         Runner.run_command(
-                            command=self.test_command, cwd=self.test_command_dir
+                            command=self.test_command,
+                            cwd=self.test_command_dir,
+                            max_run_time=self.max_run_time,
                         )
                     )
                     if exit_code != 0:
@@ -663,12 +693,16 @@ class UnitTestValidator:
             # Run the analysis via LLM
             response, prompt_token_count, response_token_count, prompt = (
                 self.agent_completion.analyze_test_failure(
-                    source_file_name=os.path.relpath(self.source_file_path, self.project_root),
+                    source_file_name=os.path.relpath(
+                        self.source_file_path, self.project_root
+                    ),
                     source_file=self._read_file(self.source_file_path),
                     processed_test_file=fail_details["processed_test_file"],
                     stderr=fail_details["stderr"],
                     stdout=fail_details["stdout"],
-                    test_file_name=os.path.relpath(self.test_file_path, self.project_root),
+                    test_file_name=os.path.relpath(
+                        self.test_file_path, self.project_root
+                    ),
                 )
             )
             self.total_input_token_count += prompt_token_count

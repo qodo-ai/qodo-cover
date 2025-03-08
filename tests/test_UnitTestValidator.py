@@ -1,9 +1,9 @@
+# Import necessary modules and classes
 from cover_agent.CoverageProcessor import CoverageProcessor
 from cover_agent.ReportGenerator import ReportGenerator
 from cover_agent.Runner import Runner
 from cover_agent.UnitTestValidator import UnitTestValidator
-from unittest.mock import patch, mock_open
-from unittest.mock import MagicMock
+from unittest.mock import patch, mock_open, MagicMock
 
 import datetime
 import os
@@ -12,6 +12,8 @@ import tempfile
 
 
 class TestUnitValidator:
+    """Test suite for the UnitTestValidator class."""
+
     def test_extract_error_message_exception_handling(self):
         """Ensure exception handling works when calling agent_completion for error extraction."""
         with tempfile.NamedTemporaryFile(
@@ -25,6 +27,7 @@ class TestUnitValidator:
                 test_command="pytest",
                 llm_model="gpt-3",
                 agent_completion=mock_agent_completion,
+                max_run_time=30,
             )
 
             # Simulate agent_completion raising an exception
@@ -39,9 +42,11 @@ class TestUnitValidator:
             }
             error_message = generator.extract_error_message(fail_details)
 
-            assert error_message == ""  # Should return an empty string on failure
+            # Should return an empty string on failure
+            assert error_message == ""
 
     def test_run_coverage_with_report_coverage_flag(self):
+        """Test running coverage with the report coverage feature flag enabled."""
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file:
@@ -53,6 +58,7 @@ class TestUnitValidator:
                 llm_model="gpt-3",
                 agent_completion=MagicMock(),
                 use_report_coverage_feature_flag=True,
+                max_run_time=30,
             )
             with patch.object(
                 Runner, "run_command", return_value=("", "", 0, datetime.datetime.now())
@@ -79,6 +85,7 @@ class TestUnitValidator:
                 test_command="pytest",
                 llm_model="gpt-3",
                 agent_completion=mock_agent_completion,
+                max_run_time=30,
             )
 
             mock_response = """
@@ -96,8 +103,8 @@ class TestUnitValidator:
                 "stdout": "test_example failed",
                 "processed_test_file": "",
                 "test_file_name": "test_test.py",
-                "source_file_name": temp_source_file.name, 
-                "source_file": ""
+                "source_file_name": temp_source_file.name,
+                "source_file": "",
             }
             error_message = generator.extract_error_message(fail_details)
 
@@ -105,15 +112,30 @@ class TestUnitValidator:
                 error_message.strip()
                 == "error_summary: Test failed due to assertion error in test_example"
             )
-            mock_agent_completion_call_args = mock_agent_completion.analyze_test_failure.call_args[1]
+            mock_agent_completion_call_args = (
+                mock_agent_completion.analyze_test_failure.call_args[1]
+            )
             assert fail_details["stderr"] == mock_agent_completion_call_args["stderr"]
             assert fail_details["stdout"] == mock_agent_completion_call_args["stdout"]
-            assert fail_details["processed_test_file"] == mock_agent_completion_call_args["processed_test_file"]
-            assert fail_details["test_file_name"] == mock_agent_completion_call_args["test_file_name"]
-            assert fail_details["source_file_name"] in mock_agent_completion_call_args["source_file_name"]
-            assert fail_details["source_file"] == mock_agent_completion_call_args["source_file"]
+            assert (
+                fail_details["processed_test_file"]
+                == mock_agent_completion_call_args["processed_test_file"]
+            )
+            assert (
+                fail_details["test_file_name"]
+                == mock_agent_completion_call_args["test_file_name"]
+            )
+            assert (
+                fail_details["source_file_name"]
+                in mock_agent_completion_call_args["source_file_name"]
+            )
+            assert (
+                fail_details["source_file"]
+                == mock_agent_completion_call_args["source_file"]
+            )
 
     def test_validate_test_pass_no_coverage_increase_with_prompt(self):
+        """Test validation of a test that passes but does not increase coverage."""
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file:
@@ -124,6 +146,7 @@ class TestUnitValidator:
                 test_command="pytest",
                 llm_model="gpt-3",
                 agent_completion=MagicMock(),
+                max_run_time=30,
             )
 
             # Setup initial state
@@ -167,6 +190,7 @@ class TestUnitValidator:
                 test_command="pytest",
                 llm_model="gpt-3",
                 agent_completion=mock_agent_completion,
+                max_run_time=30,
             )
 
             # Mock responses from agent_completion
@@ -197,6 +221,7 @@ class TestUnitValidator:
             mock_agent_completion.analyze_test_insert_line.assert_called_once()
 
     def test_post_process_coverage_report_with_report_coverage_flag(self):
+        """Test post-processing of the coverage report with the report coverage feature flag enabled."""
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file:
@@ -208,6 +233,7 @@ class TestUnitValidator:
                 llm_model="gpt-3",
                 agent_completion=MagicMock(),
                 use_report_coverage_feature_flag=True,
+                max_run_time=30,
             )
             with patch.object(
                 CoverageProcessor,
@@ -221,6 +247,7 @@ class TestUnitValidator:
                 assert coverage_percentages == {"test.py": 1.0}
 
     def test_post_process_coverage_report_with_diff_coverage(self):
+        """Test post-processing of the coverage report with diff coverage enabled."""
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file:
@@ -232,6 +259,7 @@ class TestUnitValidator:
                 llm_model="gpt-3",
                 agent_completion=MagicMock(),
                 diff_coverage=True,
+                max_run_time=30,
             )
             with patch.object(generator, "generate_diff_coverage_report"), patch.object(
                 CoverageProcessor, "process_coverage_report", return_value=([], [], 0.8)
@@ -242,6 +270,7 @@ class TestUnitValidator:
                 assert percentage_covered == 0.8
 
     def test_post_process_coverage_report_without_flags(self):
+        """Test post-processing of the coverage report without any feature flags."""
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file:
@@ -252,6 +281,7 @@ class TestUnitValidator:
                 test_command="pytest",
                 llm_model="gpt-3",
                 agent_completion=MagicMock(),
+                max_run_time=30,
             )
             with patch.object(
                 CoverageProcessor, "process_coverage_report", return_value=([], [], 0.7)
@@ -262,6 +292,7 @@ class TestUnitValidator:
                 assert percentage_covered == 0.7
 
     def test_generate_diff_coverage_report_success(self):
+        """Test successful generation of the diff coverage report."""
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file:
@@ -274,6 +305,7 @@ class TestUnitValidator:
                 agent_completion=MagicMock(),
                 diff_coverage=True,
                 comparison_branch="main",
+                max_run_time=30,
             )
             with patch(
                 "cover_agent.UnitTestValidator.diff_cover_main"
@@ -290,6 +322,7 @@ class TestUnitValidator:
                 )
 
     def test_generate_diff_coverage_report_failure(self):
+        """Test failure in generating the diff coverage report."""
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file:
@@ -302,6 +335,7 @@ class TestUnitValidator:
                 agent_completion=MagicMock(),
                 diff_coverage=True,
                 comparison_branch="main",
+                max_run_time=30,
             )
             with patch(
                 "cover_agent.UnitTestValidator.diff_cover_main",

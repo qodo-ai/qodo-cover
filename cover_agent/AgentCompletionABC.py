@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
 
+
 class AgentCompletionABC(ABC):
     """
     Abstract base class for AI-driven prompt handling. Each method accepts

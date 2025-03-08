@@ -6,11 +6,20 @@ import os
 import pytest
 import tempfile
 
+from unittest.mock import mock_open
 import unittest
 
 
 class TestCoverAgent:
+    """
+    Test suite for the CoverAgent class.
+    """
+
     def test_parse_args(self):
+        """
+        Test the argument parsing functionality.
+        Ensures that all arguments are correctly parsed and assigned.
+        """
         with patch(
             "sys.argv",
             [
@@ -28,6 +37,7 @@ class TestCoverAgent:
             ],
         ):
             args = parse_args()
+            # Assertions to verify correct argument parsing
             assert args.source_file_path == "test_source.py"
             assert args.test_file_path == "test_file.py"
             assert args.project_root == ""
@@ -43,6 +53,10 @@ class TestCoverAgent:
     @patch("cover_agent.CoverAgent.UnitTestGenerator")
     @patch("cover_agent.CoverAgent.os.path.isfile")
     def test_agent_source_file_not_found(self, mock_isfile, mock_unit_cover_agent):
+        """
+        Test the behavior when the source file is not found.
+        Ensures that a FileNotFoundError is raised and the agent is not initialized.
+        """
         args = argparse.Namespace(
             source_file_path="test_source.py",
             test_file_path="test_file.py",
@@ -55,6 +69,7 @@ class TestCoverAgent:
             report_filepath="test_results.html",
             desired_coverage=90,
             max_iterations=10,
+            max_run_time=30,
         )
         parse_args = lambda: args
         mock_isfile.return_value = False
@@ -63,6 +78,7 @@ class TestCoverAgent:
             with pytest.raises(FileNotFoundError) as exc_info:
                 agent = CoverAgent(args)
 
+        # Assert that the correct error message is raised
         assert (
             str(exc_info.value) == f"Source file not found at {args.source_file_path}"
         )
@@ -75,6 +91,10 @@ class TestCoverAgent:
     def test_agent_test_file_not_found(
         self, mock_unit_cover_agent, mock_isfile, mock_exists
     ):
+        """
+        Test the behavior when the test file is not found.
+        Ensures that a FileNotFoundError is raised and the agent is not initialized.
+        """
         args = argparse.Namespace(
             source_file_path="test_source.py",
             test_file_path="test_file.py",
@@ -88,6 +108,7 @@ class TestCoverAgent:
             desired_coverage=90,
             max_iterations=10,
             prompt_only=False,
+            max_run_time=30,
         )
         parse_args = lambda: args
         mock_isfile.side_effect = [True, False]
@@ -97,10 +118,15 @@ class TestCoverAgent:
             with pytest.raises(FileNotFoundError) as exc_info:
                 agent = CoverAgent(args)
 
+        # Assert that the correct error message is raised
         assert str(exc_info.value) == f"Test file not found at {args.test_file_path}"
 
     @patch("cover_agent.CoverAgent.os.path.isfile", return_value=True)
     def test_duplicate_test_file_without_output_path(self, mock_isfile):
+        """
+        Test the behavior when no output path is provided for the test file.
+        Ensures that an AssertionError is raised.
+        """
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file:
@@ -128,6 +154,7 @@ class TestCoverAgent:
                     diff_coverage=False,
                     branch="main",
                     run_tests_multiple_times=1,
+                    max_run_time=30,
                 )
 
                 with pytest.raises(AssertionError) as exc_info:
@@ -135,6 +162,7 @@ class TestCoverAgent:
                     failed_test_runs = agent.test_validator.get_coverage()
                     agent._duplicate_test_file()
 
+                # Assert that the correct error message is raised
                 assert "Fatal: Coverage report" in str(exc_info.value)
                 assert args.test_file_output_path == args.test_file_path
 
@@ -154,6 +182,10 @@ class TestCoverAgent:
         mock_unit_test_generator,
         mock_sys_exit,
     ):
+        """
+        Test the behavior when running with strict coverage and max iterations.
+        Ensures that the agent exits with the correct status code when coverage is not met.
+        """
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file, tempfile.NamedTemporaryFile(
@@ -183,6 +215,7 @@ class TestCoverAgent:
                 strict_coverage=True,
                 diff_coverage=False,
                 branch="main",
+                max_run_time=30,
             )
             # Mock the methods used in run
             validator = mock_unit_test_validator.return_value
@@ -202,6 +235,10 @@ class TestCoverAgent:
     @patch("cover_agent.CoverAgent.os.path.isfile", return_value=True)
     @patch("cover_agent.CoverAgent.os.path.isdir", return_value=False)
     def test_project_root_not_found(self, mock_isdir, mock_isfile):
+        """
+        Test the behavior when the project root directory is not found.
+        Ensures that a FileNotFoundError is raised.
+        """
         args = argparse.Namespace(
             source_file_path="test_source.py",
             test_file_path="test_file.py",
@@ -215,11 +252,13 @@ class TestCoverAgent:
             report_filepath="test_results.html",
             desired_coverage=90,
             max_iterations=10,
+            max_run_time=30,
         )
 
         with pytest.raises(FileNotFoundError) as exc_info:
             agent = CoverAgent(args)
 
+        # Assert that the correct error message is raised
         assert str(exc_info.value) == f"Project root not found at {args.project_root}"
 
     @patch("cover_agent.CoverAgent.UnitTestValidator")
@@ -229,6 +268,10 @@ class TestCoverAgent:
     def test_run_diff_coverage(
         self, mock_logger, mock_test_db, mock_test_gen, mock_test_validator
     ):
+        """
+        Test the behavior when running with diff coverage enabled.
+        Ensures that the correct log messages are generated.
+        """
         with tempfile.NamedTemporaryFile(
             suffix=".py", delete=False
         ) as temp_source_file, tempfile.NamedTemporaryFile(
@@ -259,6 +302,7 @@ class TestCoverAgent:
                 strict_coverage=False,
                 diff_coverage=True,
                 branch="main",
+                max_run_time=30,
             )
             mock_test_validator.return_value.current_coverage = 0.5
             mock_test_validator.return_value.desired_coverage = 90
@@ -279,3 +323,66 @@ class TestCoverAgent:
         os.remove(temp_source_file.name)
         os.remove(temp_test_file.name)
         os.remove(temp_output_file.name)
+
+    @patch("cover_agent.CoverAgent.os.path.isfile", return_value=True)
+    @patch("cover_agent.CoverAgent.os.path.isdir", return_value=True)
+    @patch("cover_agent.CoverAgent.shutil.copy")
+    @patch("builtins.open", new_callable=mock_open, read_data="# Test content")
+    def test_run_each_test_separately_with_pytest(
+        self, mock_open_file, mock_copy, mock_isdir, mock_isfile
+    ):
+        """
+        Test the behavior when running each test separately with pytest.
+        Ensures that the test command is modified correctly.
+        """
+        with tempfile.NamedTemporaryFile(
+            suffix=".py", delete=False
+        ) as temp_source_file, tempfile.NamedTemporaryFile(
+            suffix=".py", delete=False
+        ) as temp_test_file, tempfile.NamedTemporaryFile(
+            suffix=".py", delete=False
+        ) as temp_output_file:
+
+            # Create a relative path for the test file
+            rel_path = "tests/test_output.py"
+
+            args = argparse.Namespace(
+                source_file_path=temp_source_file.name,
+                test_file_path=temp_test_file.name,
+                project_root="/project/root",
+                test_file_output_path="/project/root/" + rel_path,
+                code_coverage_report_path="coverage_report.xml",
+                test_command="pytest --cov=myapp --cov-report=xml",
+                test_command_dir=os.getcwd(),
+                included_files=None,
+                coverage_type="cobertura",
+                report_filepath="test_results.html",
+                desired_coverage=90,
+                max_iterations=10,
+                additional_instructions="",
+                model="openai/test-model",
+                api_base="openai/test-api",
+                use_report_coverage_feature_flag=False,
+                log_db_path="",
+                diff_coverage=False,
+                branch="main",
+                run_tests_multiple_times=1,
+                run_each_test_separately=True,
+                max_run_time=30,
+            )
+
+            # Initialize CoverAgent
+            agent = CoverAgent(args)
+
+            # Verify the test command was modified correctly
+            assert hasattr(args, "test_command_original")
+            assert args.test_command_original == "pytest --cov=myapp --cov-report=xml"
+            assert (
+                args.test_command
+                == "pytest tests/test_output.py --cov=myapp --cov-report=xml"
+            )
+
+            # Clean up temporary files
+            os.remove(temp_source_file.name)
+            os.remove(temp_test_file.name)
+            os.remove(temp_output_file.name)

@@ -47,14 +47,18 @@ class DefaultAgentCompletion(AgentCompletionABC):
         try:
             # 1. Fetch the prompt config from your TOML-based settings
             settings = get_settings().get(file)
-            if not settings or not hasattr(settings, "system") or not hasattr(settings, "user"):
+            if (
+                not settings
+                or not hasattr(settings, "system")
+                or not hasattr(settings, "user")
+            ):
                 msg = f"Could not find valid system/user prompt settings for: {file}"
                 self.logger.error(msg)
                 raise ValueError(msg)
 
             # 2. Render system & user templates with the passed-in kwargs
             system_prompt = environment.from_string(settings.system).render(**kwargs)
-            user_prompt   = environment.from_string(settings.user).render(**kwargs)
+            user_prompt = environment.from_string(settings.user).render(**kwargs)
 
         except ValueError:
             # Re-raise the ValueError above so callers can catch it if needed.
