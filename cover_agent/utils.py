@@ -337,6 +337,12 @@ def parse_args_full_repo():
         action="store_true",
         help="Enable record mode for LLM responses. Default: False.",
     )
+    parser.add_argument(
+        "--disable-file-generation",
+        action="store_true",
+        default=False,
+        help="Disable generation of output files (HTML, logs, DB files)",
+    )
     return parser.parse_args()
 
 
