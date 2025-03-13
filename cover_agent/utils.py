@@ -331,6 +331,12 @@ def parse_args_full_repo():
         type=str,
         default="main",
     )
+    parser.add_argument(
+        "--disable-file-generation",
+        action="store_true",
+        default=False,
+        help="Disable generation of output files (HTML, logs, DB files)",
+    )
     return parser.parse_args()
 
 

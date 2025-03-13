@@ -115,6 +115,12 @@ def parse_args():
         default="main",
         help="The branch to compare against when using --diff-coverage. Default: %(default)s.",
     )
+    parser.add_argument(
+        "--disable-file-generation",
+        action="store_true",
+        default=False,
+        help="Disable generation of output files (HTML, logs, DB files)",
+    )
 
     # Create mutually exclusive group
     group = parser.add_mutually_exclusive_group()
