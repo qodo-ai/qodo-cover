@@ -40,10 +40,14 @@ class CoverAgent:
             FileNotFoundError: If required source files or directories are not found.
         """
         self.args = args
-        self.logger = CustomLogger.get_logger(__name__)
+        self.generate_log_files = not args.disable_file_generation
+        
+        # Initialize logger with file generation flag
+        self.logger = CustomLogger.get_logger(__name__, generate_log_files=self.generate_log_files)
 
         self._validate_paths()
-        self._duplicate_test_file()
+        if not self.generate_log_files:
+            self._duplicate_test_file()
 
         # Configure the AgentCompletion object
         if agent_completion:
@@ -283,9 +287,12 @@ class CoverAgent:
         self.logger.info(
             f"Total number of output tokens used for LLM model {self.args.model}: {self.test_gen.total_output_token_count + self.test_validator.total_output_token_count}"
         )
+        
+        # Only generate report if file generation is enabled
+        if not self.generate_log_files:
+            # Generate report and cleanup
+            self.test_db.dump_to_report(self.args.report_filepath)
 
-        # Generate report and cleanup
-        self.test_db.dump_to_report(self.args.report_filepath)
         if "WANDB_API_KEY" in os.environ:
             wandb.finish()
 

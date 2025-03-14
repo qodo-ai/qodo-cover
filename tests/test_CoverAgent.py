@@ -34,6 +34,7 @@ class TestCoverAgent:
                 "pytest",
                 "--max-iterations",
                 "10",
+                "--disable-file-generation",
             ],
         ):
             args = parse_args()
@@ -70,6 +71,7 @@ class TestCoverAgent:
             desired_coverage=90,
             max_iterations=10,
             max_run_time=30,
+            disable_file_generation=False,
         )
         parse_args = lambda: args
         mock_isfile.return_value = False
@@ -109,6 +111,7 @@ class TestCoverAgent:
             max_iterations=10,
             prompt_only=False,
             max_run_time=30,
+            disable_file_generation=False,
         )
         parse_args = lambda: args
         mock_isfile.side_effect = [True, False]
@@ -155,6 +158,7 @@ class TestCoverAgent:
                     branch="main",
                     run_tests_multiple_times=1,
                     max_run_time=30,
+                    disable_file_generation=False,
                 )
 
                 with pytest.raises(AssertionError) as exc_info:
@@ -216,6 +220,7 @@ class TestCoverAgent:
                 diff_coverage=False,
                 branch="main",
                 max_run_time=30,
+                disable_file_generation=False,
             )
             # Mock the methods used in run
             validator = mock_unit_test_validator.return_value
@@ -253,6 +258,7 @@ class TestCoverAgent:
             desired_coverage=90,
             max_iterations=10,
             max_run_time=30,
+            disable_file_generation=False,
         )
 
         with pytest.raises(FileNotFoundError) as exc_info:
@@ -303,6 +309,7 @@ class TestCoverAgent:
                 diff_coverage=True,
                 branch="main",
                 max_run_time=30,
+                disable_file_generation=False,
             )
             mock_test_validator.return_value.current_coverage = 0.5
             mock_test_validator.return_value.desired_coverage = 90
@@ -369,6 +376,7 @@ class TestCoverAgent:
                 run_tests_multiple_times=1,
                 run_each_test_separately=True,
                 max_run_time=30,
+                disable_file_generation=False,
             )
 
             # Initialize CoverAgent
