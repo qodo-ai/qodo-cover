@@ -42,7 +42,7 @@ jobs:
       
       # Step to cache Poetry dependencies
       - name: Cache Poetry dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/pypoetry
@@ -87,7 +87,7 @@ jobs:
       
       # Step to cache Poetry dependencies
       - name: Cache Poetry dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/pypoetry
@@ -124,7 +124,7 @@ jobs:
     
     # Step to cache Poetry dependencies
     - name: Cache Poetry dependencies
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
         path: |
           ~/.cache/pypoetry
