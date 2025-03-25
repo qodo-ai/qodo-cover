@@ -20,12 +20,15 @@ sqlalchemy = "^2.0.38"
 diff-cover = "^9.2.3"
 tenacity = "^9.0.0"
 
+# Infrastructure Dependencies
+docker = "^7.1.0"
+boto3 = "^1.36.25"
+google-cloud-aiplatform = "^1.81.0"
+
 # LLM Dependencies
 litellm = "^1.61.13"
 openai = "^1.63.2"
 tiktoken = "^0.8.0"
-boto3 = "^1.36.25"
-google-cloud-aiplatform = "^1.81.0"
 numpy = "^1.26.4"   # Note: Earlier version have incompatibility issues with google-cloud-aiplatform
 dynaconf = "^3.2.10"
 wandb = "^0.17.9"
