@@ -690,6 +690,21 @@ files = [
 ]
 
 [[package]]
+name = "dotenv"
+version = "0.9.9"
+description = "Deprecated package"
+optional = false
+python-versions = "*"
+groups = ["main"]
+markers = "sys_platform != \"linux\""
+files = [
+    {file = "dotenv-0.9.9-py2.py3-none-any.whl", hash = "sha256:29cf74a087b31dafdb5a446b6d7e11cbce8ed2741540e2339c69fbef92c94ce9"},
+]
+
+[package.dependencies]
+python-dotenv = "*"
+
+[[package]]
 name = "dunamai"
 version = "1.23.0"
 description = "Dynamic version generation"
@@ -4606,4 +4621,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9.17,<3.14"
-content-hash = "4c3aacb1f99ee708dd1f97c93b9b952e2b83f01ce9ccf9d9819159c6f454a507"
+content-hash = "b6ad279586c9c356450b6e87e8ff3fd384ed91c9d1eba8b52b630f7a60b6ce24"

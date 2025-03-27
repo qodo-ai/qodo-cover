@@ -4,18 +4,25 @@ import os
 import sys
 import tarfile
 
+from typing import Any
+
 import docker
 from docker.errors import APIError, BuildError, DockerException
+from docker.models.containers import Container
+from dotenv import load_dotenv
 
 from cover_agent.CustomLogger import CustomLogger
 
+
+load_dotenv()
 logger = CustomLogger.get_logger(__name__)
+
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Test with Docker.")
-    parser.add_argument("--model", default="", help="Model name.")
+    parser.add_argument("--model", default=os.getenv("MODEL"), help="Model name.")
     parser.add_argument("--api-base", default="", help="API base URL.")
     parser.add_argument("--openai-api-key", default=os.getenv("OPENAI_API_KEY", ""), help="OpenAI API key.")
     parser.add_argument("--dockerfile", default="", help="Path to Dockerfile.")
@@ -25,18 +32,22 @@ def parse_args():
     parser.add_argument("--test-command", default="", help="Command to run tests.")
     parser.add_argument("--coverage-type", default="cobertura", help="Coverage type.")
     parser.add_argument("--code-coverage-report-path", default="coverage.xml", help="Path to code coverage report.")
-    parser.add_argument("--max-iterations", type=int, default=3, help="Maximum number of iterations.")
-    parser.add_argument("--desired-coverage", type=int, default=70, help="Desired code coverage percentage.")
+    parser.add_argument(
+        "--max-iterations", type=int, default=os.getenv("MAX_ITERATIONS"), help="Maximum number of iterations."
+    )
+    parser.add_argument(
+        "--desired-coverage", type=int, default=os.getenv("DESIRED_COVERAGE"), help="Desired code coverage percentage."
+    )
     parser.add_argument("--log-db-path", default=os.getenv("LOG_DB_PATH", ""), help="Path to log DB.")
     return parser.parse_args()
 
 
-def build_or_pull_image(client, dockerfile, docker_image):
+def build_or_pull_image(client: docker.DockerClient, dockerfile: str, docker_image: str) -> str:
     image_tag = "cover-agent-image"
 
     try:
         if dockerfile:
-            logger.info("Building the Docker image...")
+            logger.info(f"Building the Docker image {docker_image}...")
             dockerfile_dir = os.path.dirname(dockerfile) or "."
             with open(dockerfile, "r") as df:
                 image, logs = client.images.build(
@@ -45,9 +56,10 @@ def build_or_pull_image(client, dockerfile, docker_image):
                     tag=image_tag,
                     rm=True,
                 )
+
             for log in logs:
                 if "stream" in log:
-                    print(log["stream"], end="")
+                    logger.info(log["stream"], end="")
         else:
             logger.info(f"Pulling the Docker image {docker_image}...")
             image = client.images.pull(docker_image)
@@ -59,7 +71,9 @@ def build_or_pull_image(client, dockerfile, docker_image):
     return image_tag
 
 
-def start_container(client, image_tag, container_env, container_volumes):
+def start_container(
+        client: docker.DockerClient, image_tag: str, container_env: dict[str, Any], container_volumes: dict[str, Any]
+) -> Container:
     container_name = "cover-agent-container"
 
     try:
@@ -86,7 +100,7 @@ def start_container(client, image_tag, container_env, container_volumes):
     return container
 
 
-def copy_to_container(container, src_path, dest_path):
+def copy_to_container(container: Container, src_path: str, dest_path: str) -> None:
     with open(src_path, "rb") as f:
         data = f.read()
 
@@ -102,13 +116,13 @@ def copy_to_container(container, src_path, dest_path):
     container.put_archive(path=os.path.dirname(dest_path), data=tar_stream)
 
 
-def run_command_in_container(container, command, exec_env):
+def run_command_in_container(container: Container, command: list[str], exec_env: dict[str, Any]) -> None:
     try:
         exec_result = container.exec_run(
             cmd=command,
             environment=exec_env if exec_env else None,
             stream=True,
-            demux=True  # separates stdout and stderr
+            demux=True,  # separates stdout and stderr
         )
         for stdout, stderr in exec_result.output:
             if stdout:
@@ -120,7 +134,7 @@ def run_command_in_container(container, command, exec_env):
         sys.exit(1)
 
 
-def run_test_with_docker(args):
+def run_test_with_docker(args: argparse.Namespace) -> None:
     client = docker.from_env()
 
     if not args.source_file_path or not args.test_file_path or not args.test_command:
@@ -128,7 +142,7 @@ def run_test_with_docker(args):
         sys.exit(1)
 
     if not args.dockerfile and not args.docker_image:
-        logger.error("Missing required parameters: either --dockerfile or --docker-image must be provided")
+        logger.error("Missing required parameters: either --dockerfile or --docker-image must be provided.")
         sys.exit(1)
 
     image_tag = build_or_pull_image(client, args.dockerfile, args.docker_image)

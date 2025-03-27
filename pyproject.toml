@@ -19,6 +19,7 @@ poetry-dynamic-versioning = "^1.7.1"
 sqlalchemy = "^2.0.38"
 diff-cover = "^9.2.3"
 tenacity = "^9.0.0"
+dotenv = "^0.9.9"
 
 # Infrastructure Dependencies
 docker = "^7.1.0"
