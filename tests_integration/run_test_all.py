@@ -1,5 +1,7 @@
 import argparse
 import os
+import sys
+import json
 
 from enum import Enum
 
@@ -22,19 +24,61 @@ class CoverageType(Enum):
     JACOCO = "jacoco"
 
 
+def stream_docker_logs(response):
+    """Stream Docker build/run logs to console."""
+    for chunk in response:
+        if isinstance(chunk, bytes):
+            print(chunk.decode(), end='')
+        elif 'stream' in chunk:
+            print(chunk['stream'], end='')
+        elif 'status' in chunk:
+            print(f"{chunk['status']}", end='')
+            if 'progress' in chunk:
+                print(f": {chunk['progress']}", end='')
+            print()
+        sys.stdout.flush()
+
+
 def build_image(client: docker.DockerClient, dockerfile: str) -> None:
     try:
-        client.images.build(path=".", dockerfile=dockerfile, tag="cover-agent-installer")
+        logger.info(f"Building image from {dockerfile}...")
+        response = client.api.build(
+            path=".",
+            dockerfile=dockerfile,
+            tag="cover-agent-installer",
+            decode=True,
+        )
+        stream_docker_logs(response)
     except DockerException as e:
         logger.error(f"Error building image: {e}")
         exit(1)
 
 
-def run_container(client: docker.DockerClient, image, volumes) -> None:
+def run_container(client: docker.DockerClient, image, volumes, command="/bin/sh -c 'tail -f /dev/null'") -> None:
     try:
-        client.containers.run(image, remove=True, volumes=volumes)
+        logger.info(f"Running container for {image}...")
+        container = client.containers.run(
+            image,
+            command=command,
+            remove=True,
+            volumes=volumes,
+            detach=True,  # Run in background
+        )
+        
+        # Stream output in real-time
+        for chunk in container.attach(stdout=True, stderr=True, stream=True, logs=True):
+            if chunk:
+                print(chunk.decode(), end='')
+                sys.stdout.flush()
+                
+        exit_code = container.wait()['StatusCode']
+        if exit_code != 0:
+            raise DockerException(f"Container exited with status {exit_code}")
+            
     except DockerException as e:
         logger.error(f"Error running container: {e}")
+        if 'container' in locals():
+            container.remove(force=True)
         exit(1)
 
 
@@ -51,7 +95,8 @@ def main():
     if run_installer:
         build_image(client, "Dockerfile")
         os.makedirs("dist", exist_ok=True)
-        run_container(client, "cover-agent-installer", {"$(pwd)/dist": {"bind": "/app/dist", "mode": "rw"}})
+        dist_path = os.path.join(os.getcwd(), "dist")
+        run_container(client, "cover-agent-installer", {dist_path: {"bind": "/app/dist", "mode": "rw"}}, command="make installer")
 
     tests = [
         # C Calculator Example

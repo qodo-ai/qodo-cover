@@ -7,7 +7,7 @@ WORKDIR /app
 COPY . .
 
 # Install required packages
-RUN pip install poetry wandb
+RUN make setup-installer
 RUN poetry install
 
 # Run the make installer as a CMD
