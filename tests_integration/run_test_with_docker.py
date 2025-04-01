@@ -59,7 +59,7 @@ def build_or_pull_image(client: docker.DockerClient, dockerfile: str, docker_ima
 
             for log in logs:
                 if "stream" in log:
-                    logger.info(log["stream"], end="")
+                    print(log["stream"], end="")
         else:
             logger.info(f"Pulling the Docker image {docker_image}...")
             image = client.images.pull(docker_image)
@@ -74,16 +74,7 @@ def build_or_pull_image(client: docker.DockerClient, dockerfile: str, docker_ima
 def start_container(
         client: docker.DockerClient, image_tag: str, container_env: dict[str, Any], container_volumes: dict[str, Any]
 ) -> Container:
-    container_name = "cover-agent-container"
-
     try:
-        # Check if a container with the same name already exists and remove it
-        existing_container = client.containers.list(filters={"name": container_name})
-
-        if existing_container:
-            logger.info(f"Removing existing container with name {container_name}...")
-            existing_container[0].remove(force=True)
-
         container = client.containers.run(
             image=image_tag,
             command="tail -f /dev/null",  # Keeps container alive
@@ -91,7 +82,6 @@ def start_container(
             volumes=container_volumes,
             detach=True,
             tty=True,
-            name=container_name,
         )
     except DockerException as e:
         logger.error(f"Failed to start the container: {e}")
@@ -124,6 +114,7 @@ def run_command_in_container(container: Container, command: list[str], exec_env:
             stream=True,
             demux=True,  # separates stdout and stderr
         )
+
         for stdout, stderr in exec_result.output:
             if stdout:
                 print(stdout.decode(), end="")
