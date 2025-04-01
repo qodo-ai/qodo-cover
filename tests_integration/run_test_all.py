@@ -1,7 +1,6 @@
 import argparse
 import os
 import sys
-import json
 
 from enum import Enum
 
@@ -120,7 +119,7 @@ def main():
             "coverage_type": CoverageType.COBERTURA.value,
         },
         # C# Calculator Web Service
-        # TODO: Fix test_command here as it fails
+        # TODO: Fix test_command here as it fails in macOS
         {
             "docker_image": "embeddeddevops/csharp_webservice:latest",
             "source_file_path": "CalculatorApi/CalculatorController.cs",
@@ -144,6 +143,7 @@ def main():
             "max_iterations": 4,
         },
         # Java Gradle example
+        # TODO: Figure out why it fails in macOS with `timed out`
         {
             "docker_image": "embeddeddevops/java_gradle:latest",
             "source_file_path": "src/main/java/com/davidparry/cover/SimpleMathOperations.java",

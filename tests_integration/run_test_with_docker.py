@@ -61,9 +61,36 @@ def build_or_pull_image(client: docker.DockerClient, dockerfile: str, docker_ima
                 if "stream" in log:
                     print(log["stream"], end="")
         else:
-            logger.info(f"Pulling the Docker image {docker_image}...")
-            image = client.images.pull(docker_image)
-            image.tag(image_tag)
+            logger.info(f"Pulling Docker image: {docker_image} ...")
+            progress_by_id = {}
+
+            try:
+                for line in client.api.pull(docker_image, stream=True, decode=True):
+                    if "id" in line:
+                        layer_id = line["id"]
+                        status = line.get("status", "")
+                        progress_by_id[layer_id] = f"{status}"
+                    elif "status" in line:
+                        logger.info(line["status"])  # catch "Using default tag" or similar
+
+            except docker.errors.APIError as e:
+                logger.error(f"Failed to pull image {docker_image}: {e}")
+                sys.exit(1)
+
+            # Tag the pulled image
+            try:
+                image = client.images.get(docker_image)
+                image.tag(image_tag)
+                logger.info(f"Tagged image {docker_image} as: {image_tag}")
+            except docker.errors.ImageNotFound:
+                logger.error(f"Pulled image {docker_image} could not be found for tagging.")
+                sys.exit(1)
+
+            # Final log output
+            logger.info("Image pull completed. Summary:")
+            for layer_id, status in progress_by_id.items():
+                logger.info(f"{layer_id}: {status}")
+
     except (BuildError, APIError) as e:
         logger.error(f"Docker error: {e}")
         sys.exit(1)
@@ -71,10 +98,11 @@ def build_or_pull_image(client: docker.DockerClient, dockerfile: str, docker_ima
     return image_tag
 
 
-def start_container(
+def run_container(
         client: docker.DockerClient, image_tag: str, container_env: dict[str, Any], container_volumes: dict[str, Any]
 ) -> Container:
     try:
+        logger.info(f"Starting the container with image {image_tag}...")
         container = client.containers.run(
             image=image_tag,
             command="tail -f /dev/null",  # Keeps container alive
@@ -83,6 +111,16 @@ def start_container(
             detach=True,
             tty=True,
         )
+
+        container_info = {
+            "Started container": container.id,
+            "Container image": container.attrs.get("Config", {}).get("Image"),
+            "Container name": container.attrs.get("Name")[1:],
+            "Container created at": container.attrs.get("Created"),
+            "Cmd": container.attrs.get("Config", {}).get("Cmd"),
+        }
+        log_multiple_lines(container_info)
+
     except DockerException as e:
         logger.error(f"Failed to start the container: {e}")
         sys.exit(1)
@@ -108,6 +146,7 @@ def copy_to_container(container: Container, src_path: str, dest_path: str) -> No
 
 def run_command_in_container(container: Container, command: list[str], exec_env: dict[str, Any]) -> None:
     try:
+        logger.info(f"Running the cover-agent command: {' '.join(command)}")
         exec_result = container.exec_run(
             cmd=command,
             environment=exec_env if exec_env else None,
@@ -125,67 +164,89 @@ def run_command_in_container(container: Container, command: list[str], exec_env:
         sys.exit(1)
 
 
-def run_test_with_docker(args: argparse.Namespace) -> None:
+def run_test_with_docker(test_args: argparse.Namespace) -> None:
     client = docker.from_env()
 
-    if not args.source_file_path or not args.test_file_path or not args.test_command:
+    logger.info("Running test with Docker...")
+    log_test_args(test_args)
+
+    if not test_args.source_file_path or not test_args.test_file_path or not test_args.test_command:
         logger.error("Missing required parameters: --source-file-path, --test-file-path, or --test-command.")
         sys.exit(1)
 
-    if not args.dockerfile and not args.docker_image:
+    if not test_args.dockerfile and not test_args.docker_image:
         logger.error("Missing required parameters: either --dockerfile or --docker-image must be provided.")
         sys.exit(1)
 
-    image_tag = build_or_pull_image(client, args.dockerfile, args.docker_image)
+    image_tag = build_or_pull_image(client, test_args.dockerfile, test_args.docker_image)
     container_env = {}
 
-    if args.openai_api_key:
-        container_env["OPENAI_API_KEY"] = args.openai_api_key
+    if test_args.openai_api_key:
+        container_env["OPENAI_API_KEY"] = test_args.openai_api_key
 
     if ANTHROPIC_API_KEY:
         container_env["ANTHROPIC_API_KEY"] = ANTHROPIC_API_KEY
 
     container_volumes = {}
 
-    if args.log_db_path:
-        log_db_name = os.path.basename(args.log_db_path)
-        container_volumes[args.log_db_path] = {"bind": f"/{log_db_name}", "mode": "rw"}
+    if test_args.log_db_path:
+        log_db_name = os.path.basename(test_args.log_db_path)
+        container_volumes[test_args.log_db_path] = {"bind": f"/{log_db_name}", "mode": "rw"}
 
-    container = start_container(client, image_tag, container_env, container_volumes)
+    container = run_container(client, image_tag, container_env, container_volumes)
     copy_to_container(container, "dist/cover-agent", "/usr/local/bin/cover-agent")
     command = [
         "/usr/local/bin/cover-agent",
-        "--source-file-path", args.source_file_path,
-        "--test-file-path", args.test_file_path,
-        "--code-coverage-report-path", args.code_coverage_report_path,
-        "--test-command", args.test_command,
-        "--coverage-type", args.coverage_type,
-        "--desired-coverage", str(args.desired_coverage),
-        "--max-iterations", str(args.max_iterations),
+        "--source-file-path", test_args.source_file_path,
+        "--test-file-path", test_args.test_file_path,
+        "--code-coverage-report-path", test_args.code_coverage_report_path,
+        "--test-command", test_args.test_command,
+        "--coverage-type", test_args.coverage_type,
+        "--desired-coverage", str(test_args.desired_coverage),
+        "--max-iterations", str(test_args.max_iterations),
         "--strict-coverage",
     ]
 
-    if args.model:
-        command += ["--model", args.model]
+    if test_args.model:
+        command += ["--model", test_args.model]
 
-    if args.api_base:
-        command += ["--api-base", args.api_base]
+    if test_args.api_base:
+        command += ["--api-base", test_args.api_base]
 
-    if args.log_db_path:
-        log_db_name = os.path.basename(args.log_db_path)
+    if test_args.log_db_path:
+        log_db_name = os.path.basename(test_args.log_db_path)
         command += ["--log-db-path", f"/{log_db_name}"]
 
     exec_env = {}
 
-    if args.openai_api_key:
-        exec_env["OPENAI_API_KEY"] = args.openai_api_key
+    if test_args.openai_api_key:
+        exec_env["OPENAI_API_KEY"] = test_args.openai_api_key
 
     if ANTHROPIC_API_KEY:
         exec_env["ANTHROPIC_API_KEY"] = ANTHROPIC_API_KEY
 
     run_command_in_container(container, command, exec_env)
+
+    logger.info("Cleaning up...")
+    logger.info(f"Stop container {container.id}...")
     container.stop()
+
+    logger.info(f"Remove container {container.id}...")
     container.remove()
+
+
+def log_test_args(test_args: argparse.Namespace, max_value_len=80) -> None:
+    logger.info("----- Test args -----")
+    for key, value in vars(test_args).items():
+        val_str = str(value)
+        if len(val_str) > max_value_len:
+            val_str = val_str[:max_value_len] + "..."
+        logger.info(f"{key:30}: {val_str}")
+
+
+def log_multiple_lines(lines: dict[str, Any]) -> None:
+    for label, value in lines.items():
+        logger.info(f"{label}: {value}")
 
 
 if __name__ == "__main__":
