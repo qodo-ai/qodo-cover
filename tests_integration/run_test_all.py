@@ -3,6 +3,7 @@ import os
 import sys
 
 from enum import Enum
+from typing import Any, Iterable
 
 import docker
 from docker.errors import DockerException
@@ -10,7 +11,7 @@ from dotenv import load_dotenv
 
 from cover_agent.CustomLogger import CustomLogger
 
-from run_test_with_docker import run_test_with_docker
+from run_test_with_docker import run_test
 
 
 load_dotenv()
@@ -23,7 +24,7 @@ class CoverageType(Enum):
     JACOCO = "jacoco"
 
 
-def stream_docker_logs(response):
+def stream_docker_logs(response: Iterable[bytes|dict[str, str]]) -> None:
     """Stream Docker build/run logs to console."""
     for chunk in response:
         if isinstance(chunk, bytes):
@@ -38,7 +39,11 @@ def stream_docker_logs(response):
         sys.stdout.flush()
 
 
-def build_image(client: docker.DockerClient, dockerfile: str) -> None:
+def build_image(client: docker.DockerClient, dockerfile: str, platform: str="linux/amd64") -> None:
+    """
+    Builds a Docker image from the specified Dockerfile.
+    Force build for x86_64 architecture (`linux/amd64`) even for Apple Silicon currently.
+    """
     try:
         logger.info(f"Building image from {dockerfile}...")
         response = client.api.build(
@@ -46,6 +51,7 @@ def build_image(client: docker.DockerClient, dockerfile: str) -> None:
             dockerfile=dockerfile,
             tag="cover-agent-installer",
             decode=True,
+            platform=platform,
         )
         stream_docker_logs(response)
     except DockerException as e:
@@ -53,7 +59,9 @@ def build_image(client: docker.DockerClient, dockerfile: str) -> None:
         exit(1)
 
 
-def run_container(client: docker.DockerClient, image, volumes, command="/bin/sh -c 'tail -f /dev/null'") -> None:
+def run_container(
+        client: docker.DockerClient, image: str, volumes: dict[str, Any], command: str="/bin/sh -c 'tail -f /dev/null'"
+) -> None:
     try:
         logger.info(f"Running container for {image}...")
         container = client.containers.run(
@@ -95,7 +103,9 @@ def main():
         build_image(client, "Dockerfile")
         os.makedirs("dist", exist_ok=True)
         dist_path = os.path.join(os.getcwd(), "dist")
-        run_container(client, "cover-agent-installer", {dist_path: {"bind": "/app/dist", "mode": "rw"}}, command="make installer")
+        run_container(
+            client, "cover-agent-installer", {dist_path: {"bind": "/app/dist", "mode": "rw"}}, command="make installer"
+        )
 
     tests = [
         # C Calculator Example
@@ -209,20 +219,19 @@ def main():
             docker_image=test["docker_image"],
             source_file_path=test["source_file_path"],
             test_file_path=test["test_file_path"],
-            code_coverage_report_path=test.get("code_coverage_report_path", ""),
+            code_coverage_report_path=test.get("code_coverage_report_path", "coverage.xml"),
             test_command=test["test_command"],
-            coverage_type=test.get("coverage_type", "cobertura"),
+            coverage_type=test.get("coverage_type", CoverageType.COBERTURA.value),
             max_iterations=test.get("max_iterations", os.getenv("MAX_ITERATIONS")),
             desired_coverage=test.get("desired_coverage", os.getenv("DESIRED_COVERAGE")),
-            model=model,
-            api_base="",
+            model=test.get("model", model),
+            api_base=os.getenv("API_BASE", ""),
             openai_api_key=os.getenv("OPENAI_API_KEY", ""),
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
-            dockerfile="",
+            dockerfile=test.get("docker_file_path", ""),
             log_db_path=os.getenv("LOG_DB_PATH", ""),
         )
-
-        run_test_with_docker(test_args)
+        run_test(test_args)
 
 
 if __name__ == "__main__":
