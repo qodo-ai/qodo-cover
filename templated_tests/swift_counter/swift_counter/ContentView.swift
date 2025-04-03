@@ -11,6 +11,7 @@ struct ContentView: View {
     @StateObject private var viewModel = ContentViewModel()
 
     var body: some View {
+    NavigationView {
         VStack(spacing: 32) {
             Text("\(viewModel.counter)")
                 .font(.title)
@@ -22,8 +23,17 @@ struct ContentView: View {
                     viewModel.decrement()
                 }
             }
+
+                NavigationLink(destination: ObjCViewControllerWrapper()) {
+                    Text("Go to ObjC View")
+                        .font(.headline)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+            }
         }
-        .padding()
     }
 }
 
