@@ -28,18 +28,18 @@ def stream_docker_logs(response: Iterable[bytes|dict[str, str]]) -> None:
     """Stream Docker build/run logs to console."""
     for chunk in response:
         if isinstance(chunk, bytes):
-            print(chunk.decode(), end='')
-        elif 'stream' in chunk:
-            print(chunk['stream'], end='')
-        elif 'status' in chunk:
-            print(f"{chunk['status']}", end='')
-            if 'progress' in chunk:
+            print(chunk.decode(), end="")
+        elif "stream" in chunk:
+            print(chunk["stream"], end="")
+        elif "status" in chunk:
+            print(f": {chunk['status']}", end='')
+            if "progress" in chunk:
                 print(f": {chunk['progress']}", end='')
             print()
         sys.stdout.flush()
 
 
-def build_image(client: docker.DockerClient, dockerfile: str, platform: str="linux/amd64") -> None:
+def build_docker_image(client: docker.DockerClient, dockerfile: str, platform: str="linux/amd64") -> None:
     """
     Builds a Docker image from the specified Dockerfile.
     Force build for x86_64 architecture (`linux/amd64`) even for Apple Silicon currently.
@@ -59,13 +59,16 @@ def build_image(client: docker.DockerClient, dockerfile: str, platform: str="lin
         exit(1)
 
 
-def run_container(
-        client: docker.DockerClient, image: str, volumes: dict[str, Any], command: str="/bin/sh -c 'tail -f /dev/null'"
+def run_docker_container(
+        client: docker.DockerClient,
+        image: str,
+        volumes: dict[str, Any],
+        command: str="/bin/sh -c 'tail -f /dev/null'",
 ) -> None:
     try:
         logger.info(f"Running container for {image}...")
         container = client.containers.run(
-            image,
+            image=image,
             command=command,
             remove=True,
             volumes=volumes,
@@ -75,18 +78,18 @@ def run_container(
         # Stream output in real-time
         for chunk in container.attach(stdout=True, stderr=True, stream=True, logs=True):
             if chunk:
-                print(chunk.decode(), end='')
+                print(chunk.decode(), end="")
                 sys.stdout.flush()
                 
-        exit_code = container.wait()['StatusCode']
+        exit_code = container.wait()["StatusCode"]
         if exit_code != 0:
             raise DockerException(f"Container exited with status {exit_code}")
             
     except DockerException as e:
         logger.error(f"Error running container: {e}")
-        if 'container' in locals():
+        if "container" in locals():
             container.remove(force=True)
-        exit(1)
+        sys.exit(1)
 
 
 def main():
@@ -100,10 +103,10 @@ def main():
     client = docker.from_env()
 
     if run_installer:
-        build_image(client, "Dockerfile")
+        build_docker_image(client, "Dockerfile")
         os.makedirs("dist", exist_ok=True)
         dist_path = os.path.join(os.getcwd(), "dist")
-        run_container(
+        run_docker_container(
             client, "cover-agent-installer", {dist_path: {"bind": "/app/dist", "mode": "rw"}}, command="make installer"
         )
 

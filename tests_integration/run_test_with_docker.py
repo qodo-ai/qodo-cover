@@ -82,12 +82,7 @@ def run_test(test_args: argparse.Namespace) -> None:
 
     run_command_in_docker_container(container, command, exec_env)
 
-    logger.info("Cleaning up...")
-    logger.info(f"Stop container {container.id}...")
-    container.stop()
-
-    logger.info(f"Remove container {container.id}...")
-    container.remove()
+    clean_up_docker_container(container)
 
 
 def build_or_pull_docker_image(client: docker.DockerClient, dockerfile: str, docker_image: str) -> str:
@@ -147,16 +142,20 @@ def build_or_pull_docker_image(client: docker.DockerClient, dockerfile: str, doc
 
 
 def run_docker_container(
-        client: docker.DockerClient, image_tag: str, container_env: dict[str, Any], container_volumes: dict[str, Any]
+        client: docker.DockerClient,
+        image: str,
+        container_env: dict[str, Any],
+        volumes: dict[str, Any],
+        command: str="/bin/sh -c 'tail -f /dev/null'",  # Keeps container alive
 ) -> Container:
     try:
-        logger.info(f"Starting the container with image {image_tag}...")
+        logger.info(f"Running container for image {image}...")
         container = client.containers.run(
-            image=image_tag,
-            command="tail -f /dev/null",  # Keeps container alive
+            image=image,
+            command=command,
             environment=container_env,
-            volumes=container_volumes,
-            detach=True,
+            volumes=volumes,
+            detach=True,  # Run in background
             tty=True,
         )
 
@@ -170,7 +169,9 @@ def run_docker_container(
         log_multiple_lines(container_info)
 
     except DockerException as e:
-        logger.error(f"Failed to start the container: {e}")
+        logger.error(f"Error running container: {e}")
+        if "container" in locals():
+            container.remove(force=True)
         sys.exit(1)
 
     return container
@@ -194,43 +195,66 @@ def copy_file_to_docker_container(container: Container, src_path: str, dest_path
 
 def run_command_in_docker_container(container: Container, command: list[str], exec_env: dict[str, Any]) -> None:
     try:
-        logger.info(f"Running the cover-agent command: {' '.join(command)}")
-        exec_result = container.exec_run(
+        joined_command = " ".join(command)
+        logger.info(f"Running the cover-agent command: {joined_command}.")
+
+        exec_create = container.client.api.exec_create(
+            container.id,
             cmd=command,
             environment=exec_env if exec_env else None,
+        )
+        exec_id = exec_create["Id"]
+
+        exec_start = container.client.api.exec_start(
+            exec_id,
             stream=True,
             demux=True,  # separates stdout and stderr
         )
 
-        for stdout, stderr in exec_result.output:
+        # Stream output in real-time
+        for data in exec_start:
+            stdout, stderr = data
             if stdout:
                 print(stdout.decode(), end="")
             if stderr:
                 print(stderr.decode(), end="")
 
-        logger.info("Done.")
-        # TODO: Implement exit on a failed test
-        # # Get the exit code from ExecResult
-        # if exec_result.exit_code is not None and exec_result.exit_code != 0:
-        #     logger.error(f"Test failed with exit code {exec_result.exit_code}")
-        #     sys.exit(1)
+        exec_inspect = container.client.api.exec_inspect(exec_id)
+        exit_code = exec_inspect["ExitCode"]
 
+        logger.debug(f"Command finished with exit code: {exit_code}")
+        if exit_code != 0:
+            logger.error(f"Error running command {joined_command}.")
+            logger.error(f"Test failed with exit code {exit_code}.")
+            clean_up_docker_container(container)
+            sys.exit(exit_code)
+
+        logger.info("Done.")
     except DockerException as e:
         logger.error(f"Failed to execute command in container: {e}")
         sys.exit(1)
 
 
-def log_test_args(test_args: argparse.Namespace, max_value_len=80) -> None:
+def log_test_args(test_args: argparse.Namespace, max_value_len=60) -> None:
     for key, value in vars(test_args).items():
-        val_str = str(value)
-        if len(val_str) > max_value_len:
-            val_str = val_str[:max_value_len] + "..."
-        logger.info(f"{key:30}: {val_str}")
+        value_str = str(value)
+        if len(value_str) > max_value_len:
+            value_str = f"{value_str[:max_value_len]}...{value_str[-5:]}"
+        logger.info(f"{key:30}: {value_str}")
 
 
 def log_multiple_lines(lines: dict[str, Any]) -> None:
     for label, value in lines.items():
         logger.info(f"{label}: {value}")
+
+
+def clean_up_docker_container(container: Container) -> None:
+    logger.info("Cleaning up...")
+    logger.info(f"Stop container {container.id}...")
+    container.stop()
+
+    logger.info(f"Remove container {container.id}...")
+    container.remove()
 
 
 def parse_args() -> argparse.Namespace:
