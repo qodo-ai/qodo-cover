@@ -11,6 +11,7 @@ from docker.errors import APIError, BuildError, DockerException
 from docker.models.containers import Container
 from dotenv import load_dotenv
 
+import tests_integration.constants as constants
 from cover_agent.CustomLogger import CustomLogger
 
 
@@ -130,7 +131,7 @@ def build_or_pull_docker_image(client: docker.DockerClient, dockerfile: str, doc
                 sys.exit(1)
 
             # Final log output
-            logger.info("Image pull completed. Summary:")
+            logger.info(f"Pull of image `{image_tag}` completed. Summary:")
             for layer_id, status in progress_by_id.items():
                 logger.info(f"{layer_id}: {status}")
 
@@ -196,7 +197,7 @@ def copy_file_to_docker_container(container: Container, src_path: str, dest_path
 def run_command_in_docker_container(container: Container, command: list[str], exec_env: dict[str, Any]) -> None:
     try:
         joined_command = " ".join(command)
-        logger.info(f"Running the cover-agent command: {joined_command}.")
+        logger.info(f"Running the cover-agent command: {joined_command}")
 
         exec_create = container.client.api.exec_create(
             container.id,
@@ -284,23 +285,23 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--desired-coverage",
         type=int,
-        default=os.getenv("DESIRED_COVERAGE"),
+        default=constants.DESIRED_COVERAGE,
         help="The desired coverage percentage.",
     )
     parser.add_argument(
         "--max-iterations",
         type=int,
-        default=os.getenv("MAX_ITERATIONS"),
+        default=constants.MAX_ITERATIONS,
         help="The maximum number of iterations.",
     )
     parser.add_argument(
         "--model",
-        default=os.getenv("MODEL"),
+        default=constants.MODEL,
         help="Which LLM model to use.",
     )
     parser.add_argument(
         "--api-base",
-        default="http://localhost:11434",
+        default=constants.API_BASE,
         help="The API url to use for Ollama or Hugging Face.",
     )
     parser.add_argument(
