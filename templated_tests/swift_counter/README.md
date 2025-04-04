@@ -31,3 +31,19 @@ cover-agent \
   --max-iterations 10 \
   --max-run-time 1000
 ```
+
+Run the following command to generate additional tests for ObjCViewModel class
+
+```sh
+cover-agent \
+  --source-file-path "templated_tests/swift_counter/swift_counter/ObjCViewModel.m" \
+  --test-file-path "templated_tests/swift_counter/swift_counterTests/ObjCViewModelTests.m" \
+  --project-root "templated_tests/swift_counter" \
+  --code-coverage-report-path "templated_tests/swift_counter/.report/cobertura.xml" \
+  --test-command "./slather.sh" \
+  --test-command-dir "templated_tests/swift_counter" \
+  --coverage-type "cobertura" \
+  --desired-coverage 70 \
+  --max-iterations 10 \
+  --max-run-time 1000
+```
