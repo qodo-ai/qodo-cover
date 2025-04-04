@@ -11,7 +11,7 @@ from docker.errors import APIError, BuildError, DockerException
 from docker.models.containers import Container
 from dotenv import load_dotenv
 
-import tests_integration.constants as constants
+import constants
 from cover_agent.CustomLogger import CustomLogger
 
 
@@ -237,10 +237,14 @@ def run_command_in_docker_container(container: Container, command: list[str], ex
 
 
 def log_test_args(test_args: argparse.Namespace, max_value_len=60) -> None:
+    exclude_keys = ('openai_api_key', 'anthropic_api_key')
     for key, value in vars(test_args).items():
+        if key in exclude_keys:
+            continue
+
         value_str = str(value)
         if len(value_str) > max_value_len:
-            value_str = f"{value_str[:max_value_len]}...{value_str[-5:]}"
+            value_str = f"{value_str[:max_value_len]}..."
         logger.info(f"{key:30}: {value_str}")
 
 
