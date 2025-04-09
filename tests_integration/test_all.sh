@@ -35,7 +35,7 @@ done
 
 # Build the installer within a Docker container if requested
 if [ "$RUN_INSTALLER" = true ]; then
-    docker build -t cover-agent-installer -f Dockerfile .
+    docker build --platform linux/amd64 -t cover-agent-installer -f Dockerfile .
 
     mkdir -p dist
     docker run --rm --volume "$(pwd)/dist:/app/dist" cover-agent-installer

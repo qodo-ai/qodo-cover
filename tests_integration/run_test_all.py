@@ -8,9 +8,8 @@ import docker
 from docker.errors import DockerException
 from dotenv import load_dotenv
 
+import tests_integration.constants as constants
 from cover_agent.CustomLogger import CustomLogger
-
-import constants
 from run_test_with_docker import run_test
 from scenarios import TESTS
 
@@ -34,7 +33,12 @@ def stream_docker_logs(response: Iterable[bytes|dict[str, str]]) -> None:
         sys.stdout.flush()
 
 
-def build_docker_image(client: docker.DockerClient, dockerfile: str, platform: str="linux/amd64") -> None:
+def build_docker_image(
+        client: docker.DockerClient,
+        dockerfile: str,
+        image_tag: str="cover-agent-installer",
+        platform: str="linux/amd64",
+) -> None:
     """
     Builds a Docker image from the specified Dockerfile.
     Force build for x86_64 architecture (`linux/amd64`) even for Apple Silicon currently.
@@ -44,7 +48,7 @@ def build_docker_image(client: docker.DockerClient, dockerfile: str, platform: s
         response = client.api.build(
             path=".",
             dockerfile=dockerfile,
-            tag="cover-agent-installer",
+            tag=image_tag,
             decode=True,
             platform=platform,
         )
@@ -65,21 +69,21 @@ def run_docker_container(
         container = client.containers.run(
             image=image,
             command=command,
-            remove=True,
             volumes=volumes,
+            remove=True,
             detach=True,  # Run in background
         )
-        
+
         # Stream output in real-time
         for chunk in container.attach(stdout=True, stderr=True, stream=True, logs=True):
             if chunk:
                 print(chunk.decode(), end="")
                 sys.stdout.flush()
-                
+
         exit_code = container.wait()["StatusCode"]
         if exit_code != 0:
             raise DockerException(f"Docker container exited with status {exit_code}.")
-            
+
     except DockerException as e:
         logger.error(f"Error running Docker container: {e}")
         if "container" in locals():
@@ -99,13 +103,22 @@ def main():
 
     if run_installer:
         # Compile `cover-agent` binary
+        logger.info(f"Compiling of cover-agent binary with model requested. Starting...")
+        image_tag = "cover-agent-installer"
+
         build_docker_image(client, "Dockerfile")
+
         os.makedirs("dist", exist_ok=True)
         dist_path = os.path.join(os.getcwd(), "dist")
+        logger.info(f"Defined dist_path: {dist_path}")
+
         run_docker_container(
-            client, "cover-agent-installer", {dist_path: {"bind": "/app/dist", "mode": "rw"}}, command="make installer"
+            client, image_tag, {dist_path: {"bind": "/app/dist", "mode": "rw"}}, command="make installer"
         )
 
+        logger.info(f"Compiling of cover-agent binary has been completed.")
+
+    # Run all tests sequentially
     for test in TESTS:
         test_args = argparse.Namespace(
             docker_image=test["docker_image"],
