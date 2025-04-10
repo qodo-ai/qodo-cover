@@ -23,7 +23,7 @@ TESTS = [
         "coverage_type": CoverageType.COBERTURA.value,
     },
     # C# Calculator Web Service
-    # TODO: Fix test_command here as it fails in macOS
+    # TODO: Rebuild the Docker image with restore command
     {
         "docker_image": "embeddeddevops/csharp_webservice:latest",
         "source_file_path": "CalculatorApi/CalculatorController.cs",
@@ -47,7 +47,7 @@ TESTS = [
         "max_iterations": 4,
     },
     # Java Gradle example
-    # TODO: Figure out why it fails in macOS with `timed out`
+    # TODO: Increase max_run_time to 240 seconds
     {
         "docker_image": "embeddeddevops/java_gradle:latest",
         "source_file_path": "src/main/java/com/davidparry/cover/SimpleMathOperations.java",
@@ -55,6 +55,7 @@ TESTS = [
         "test_command": r"./gradlew clean test jacocoTestReport",
         "coverage_type": CoverageType.JACOCO.value,
         "code_coverage_report_path": "build/reports/jacoco/test/jacocoTestReport.csv",
+        "max_run_time": 240,
     },
     # Java Spring Calculator example
     {

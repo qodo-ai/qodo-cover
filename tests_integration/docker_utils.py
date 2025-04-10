@@ -34,6 +34,7 @@ _STATUS_PREFIX_MAP: list[tuple[str, DockerStatus]] = [
     ("Download", DockerStatus.DOWNLOADING),
     ("Extract", DockerStatus.EXTRACTING),
     ("Verifying checksum", DockerStatus.VERIFYING_CHECKSUM),
+    ("Pull complete", DockerStatus.PULL_COMPLETE),
     ("Waiting", DockerStatus.WAITING),
 ]
 
@@ -193,7 +194,7 @@ def copy_file_to_docker_container(container: Container, src_path: str, dest_path
 def run_command_in_docker_container(container: Container, command: list[str], exec_env: dict[str, Any]) -> None:
     try:
         joined_command = " ".join(command)
-        logger.info(f"Running the cover-agent command: {joined_command}")
+        logger.info(f"Running the command in the Docker container: {joined_command}")
 
         exec_create = container.client.api.exec_create(
             container.id,

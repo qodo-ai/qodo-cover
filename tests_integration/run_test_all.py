@@ -1,94 +1,24 @@
 import argparse
 import os
-import sys
-
-from typing import Any, Iterable
 
 import docker
-from docker.errors import DockerException
 from dotenv import load_dotenv
 
 import tests_integration.constants as constants
+
 from cover_agent.CustomLogger import CustomLogger
-from run_test_with_docker import run_test
-from scenarios import TESTS
+from tests_integration.docker_utils import (
+    build_docker_image,
+    clean_up_docker_container,
+    run_command_in_docker_container,
+    run_docker_container,
+)
+from tests_integration.run_test_with_docker import run_test
+from tests_integration.scenarios import TESTS
 
 
 load_dotenv()
 logger = CustomLogger.get_logger(__name__)
-
-
-def stream_docker_logs(response: Iterable[bytes|dict[str, str]]) -> None:
-    """Stream Docker build/run logs to console."""
-    for chunk in response:
-        if isinstance(chunk, bytes):
-            print(chunk.decode(), end="")
-        elif "stream" in chunk:
-            print(chunk["stream"], end="")
-        elif "status" in chunk:
-            print(f": {chunk['status']}", end='')
-            if "progress" in chunk:
-                print(f": {chunk['progress']}", end='')
-            print()
-        sys.stdout.flush()
-
-
-def build_docker_image(
-        client: docker.DockerClient,
-        dockerfile: str,
-        image_tag: str="cover-agent-installer",
-        platform: str="linux/amd64",
-) -> None:
-    """
-    Builds a Docker image from the specified Dockerfile.
-    Force build for x86_64 architecture (`linux/amd64`) even for Apple Silicon currently.
-    """
-    try:
-        logger.info(f"Building Docker image from {dockerfile}...")
-        response = client.api.build(
-            path=".",
-            dockerfile=dockerfile,
-            tag=image_tag,
-            decode=True,
-            platform=platform,
-        )
-        stream_docker_logs(response)
-    except DockerException as e:
-        logger.error(f"Error building Docker image: {e}")
-        exit(1)
-
-
-def run_docker_container(
-        client: docker.DockerClient,
-        image: str,
-        volumes: dict[str, Any],
-        command: str="/bin/sh -c 'tail -f /dev/null'",
-) -> None:
-    try:
-        logger.info(f"Running Docker container for {image}...")
-        container = client.containers.run(
-            image=image,
-            command=command,
-            volumes=volumes,
-            remove=True,
-            detach=True,  # Run in background
-        )
-
-        # Stream output in real-time
-        for chunk in container.attach(stdout=True, stderr=True, stream=True, logs=True):
-            if chunk:
-                print(chunk.decode(), end="")
-                sys.stdout.flush()
-
-        exit_code = container.wait()["StatusCode"]
-        if exit_code != 0:
-            raise DockerException(f"Docker container exited with status {exit_code}.")
-
-    except DockerException as e:
-        logger.error(f"Error running Docker container: {e}")
-        if "container" in locals():
-            container.remove(force=True)
-        sys.exit(1)
 
 
 def main():
@@ -102,21 +32,27 @@ def main():
     client = docker.from_env()
 
     if run_installer:
-        # Compile `cover-agent` binary
-        logger.info(f"Compiling of cover-agent binary with model requested. Starting...")
+        logger.info(f"Compiling cover-agent binary...")
         image_tag = "cover-agent-installer"
 
-        build_docker_image(client, "Dockerfile")
+        logger.info(f"Building the Docker image {image_tag}...")
+        build_docker_image(client, "Dockerfile", image_tag=image_tag)
 
         os.makedirs("dist", exist_ok=True)
         dist_path = os.path.join(os.getcwd(), "dist")
         logger.info(f"Defined dist_path: {dist_path}")
 
-        run_docker_container(
-            client, image_tag, {dist_path: {"bind": "/app/dist", "mode": "rw"}}, command="make installer"
-        )
+        logger.info(f"Running the Docker container with image {image_tag}...")
+        container = run_docker_container(client, image_tag, volumes={dist_path: {"bind": "/app/dist", "mode": "rw"}})
 
-        logger.info(f"Compiling of cover-agent binary has been completed.")
+        logger.info(f"Running command in the Docker container {container.name}...")
+        run_command_in_docker_container(container, ["/bin/sh", "-c", "cd /app && make installer"], {})
+
+        logger.info(f"Cleaning-up the Docker container {container.name}...")
+        clean_up_docker_container(container)
+
+
+        logger.info(f"Compiling of cover-agent binary completed.")
 
     # Run all tests sequentially
     for test in TESTS:
@@ -131,6 +67,7 @@ def main():
             desired_coverage=test.get("desired_coverage", constants.DESIRED_COVERAGE),
             model=test.get("model", model),
             api_base=os.getenv("API_BASE", ""),
+            max_run_time=test.get("max_run_time", constants.MAX_RUN_TIME),
             openai_api_key=os.getenv("OPENAI_API_KEY", ""),
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
             dockerfile=test.get("docker_file_path", ""),

@@ -1,5 +1,5 @@
 # Dockerfile to build installer for Cover Agent
-FROM python:3.12-bullseye
+FROM python:3.12-bookworm
 
 WORKDIR /app
 

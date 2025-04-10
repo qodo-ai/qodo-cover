@@ -62,6 +62,7 @@ def run_test(test_args: argparse.Namespace) -> None:
         "--coverage-type", test_args.coverage_type,
         "--desired-coverage", str(test_args.desired_coverage),
         "--max-iterations", str(test_args.max_iterations),
+        "--max-run-time", str(test_args.max_run_time),
         "--strict-coverage",
     ]
 
