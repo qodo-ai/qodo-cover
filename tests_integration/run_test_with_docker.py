@@ -1,6 +1,5 @@
 import argparse
 import os
-import sys
 
 import docker
 from dotenv import load_dotenv
@@ -21,38 +20,75 @@ load_dotenv()
 logger = CustomLogger.get_logger(__name__)
 
 
+class InvalidTestArgsError(Exception):
+    """Raised when required test arguments are missing."""
+
+
 def run_test(test_args: argparse.Namespace) -> None:
     client = docker.from_env()
+    container = None
 
-    logger.info("===== Running test with Docker and these args =====")
+    logger.info("=========== Running test with Docker and these args ================")
     log_test_args(test_args)
 
+    try:
+        validate_test_args(test_args)
+        container_env = compose_container_env(test_args)
+        container_volumes = compose_container_volumes(test_args)
+        command = compose_test_command(test_args)
+        exec_env = {
+            key: value for key, value in container_env.items()
+            if key in {"OPENAI_API_KEY", "ANTHROPIC_API_KEY"}
+        }
+
+        image_tag = get_docker_image(client, test_args.dockerfile, test_args.docker_image)
+        container = run_docker_container(client, image_tag, container_volumes, container_env=container_env)
+        copy_file_to_docker_container(container, "dist/cover-agent", "/usr/local/bin/cover-agent")
+        run_command_in_docker_container(container, command, exec_env)
+    except InvalidTestArgsError as e:
+        logger.error(f"Invalid cover-agent arguments: {e}")
+        return
+    except Exception as e:
+        logger.error(f"Error during test execution: {e}")
+        raise
+    finally:
+        if container:
+            clean_up_docker_container(container)
+
+
+def validate_test_args(test_args: argparse.Namespace) -> None:
     if not test_args.source_file_path or not test_args.test_file_path or not test_args.test_command:
-        logger.error("Missing required parameters: --source-file-path, --test-file-path, or --test-command.")
-        sys.exit(1)
+        msg = "Missing required parameters: --source-file-path, --test-file-path, or --test-command."
+        logger.error(msg)
+        raise InvalidTestArgsError(msg)
 
     if not test_args.dockerfile and not test_args.docker_image:
-        logger.error("Missing required parameters: either --dockerfile or --docker-image must be provided.")
-        sys.exit(1)
+        msg = "Missing required parameters: either --dockerfile or --docker-image must be provided."
+        logger.error(msg)
+        raise InvalidTestArgsError(msg)
 
-    image_tag = get_docker_image(client, test_args.dockerfile, test_args.docker_image)
-    container_env = {}
 
+def compose_container_env(test_args: argparse.Namespace) -> dict:
+    env = {}
     if test_args.openai_api_key:
-        container_env["OPENAI_API_KEY"] = test_args.openai_api_key
-
+        env["OPENAI_API_KEY"] = test_args.openai_api_key
     if test_args.anthropic_api_key:
-        container_env["ANTHROPIC_API_KEY"] = test_args.anthropic_api_key
+        env["ANTHROPIC_API_KEY"] = test_args.anthropic_api_key
+    return env
 
-    container_volumes = {}
 
+def compose_container_volumes(test_args: argparse.Namespace) -> dict:
+    volumes = {}
     if test_args.log_db_path:
         log_db_name = os.path.basename(test_args.log_db_path)
-        container_volumes[test_args.log_db_path] = {"bind": f"/{log_db_name}", "mode": "rw"}
+        volumes[test_args.log_db_path] = {
+            "bind": f"/{log_db_name}",
+            "mode": "rw"
+        }
+    return volumes
 
-    container = run_docker_container(client, image_tag, container_volumes, container_env=container_env)
-    copy_file_to_docker_container(container, "dist/cover-agent", "/usr/local/bin/cover-agent")
 
+def compose_test_command(test_args: argparse.Namespace) -> list:
     command = [
         "/usr/local/bin/cover-agent",
         "--source-file-path", test_args.source_file_path,
@@ -76,17 +112,7 @@ def run_test(test_args: argparse.Namespace) -> None:
         log_db_name = os.path.basename(test_args.log_db_path)
         command.extend(["--log-db-path", f"/{log_db_name}"])
 
-    exec_env = {}
-
-    if test_args.openai_api_key:
-        exec_env["OPENAI_API_KEY"] = test_args.openai_api_key
-
-    if test_args.anthropic_api_key:
-        exec_env["ANTHROPIC_API_KEY"] = test_args.anthropic_api_key
-
-    run_command_in_docker_container(container, command, exec_env)
-
-    clean_up_docker_container(container)
+    return command
 
 
 def log_test_args(test_args: argparse.Namespace, max_value_len=60) -> None:

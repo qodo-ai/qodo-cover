@@ -17,6 +17,10 @@ from cover_agent.CustomLogger import CustomLogger
 logger = CustomLogger.get_logger(__name__)
 
 
+class DockerUtilityError(Exception):
+    """Raised when a Docker operation fails."""
+
+
 class DockerStatus(Enum):
     PULLING_FS_LAYER = "Pulling fs layer"
     DOWNLOADING = "Downloading"
@@ -55,7 +59,7 @@ def get_docker_image(
             pull_and_tag_docker_image(client, docker_image, image_tag)
     except (BuildError, APIError) as e:
         logger.error(f"Docker error: {e}")
-        sys.exit(1)
+        raise DockerUtilityError("Failed to build or pull Docker image.") from e
 
     logger.info(f"Successfully obtained the Docker image {image_tag}.")
     return image_tag
@@ -117,16 +121,16 @@ def pull_and_tag_docker_image(client: docker.DockerClient, docker_image: str, im
         stream_docker_pull_output(stream)
     except docker.errors.APIError as e:
         logger.error(f"Failed to pull image {docker_image}: {e}")
-        sys.exit(1)
+        raise DockerUtilityError(f"Pull failed for image {docker_image}") from e
 
     try:
         logger.info(f"Tagging the Docker image {docker_image} ...")
         image = client.images.get(docker_image)
         image.tag(image_tag)
         logger.info(f"Tagged the Docker image {docker_image} as {image_tag}")
-    except docker.errors.ImageNotFound:
+    except docker.errors.ImageNotFound as e:
         logger.error(f"Pulled Docker image {docker_image} could not be found for tagging.")
-        sys.exit(1)
+        raise DockerUtilityError("Image tagging failed: image not found") from e
 
 
 def run_docker_container(
@@ -165,9 +169,9 @@ def run_docker_container(
     except DockerException as e:
         logger.error(f"Error running the Docker container: {e}")
         if "container" in locals():
-            logger.debug(f"Removing the Docker container {container.name}...")
+            logger.info(f"Removing the Docker container {container.name}...")
             container.remove(force=True)
-        sys.exit(1)
+        raise DockerUtilityError("Failed to run Docker container") from e
 
     return container
 
@@ -218,12 +222,12 @@ def run_command_in_docker_container(container: Container, command: list[str], ex
             logger.error(f"Error running command {joined_command}.")
             logger.error(f"Test failed with exit code {exit_code}.")
             clean_up_docker_container(container)
-            sys.exit(exit_code)
+            raise DockerUtilityError(f"Test command failed with exit code {exit_code}")
 
         logger.info("Done.")
     except DockerException as e:
         logger.error(f"Failed to execute the command in the Docker container {container.name}: {e}")
-        sys.exit(1)
+        raise DockerUtilityError("Execution inside Docker container failed") from e
 
 
 def clean_up_docker_container(container: Container, force_remove: bool=True) -> None:
