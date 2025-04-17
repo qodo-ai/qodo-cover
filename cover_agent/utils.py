@@ -331,6 +331,12 @@ def parse_args_full_repo():
         type=str,
         default="main",
     )
+    parser.add_argument(
+        "--max-run-time",
+        type=int,
+        default=30,
+        help="Maximum time (in seconds) allowed for test execution. Overrides the value in configuration.toml if provided. Defaults to 30 seconds.",
+    )
     return parser.parse_args()
 
 
