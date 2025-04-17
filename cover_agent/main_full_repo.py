@@ -28,7 +28,8 @@ async def run():
     async with context_helper.start_server():
         print("LSP server initialized.")
 
-        ai_caller = AICaller(model=args.model,api_base=args.api_base, max_tokens=8192)
+        api_base = getattr(args, 'api_base', None)
+        ai_caller = AICaller(model=args.model, api_base=api_base, max_tokens=8192)
 
         # main loop for analyzing test files
         for test_file in test_files:
