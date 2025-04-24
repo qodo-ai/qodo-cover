@@ -25,6 +25,25 @@ class InvalidTestArgsError(Exception):
 
 
 def run_test(test_args: argparse.Namespace) -> None:
+    """
+    Executes a test inside a Docker container using the provided arguments.
+
+    This function validates the test arguments, sets up the Docker container environment,
+    and runs the specified test command inside the container. It also handles errors
+    and ensures proper cleanup of the Docker container.
+
+    Args:
+        test_args (argparse.Namespace): The arguments required to configure and run the test.
+                                         These include paths, Docker configuration, and API keys.
+
+    Raises:
+        InvalidTestArgsError: If required test arguments are missing or invalid.
+        Exception: For any other errors encountered during test execution.
+
+    Example:
+        args = parse_args()
+        run_test(args)
+    """
     client = docker.from_env()
     container = None
 
@@ -57,6 +76,19 @@ def run_test(test_args: argparse.Namespace) -> None:
 
 
 def validate_test_args(test_args: argparse.Namespace) -> None:
+    """
+    Validates the test arguments provided for running a Docker-based test.
+
+    This function checks if the required arguments for the test are present and valid.
+    If any required argument is missing, it raises an `InvalidTestArgsError`.
+
+    Args:
+        test_args (argparse.Namespace): The arguments required for the test, including
+                                         file paths, Docker configuration, and test commands.
+
+    Raises:
+        InvalidTestArgsError: If any of the required arguments are missing or invalid.
+    """
     if not test_args.source_file_path or not test_args.test_file_path or not test_args.test_command:
         msg = "Missing required parameters: --source-file-path, --test-file-path, or --test-command."
         logger.error(msg)
@@ -69,6 +101,20 @@ def validate_test_args(test_args: argparse.Namespace) -> None:
 
 
 def compose_container_env(test_args: argparse.Namespace) -> dict:
+    """
+    Composes the environment variables for the Docker container.
+
+    This function creates a dictionary of environment variables to be passed to the Docker container
+    based on the provided test arguments. It includes API keys if they are specified.
+
+    Args:
+        test_args (argparse.Namespace): The arguments containing the environment configuration,
+                                         including optional API keys.
+
+    Returns:
+        dict: A dictionary of environment variables to be used in the Docker container.
+              Keys are the variable names, and values are their corresponding values.
+    """
     env = {}
     if test_args.openai_api_key:
         env["OPENAI_API_KEY"] = test_args.openai_api_key
@@ -78,6 +124,21 @@ def compose_container_env(test_args: argparse.Namespace) -> dict:
 
 
 def compose_container_volumes(test_args: argparse.Namespace) -> dict:
+    """
+    Composes the volume mappings for the Docker container.
+
+    This function creates a dictionary of volume bindings to be passed to the Docker container
+    based on the provided test arguments. If a log database path is specified, it is added
+    to the volume mappings.
+
+    Args:
+        test_args (argparse.Namespace): The arguments containing the volume configuration,
+                                         including the optional log database path.
+
+    Returns:
+        dict: A dictionary where keys are host paths and values are dictionaries specifying
+              the bind path and access mode inside the container.
+    """
     volumes = {}
     if test_args.log_db_path:
         log_db_name = os.path.basename(test_args.log_db_path)
@@ -89,6 +150,21 @@ def compose_container_volumes(test_args: argparse.Namespace) -> dict:
 
 
 def compose_test_command(test_args: argparse.Namespace) -> list:
+    """
+    Composes the test command to be executed inside the Docker container.
+
+    This function generates a list of command-line arguments for the `cover-agent` tool
+    based on the provided test arguments. It includes mandatory arguments such as file paths,
+    test commands, and coverage settings, as well as optional arguments like model, API base,
+    and log database path.
+
+    Args:
+        test_args (argparse.Namespace): The arguments required to configure the test command,
+                                         including file paths, coverage settings, and optional parameters.
+
+    Returns:
+        list: A list of strings representing the command-line arguments for the `cover-agent` tool.
+    """
     command = [
         "/usr/local/bin/cover-agent",
         "--source-file-path", test_args.source_file_path,
@@ -116,6 +192,21 @@ def compose_test_command(test_args: argparse.Namespace) -> list:
 
 
 def log_test_args(test_args: argparse.Namespace, max_value_len=60) -> None:
+    """
+    Logs the test arguments, excluding sensitive information.
+
+    This function iterates through the provided test arguments and logs their key-value pairs.
+    Sensitive keys, such as API keys, are excluded from logging. If a value exceeds the
+    specified maximum length, it is truncated and appended with ellipses.
+
+    Args:
+        test_args (argparse.Namespace): The arguments to be logged.
+        max_value_len (int): The maximum length of the value to be logged. Defaults to 60.
+
+    Excludes:
+        - "openai_api_key"
+        - "anthropic_api_key"
+    """
     exclude_keys = ("openai_api_key", "anthropic_api_key")
     for key, value in vars(test_args).items():
         if key in exclude_keys:
@@ -128,6 +219,33 @@ def log_test_args(test_args: argparse.Namespace, max_value_len=60) -> None:
 
 
 def parse_args() -> argparse.Namespace:
+    """
+    Parses command-line arguments for configuring and running tests with Docker.
+
+    This function defines and parses the required and optional arguments needed
+    to execute tests inside a Docker container. It includes arguments for file paths,
+    Docker configuration, API keys, and other test-related settings.
+
+    Returns:
+        argparse.Namespace: An object containing the parsed arguments as attributes.
+                            Each attribute corresponds to a command-line argument.
+
+    Command-line Arguments:
+        --source-file-path (str, required): Path to the source file.
+        --test-file-path (str, required): Path to the input test file.
+        --code-coverage-report-path (str, required): Path to the code coverage report file.
+        --test-command (str, required): The command to run tests and generate coverage report.
+        --coverage-type (str, optional): Type of coverage report. Defaults to "cobertura".
+        --desired-coverage (int, optional): The desired coverage percentage. Defaults to a constant.
+        --max-iterations (int, optional): The maximum number of iterations. Defaults to a constant.
+        --model (str, optional): Which LLM model to use. Defaults to a constant.
+        --api-base (str, optional): The API URL to use for Ollama or Hugging Face. Defaults to a constant.
+        --log-db-path (str, optional): Path to an optional log database. Defaults to an environment variable.
+        --dockerfile (str, optional): Path to the Dockerfile. Defaults to an empty string.
+        --docker-image (str, optional): Docker image name. Defaults to an empty string.
+        --openai-api-key (str, optional): OpenAI API key. Defaults to an environment variable.
+        --anthropic-api-key (str, optional): Anthropic API key. Defaults to an environment variable.
+    """
     parser = argparse.ArgumentParser(description="Test with Docker.")
     parser.add_argument(
         "--source-file-path", required=True, help="Path to the source file."
