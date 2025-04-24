@@ -19,13 +19,13 @@ You can run these example test suites using a locally hosted LLM or in the cloud
 ### Running the Tests
 To run the full test suite, simply run the following command from the root of the repository:
 ```shell
-python tests_integration/run_test_all.py
+poetry run python tests_integration/run_test_all.py
 ```
 
 Or run each test individually:
 #### Python Fast API Example
 ```shell
-python tests_integration/run_test_with_docker.py \
+poetry run python tests_integration/run_test_with_docker.py \
   --dockerfile "templated_tests/python_fastapi/Dockerfile"\
   --source-file-path "app.py" \
   --test-file-path "test_app.py" \
@@ -34,7 +34,7 @@ python tests_integration/run_test_with_docker.py \
 
 #### Go Webservice Example
 ```shell
-python tests_integration/run_test_with_docker.py \
+poetry run python tests_integration/run_test_with_docker.py \
   --dockerfile "templated_tests/go_webservice/Dockerfile" \
   --source-file-path "app.go" \
   --test-file-path "app_test.go" \
@@ -44,7 +44,7 @@ python tests_integration/run_test_with_docker.py \
 
 #### Java Gradle Example
 ```shell
-python tests_integration/run_test_with_docker.py \
+poetry run python tests_integration/run_test_with_docker.py \
   --dockerfile "templated_tests/java_gradle/Dockerfile" \
   --source-file-path "src/main/java/com/davidparry/cover/SimpleMathOperations.java" \
   --test-file-path "src/test/groovy/com/davidparry/cover/SimpleMathOperationsSpec.groovy" \
@@ -56,7 +56,7 @@ python tests_integration/run_test_with_docker.py \
 
 #### Java Spring Calculator Example
 ```shell
-python tests_integration/run_test_with_docker.py \
+poetry run python tests_integration/run_test_with_docker.py \
   --dockerfile "templated_tests/java_spring_calculator/Dockerfile" \
   --source-file-path "src/main/java/com/example/calculator/controller/CalculatorController.java" \
   --test-file-path "src/test/java/com/example/calculator/controller/CalculatorControllerTest.java" \
@@ -68,7 +68,7 @@ python tests_integration/run_test_with_docker.py \
 
 #### VanillaJS Example
 ```shell
-python tests_integration/run_test_with_docker.py \
+poetry run python tests_integration/run_test_with_docker.py \
   --dockerfile "templated_tests/js_vanilla/Dockerfile" \
   --source-file-path "ui.js" \
   --test-file-path "ui.test.js" \
@@ -98,7 +98,7 @@ The `increase_coverage.py` script attempts to run Cover Agent for all files with
 ```
 poetry install
 poetry shell
-python tests_integration/increase_coverage.py
+poetry run python tests_integration/increase_coverage.py
 ```
 
 # Analyzing failures
