@@ -1,6 +1,5 @@
 import io
 import os
-import sys
 import tarfile
 
 from enum import Enum
@@ -22,6 +21,9 @@ class DockerUtilityError(Exception):
 
 
 class DockerStatus(Enum):
+    """
+    Enum representing various statuses during Docker operations.
+    """
     PULLING_FS_LAYER = "Pulling fs layer"
     DOWNLOADING = "Downloading"
     DOWNLOAD_COMPLETE = "Download complete"
@@ -46,7 +48,21 @@ _STATUS_PREFIX_MAP: list[tuple[str, DockerStatus]] = [
 def get_docker_image(
     client: docker.DockerClient, dockerfile: str | None, docker_image: str, platform: str = "linux/amd64"
 ) -> str:
-    """Get the Docker image by either building or pulling it."""
+    """
+    Retrieves a Docker image by either building it from a Dockerfile or pulling it from a registry.
+
+    Args:
+        client (docker.DockerClient): Docker client instance.
+        dockerfile (str | None): Path to the Dockerfile. If None, the image will be pulled.
+        docker_image (str): Name of the Docker image to pull.
+        platform (str): Target platform for the image. Defaults to "linux/amd64".
+
+    Returns:
+        str: The tag of the obtained Docker image.
+
+    Raises:
+        DockerUtilityError: If the image build or pull operation fails.
+    """
     logger.info(f"Starting to get the Docker image {docker_image} with platform {platform}...")
     image_tag = "cover-agent-image"
 
@@ -71,6 +87,15 @@ def build_docker_image(
     """
     Builds a Docker image from the specified Dockerfile.
     Force build for x86_64 architecture (`linux/amd64`) even for Apple Silicon currently.
+
+    Args:
+        client (docker.DockerClient): Docker client instance.
+        dockerfile (str): Path to the Dockerfile.
+        image_tag (str): Tag to assign to the built image.
+        platform (str): Target platform for the image. Defaults to "linux/amd64".
+
+    Raises:
+        DockerUtilityError: If the build operation fails.
     """
     logger.info(
         f"Starting to build the Docker image {image_tag} using Dockerfile {dockerfile} on platform {platform}."
@@ -96,7 +121,27 @@ def build_docker_image(
 
 
 def create_build_context(build_dir: str) -> io.BytesIO:
-    """Creates a tar archive of the build context directory."""
+    """
+    Creates a tar archive of the build context directory.
+
+    This function takes a directory path as input, iterates through all files
+    within the directory (and its subdirectories), and adds them to a tar archive.
+    The resulting tar archive is returned as an in-memory byte stream.
+
+    Args:
+        build_dir (str): The path to the directory to be archived.
+
+    Returns:
+        io.BytesIO: An in-memory byte stream containing the tar archive.
+
+    Raises:
+        OSError: If there is an issue accessing files in the directory.
+
+    Example:
+        tar_stream = create_build_context("/path/to/build_dir")
+        with open("build_context.tar", "wb") as f:
+             f.write(tar_stream.read())
+    """
     logger.info(f"Creating build context for directory: {build_dir}")
     tar_stream = io.BytesIO()
     with tarfile.open(fileobj=tar_stream, mode='w') as tar:
@@ -113,7 +158,23 @@ def create_build_context(build_dir: str) -> io.BytesIO:
 
 
 def pull_and_tag_docker_image(client: docker.DockerClient, docker_image: str, image_tag: str) -> None:
-    """Pulls a Docker image and tags it."""
+    """
+    Pulls a Docker image from a registry and tags it with a specified tag.
+
+    This function first pulls the specified Docker image from the registry using the provided
+    Docker client. After successfully pulling the image, it tags the image with the given tag.
+
+    Args:
+        client (docker.DockerClient): The Docker client instance used to interact with the Docker API.
+        docker_image (str): The name of the Docker image to pull from the registry.
+        image_tag (str): The tag to assign to the pulled Docker image.
+
+    Raises:
+        DockerUtilityError: If the image pull or tagging operation fails.
+
+    Example:
+        pull_and_tag_docker_image(client, "python:3.11", "my-python-image")
+    """
     logger.info(f"Pulling the Docker image {docker_image} ...")
 
     try:
@@ -141,6 +202,36 @@ def run_docker_container(
         container_env: dict[str, Any] | None = None,
         remove: bool=False,
 ) -> Container:
+    """
+    Runs a Docker container with the specified configuration.
+
+    This function starts a Docker container using the provided image, volumes, and command.
+    It also allows setting environment variables and optionally removes the container after it stops.
+
+    Args:
+        client (docker.DockerClient): The Docker client instance used to interact with the Docker API.
+        image (str): The name of the Docker image to use for the container.
+        volumes (dict[str, Any]): A dictionary mapping host paths to container paths for volume mounting.
+        command (str): The command to run inside the container. Defaults to keeping the container alive.
+        container_env (dict[str, Any] | None): Environment variables to set inside the container. Defaults to None.
+        remove (bool): Whether to automatically remove the container after it stops. Defaults to False.
+
+    Returns:
+        Container: The Docker container instance.
+
+    Raises:
+        DockerUtilityError: If the container fails to start or encounters an error.
+
+    Example:
+        container = run_docker_container(
+            client=docker_client,
+            image="python:3.9",
+            volumes={"/host/path": {"bind": "/container/path", "mode": "rw"}},
+            command="python script.py",
+            container_env={"ENV_VAR": "value"},
+            remove=True,
+        )
+    """
     if container_env is None:
         container_env = {}
 
@@ -150,7 +241,7 @@ def run_docker_container(
             image=image,
             command=command,
             volumes=volumes,
-            detach=True,  # Run in background
+            detach=True,  # Run in the background
             tty=True,
             environment=container_env,
             remove=remove,
@@ -177,6 +268,24 @@ def run_docker_container(
 
 
 def copy_file_to_docker_container(container: Container, src_path: str, dest_path: str) -> None:
+    """
+    Copies a file from the host system to a specified path inside a Docker container.
+
+    This function reads the file from the host system, creates a tar archive containing the file,
+    and transfers the archive to the specified destination path inside the Docker container.
+
+    Args:
+        container (Container): The Docker container instance where the file will be copied.
+        src_path (str): The path to the source file on the host system.
+        dest_path (str): The destination path inside the Docker container.
+
+    Raises:
+        FileNotFoundError: If the source file does not exist.
+        OSError: If there is an issue reading the source file or creating the tar archive.
+
+    Example:
+        copy_file_to_docker_container(container, "/host/path/file.txt", "/container/path/file.txt")
+    """
     logger.info(f"Copying file from {src_path} to {dest_path} in the Docker container {container.name}...")
     with open(src_path, "rb") as f:
         data = f.read()
@@ -196,6 +305,29 @@ def copy_file_to_docker_container(container: Container, src_path: str, dest_path
 
 
 def run_command_in_docker_container(container: Container, command: list[str], exec_env: dict[str, Any]) -> None:
+    """
+    Executes a command inside a running Docker container.
+
+    This function creates an execution environment within the specified Docker container,
+    runs the provided command, and streams the output (stdout and stderr). If the command
+    fails (non-zero exit code), the container is cleaned up, and an exception is raised.
+
+    Args:
+        container (Container): The Docker container instance where the command will be executed.
+        command (list[str]): The command to execute inside the container, provided as a list of strings.
+        exec_env (dict[str, Any]): Environment variables to set for the command execution.
+
+    Raises:
+        DockerUtilityError: If the command execution fails or the exit code is non-zero.
+        DockerException: If there is an error interacting with the Docker API.
+
+    Example:
+        run_command_in_docker_container(
+            container=my_container,
+            command=["python", "script.py"],
+            exec_env={"ENV_VAR": "value"},
+        )
+    """
     try:
         joined_command = " ".join(command)
         logger.info(f"Running the command in the Docker container: {joined_command}")
@@ -221,7 +353,7 @@ def run_command_in_docker_container(container: Container, command: list[str], ex
         if exit_code != 0:
             logger.error(f"Error running command {joined_command}.")
             logger.error(f"Test failed with exit code {exit_code}.")
-            clean_up_docker_container(container)
+            clean_up_docker_container(container)  # Force clean-up container on failure
             raise DockerUtilityError(f"Test command failed with exit code {exit_code}")
 
         logger.info("Done.")
@@ -230,17 +362,49 @@ def run_command_in_docker_container(container: Container, command: list[str], ex
         raise DockerUtilityError("Execution inside Docker container failed") from e
 
 
-def clean_up_docker_container(container: Container, force_remove: bool=True) -> None:
+def clean_up_docker_container(container: Container) -> None:
+    """
+    Cleans up a Docker container by stopping and optionally removing it.
+
+    This function stops the specified Docker container and, if `force_remove` is True,
+    removes the container from the Docker host.
+
+    Args:
+        container (Container): The Docker container instance to clean up.
+
+    Returns:
+        None
+
+    Example:
+        clean_up_docker_container(container=my_container, force_remove=True)
+    """
     logger.info("Cleaning up...")
     logger.info(f"Stop the Docker container {container.id}...")
     container.stop()
 
-    if force_remove:
-        logger.info(f"Remove the Docker container {container.id}...")
-        container.remove()
+    logger.info(f"Remove the Docker container {container.id}...")
+    container.remove()
 
 
 def normalize_status(raw_status: str) -> DockerStatus:
+    """
+    Normalizes a raw Docker status string to a corresponding DockerStatus enum value.
+
+    This function trims the input status string, checks if it matches the "PULL_COMPLETE" status,
+    and iterates through a predefined mapping of status prefixes to determine the appropriate
+    DockerStatus enum value. If no match is found, it returns DockerStatus.UNKNOWN.
+
+    Args:
+        raw_status (str): The raw status string to normalize.
+
+    Returns:
+        DockerStatus: The corresponding DockerStatus enum value.
+
+    Example:
+        normalize_status("Pulling fs layer")
+
+        DockerStatus.PULLING_FS_LAYER
+    """
     raw_status = raw_status.strip()
     if raw_status == DockerStatus.PULL_COMPLETE.value:
         return DockerStatus.PULL_COMPLETE
@@ -253,9 +417,22 @@ def normalize_status(raw_status: str) -> DockerStatus:
 
 
 def stream_docker_build_output(stream: Iterable[dict]) -> None:
+    """
+    Streams and processes the output of a Docker build operation.
+
+    This function iterates through the provided stream of dictionaries, which represent
+    the output of a Docker build process. It handles and logs different types of messages
+    such as build progress, errors, and error details.
+
+    Args:
+        stream (Iterable[dict]): An iterable of dictionaries containing Docker build output.
+
+    Example:
+        stream_docker_build_output(build_stream)
+    """
     for line in stream:
         if "stream" in line:
-            print(line["stream"], end="")  # line already has newline
+            print(line["stream"], end="")  # line already has a newline
         elif "error" in line:
             logger.error(line["error"])
         elif "errorDetail" in line:
@@ -263,6 +440,19 @@ def stream_docker_build_output(stream: Iterable[dict]) -> None:
 
 
 def stream_docker_pull_output(stream: Iterable[dict]) -> None:
+    """
+    Streams and processes the output of a Docker pull operation.
+
+    This function uses a progress bar to display the status of each layer being pulled.
+    It iterates through the provided stream of dictionaries, which represent the output
+    of a Docker pull process, and updates the progress bar accordingly.
+
+    Args:
+        stream (Iterable[dict]): An iterable of dictionaries containing Docker pull output.
+
+    Example:
+        stream_docker_pull_output(pull_stream)
+    """
     progress = Progress(
         TextColumn("{task.fields[layer_id]}", justify="left"),
         TextColumn("{task.fields[status]}", justify="left"),
@@ -277,6 +467,23 @@ def stream_docker_pull_output(stream: Iterable[dict]) -> None:
 
 
 def stream_docker_run_command_output(exec_start: Iterable[tuple[bytes, bytes]]) -> None:
+    """
+    Streams and processes the output of a command executed inside a Docker container.
+
+    This function iterates through the provided iterable of tuples, where each tuple contains
+    the stdout and stderr output of the command execution. It decodes and prints the output
+    to the console in real-time.
+
+    Args:
+        exec_start (Iterable[tuple[bytes, bytes]]): An iterable of tuples containing the
+        stdout and stderr output as byte strings.
+
+    Example:
+        exec_start = [(b'output line 1\\n', b''), (b'', b'error line 1\\n')]
+        stream_docker_run_command_output(exec_start)
+        output line 1
+        error line 1
+    """
     for data in exec_start:
         stdout, stderr = data
         if stdout:
@@ -286,6 +493,23 @@ def stream_docker_run_command_output(exec_start: Iterable[tuple[bytes, bytes]]) 
 
 
 def show_progress(line: dict, progress: Progress, id_to_task: dict[str, int] | None = None) -> None:
+    """
+    Updates or creates progress tasks for Docker layer operations.
+
+    This function processes a line of Docker pull or build output, normalizes the status,
+    and updates the progress bar for the corresponding layer. If the layer does not already
+    have a task, a new one is created.
+
+    Args:
+        line (dict): A dictionary containing information about the Docker operation, such as
+                     layer ID, status, and progress.
+        progress (Progress): A `rich.progress.Progress` instance used to display progress bars.
+        id_to_task (dict[str, int] | None): A mapping of layer IDs to task IDs in the progress bar.
+                                            Defaults to None, in which case a new dictionary is created.
+
+    Returns:
+        None
+    """
     if id_to_task is None:
         id_to_task = {}
 
@@ -311,5 +535,23 @@ def show_progress(line: dict, progress: Progress, id_to_task: dict[str, int] | N
 
 
 def log_multiple_lines(lines: dict[str, Any]) -> None:
+    """
+    Logs multiple lines of key-value pairs.
+
+    This function iterates through a dictionary of key-value pairs and logs each pair
+    as an informational message.
+
+    Args:
+        lines (dict[str, Any]): A dictionary where keys are labels (str) and values are the corresponding data (Any).
+
+    Returns:
+        None
+
+    Example:
+        log_multiple_lines({"Key1": "Value1", "Key2": "Value2"})
+        # Logs:
+        # Key1: Value1
+        # Key2: Value2
+    """
     for label, value in lines.items():
         logger.info(f"{label}: {value}")
