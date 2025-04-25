@@ -23,7 +23,6 @@ TESTS = [
         "coverage_type": CoverageType.COBERTURA.value,
     },
     # C# Calculator Web Service
-    # TODO: Rebuild the Docker image with restore command
     {
         "docker_image": "embeddeddevops/csharp_webservice:latest",
         "source_file_path": "CalculatorApi/CalculatorController.cs",
@@ -47,7 +46,6 @@ TESTS = [
         "max_iterations": 4,
     },
     # Java Gradle example
-    # TODO: Increase max_run_time to 240 seconds
     {
         "docker_image": "embeddeddevops/java_gradle:latest",
         "source_file_path": "src/main/java/com/davidparry/cover/SimpleMathOperations.java",

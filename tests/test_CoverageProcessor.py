@@ -510,7 +510,7 @@ class TestCoverageProcessor:
         file_extension = processor.get_file_extension("coverage_report")
 
         # Assert
-        assert file_extension is ""
+        assert file_extension == ""
 
     def test_parse_coverage_report_lcov_with_feature_flag(self, mocker):
         """

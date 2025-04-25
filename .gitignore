@@ -19,9 +19,12 @@ __pycache__
 
 # Generated debug files
 generated_prompt.md
-test_results.html
 run.log
 *.db
+
+# Test files
+htmlcov/
+test_results.html
 
 # PyInstaller Generated files
 /build/

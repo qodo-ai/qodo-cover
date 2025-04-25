@@ -1,7 +1,9 @@
 import argparse
+import inspect
 import logging
 import os
 import re
+import time
 import yaml
 
 from typing import List
@@ -331,6 +333,11 @@ def parse_args_full_repo():
         type=str,
         default="main",
     )
+    parser.add_argument(
+        "--record-mode",
+        action="store_true",
+        help="Enable record mode for LLM responses. Default: False.",
+    )
     return parser.parse_args()
 
 
@@ -392,3 +399,52 @@ def find_test_files(args) -> list:
         test_files = test_files[:MAX_TEST_FILES]
 
     return test_files
+
+
+def stream_recorded_llm_response(content: str) -> None:
+    for line in content.splitlines():
+        if not line:
+            print()
+            continue
+
+        indent = len(line) - len(line.lstrip())
+        print(" " * indent, end="")
+
+        for word in line.lstrip().split():
+            print(word, end=" ", flush=True)
+            time.sleep(0.01)
+
+        print()
+
+
+def get_original_caller():
+    """
+    Gets the name of the original calling function by traversing the call stack
+    and skipping framework/internal function calls.
+
+    Returns:
+        str: The name of the original calling function with parentheses
+    """
+    frames_to_skip = {
+        "retry_wrapper",
+        "wrapper",
+        "call_model",
+        "get_original_caller",
+        "__call__",
+        "decorator",
+        "wrapped_f",
+        "wrap",
+        "wrapper_descriptor",
+        "actualfunc",
+        "wrapped",
+        "inner",
+    }
+
+    for frame in inspect.stack()[1:]:
+        function_name = frame.function
+        if (not any(function_name.startswith(skip) for skip in ['__', 'wrap']) and
+                function_name not in frames_to_skip):
+
+            return f"{function_name}()"
+
+    return "unknown_caller()"
