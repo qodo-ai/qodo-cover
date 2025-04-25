@@ -330,7 +330,7 @@ class CoverageProcessor:
 
     def extract_package_and_class_java(self):
         package_pattern = re.compile(r"^\s*package\s+([\w\.]+)\s*;.*$")
-        class_pattern = re.compile(r"^\s*public\s+class\s+(\w+).*")
+        class_pattern = re.compile(r"^\s*(?:public\s+)?(?:class|interface)\s+(\w+).*")
 
         package_name = ""
         class_name = ""
