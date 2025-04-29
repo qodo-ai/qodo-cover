@@ -82,14 +82,14 @@ class RecordReplayManager:
                 cached_data = yaml.safe_load(f)
 
             prompt_hash = hashlib.sha256(str(prompt).encode()).hexdigest()
-            self.logger.info(f"Looking for prompt hash: {prompt_hash}...")
+            self.logger.info(f"Looking for prompt hash: {prompt_hash[:self.HASH_DISPLAY_LENGTH]}...")
 
             if prompt_hash in cached_data:
                 self.logger.info(f"Record hit for prompt hash {prompt_hash[:self.HASH_DISPLAY_LENGTH]}.")
                 entry = cached_data[prompt_hash]
                 return entry["response"], entry["prompt_tokens"], entry["completion_tokens"]
 
-            self.logger.info(f"No record entry found for prompt hash {prompt_hash}.")
+            self.logger.info(f"No record entry found for prompt hash {prompt_hash[:self.HASH_DISPLAY_LENGTH]}.")
         except Exception as e:
             self.logger.error(f"Error loading recorded LLM response {e}", exc_info=True)
         return None
@@ -208,4 +208,12 @@ class RecordReplayManager:
         files_hash = self._calculate_files_hash(source_file, test_file)  # Calculate the combined hash
         test_name = os.getenv("TEST_NAME", "default")  # Use TEST_NAME env variable or default to "default"
 
-        return (self.base_dir / f"{test_name}_responses_{files_hash}.yml").resolve()  # Return the absolute file path
+        # For debug needs when running tests not in a container. May be removed in the future.
+        if test_name == "default":
+            test_name = Path(source_file).parts[-2] if len(Path(source_file).parts) >= 2 else test_name
+
+        # Get the absolute file path
+        response_file_path = (self.base_dir / f"{test_name}_responses_{files_hash}.yml").resolve()
+        self.logger.info(f"Response file path {response_file_path}.")
+
+        return response_file_path

@@ -86,13 +86,12 @@ class AICaller:
             if recorded_response:
                 content, prompt_tokens, completion_tokens = recorded_response
 
-                replay_msg = f"▶️  Replaying results from recorded LLM response...\n"
+                replay_msg = f"▶️  Replaying results from recorded LLM response..."
+                self.logger.info(replay_msg)
                 if stream:  # Optional: Delay to simulate more 'natural' response pacing
-                    # TODO: Replace with a logger
-                    print(replay_msg)
                     stream_recorded_llm_response(content)
                 else:
-                    print(f"{replay_msg}{content}")
+                    print(content)
 
                 return content, prompt_tokens, completion_tokens
 

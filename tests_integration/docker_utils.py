@@ -15,6 +15,8 @@ from cover_agent.CustomLogger import CustomLogger
 
 logger = CustomLogger.get_logger(__name__)
 
+HASH_DISPLAY_LENGTH = 12
+
 
 class DockerUtilityError(Exception):
     """Raised when a Docker operation fails."""
@@ -273,10 +275,10 @@ def run_docker_container(
         )
 
         container_info = {
-            "Started container": container.id,
+            "Started container": container.id[:HASH_DISPLAY_LENGTH],
             "Container image": container.attrs.get("Config", {}).get("Image"),
             "Container name": container.attrs.get("Name")[1:],
-            "Container ID": container.attrs.get("Id"),
+            "Container ID": container.attrs.get("Id")[:HASH_DISPLAY_LENGTH],
             "Container created at": container.attrs.get("Created"),
             "Cmd": container.attrs.get("Config", {}).get("Cmd"),
         }
@@ -404,10 +406,10 @@ def clean_up_docker_container(container: Container) -> None:
         clean_up_docker_container(container=my_container, force_remove=True)
     """
     logger.info("Cleaning up...")
-    logger.info(f"Stop the Docker container {container.id}...")
+    logger.info(f"Stop the Docker container {container.id[:HASH_DISPLAY_LENGTH]}.")
     container.stop()
 
-    logger.info(f"Remove the Docker container {container.id}...")
+    logger.info(f"Remove the Docker container {container.id[:HASH_DISPLAY_LENGTH]}.")
     container.remove()
 
 

@@ -49,13 +49,11 @@ class AICallerReplay:
             raise KeyError(msg)
 
         content, prompt_tokens, completion_tokens = recorded_response
-        replay_msg = "▶️  Replaying results from recorded LLM response...\n"
-
+        replay_msg = "▶️  Replaying results from recorded LLM response..."
+        self.logger.info(replay_msg)
         if stream:
-            self.logger.info(replay_msg)
             stream_recorded_llm_response(content)
         else:
-            self.logger.info(replay_msg)
             print(content)
 
         return content, prompt_tokens, completion_tokens
