@@ -3,8 +3,7 @@ import os
 
 from dotenv import load_dotenv
 
-import tests_integration.constants as constants
-
+from cover_agent import constants
 from cover_agent.CustomLogger import CustomLogger
 from tests_integration.run_test_with_docker import run_test
 from tests_integration.scenarios import TESTS

@@ -10,12 +10,13 @@ from docker.errors import APIError, BuildError, DockerException
 from docker.models.containers import Container
 from rich.progress import Progress, TextColumn
 
+from cover_agent import constants
 from cover_agent.CustomLogger import CustomLogger
-
+from cover_agent.utils import truncate_hash
 
 logger = CustomLogger.get_logger(__name__)
 
-HASH_DISPLAY_LENGTH = 12
+HASH_DISPLAY_LENGTH = constants.DOCKER_HASH_DISPLAY_LENGTH
 
 
 class DockerUtilityError(Exception):
@@ -275,10 +276,10 @@ def run_docker_container(
         )
 
         container_info = {
-            "Started container": container.id[:HASH_DISPLAY_LENGTH],
+            "Started container": truncate_hash(container.id, HASH_DISPLAY_LENGTH),
             "Container image": container.attrs.get("Config", {}).get("Image"),
             "Container name": container.attrs.get("Name")[1:],
-            "Container ID": container.attrs.get("Id")[:HASH_DISPLAY_LENGTH],
+            "Container ID": truncate_hash(container.attrs.get("Id"), HASH_DISPLAY_LENGTH),
             "Container created at": container.attrs.get("Created"),
             "Cmd": container.attrs.get("Config", {}).get("Cmd"),
         }
@@ -406,10 +407,10 @@ def clean_up_docker_container(container: Container) -> None:
         clean_up_docker_container(container=my_container, force_remove=True)
     """
     logger.info("Cleaning up...")
-    logger.info(f"Stop the Docker container {container.id[:HASH_DISPLAY_LENGTH]}.")
+    logger.info(f"Stop the Docker container {truncate_hash(container.id, HASH_DISPLAY_LENGTH)}.")
     container.stop()
 
-    logger.info(f"Remove the Docker container {container.id[:HASH_DISPLAY_LENGTH]}.")
+    logger.info(f"Remove the Docker container {truncate_hash(container.id, HASH_DISPLAY_LENGTH)}.")
     container.remove()
 
 

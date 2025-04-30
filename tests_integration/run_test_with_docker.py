@@ -6,9 +6,8 @@ from pathlib import Path
 import docker
 from dotenv import load_dotenv
 
-
+from cover_agent import constants
 from cover_agent.CustomLogger import CustomLogger
-import tests_integration.constants as constants
 from tests_integration.docker_utils import (
     clean_up_docker_container,
     copy_file_to_docker_container,

@@ -1,4 +1,4 @@
-c1cabf00f41c8a2daa7be09960636a5ace0ea87e60713a8241abffeec9982652:
+c1cabf00f41c:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a c++ test file as input.\n\
@@ -36,8 +36,8 @@ c1cabf00f41c8a2daa7be09960636a5ace0ea87e60713a8241abffeec9982652:
     ```'
   prompt_tokens: 388
   completion_tokens: 30
-  files_hash: fa7bddecaf00375e3436332083137fc768195e43b3c57c8620f9b381b3ab9a7f
-6b9ac852682195b3a9223b73b89980bc0376d5e01ffb1ba40c8714c1f6bde312:
+  files_hash: fa7bddecaf00
+6b9ac8526821:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a c++ test file as input.\n\
@@ -89,8 +89,8 @@ c1cabf00f41c8a2daa7be09960636a5ace0ea87e60713a8241abffeec9982652:
     ```'
   prompt_tokens: 592
   completion_tokens: 47
-  files_hash: fa7bddecaf00375e3436332083137fc768195e43b3c57c8620f9b381b3ab9a7f
-b43a8fca77707d2c2c42634aa694e68bce8cd44ec070ccf380ab2494350b67d0:
+  files_hash: fa7bddecaf00
+b43a8fca7770:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a c++ source file, and\
@@ -181,8 +181,8 @@ b43a8fca77707d2c2c42634aa694e68bce8cd44ec070ccf380ab2494350b67d0:
     \ edge case\n```"
   prompt_tokens: 1208
   completion_tokens: 344
-  files_hash: fa7bddecaf00375e3436332083137fc768195e43b3c57c8620f9b381b3ab9a7f
-f38efad61022dda170d5389b82f62e5db811b15a34e0add133cfeaaedb3f66aa:
+  files_hash: fa7bddecaf00
+f38efad61022:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a c++ source file, and\
@@ -284,4 +284,4 @@ f38efad61022dda170d5389b82f62e5db811b15a34e0add133cfeaaedb3f66aa:
     \    }\n  new_imports_code: |\n    \"\"\n  test_tags: edge case\n```"
   prompt_tokens: 1365
   completion_tokens: 390
-  files_hash: fa7bddecaf00375e3436332083137fc768195e43b3c57c8620f9b381b3ab9a7f
+  files_hash: fa7bddecaf00

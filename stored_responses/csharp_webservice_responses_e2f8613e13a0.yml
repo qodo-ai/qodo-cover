@@ -1,4 +1,4 @@
-84fe888ef68d93c1e1fc2516d5d7aed8a81fa6bf4f710316333dc0377b818526:
+84fe888ef68d:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a c# test file as input.\n\
@@ -40,8 +40,8 @@
     ```'
   prompt_tokens: 425
   completion_tokens: 30
-  files_hash: e2f8613e13a081f63d35bdaa2e026358105f7c61f194969c99be4305bc73ed00
-ceb1ab37104d6dd3da1385774af52936cfe0ffd3a2d5f1a8cd3654ba43f6f61e:
+  files_hash: e2f8613e13a0
+ceb1ab37104d:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a c# test file as input.\n\
@@ -96,8 +96,8 @@ ceb1ab37104d6dd3da1385774af52936cfe0ffd3a2d5f1a8cd3654ba43f6f61e:
     ```'
   prompt_tokens: 636
   completion_tokens: 47
-  files_hash: e2f8613e13a081f63d35bdaa2e026358105f7c61f194969c99be4305bc73ed00
-f08949865ae32e454165db3bbeed0be731bbaf9de6adb1821c8ba041e35fc408:
+  files_hash: e2f8613e13a0
+f08949865ae3:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a c# source file, and\
@@ -209,4 +209,4 @@ f08949865ae32e454165db3bbeed0be731bbaf9de6adb1821c8ba041e35fc408:
     \   }\n  new_imports_code: |\n    \"\"\n  test_tags: edge case\n```"
   prompt_tokens: 1240
   completion_tokens: 581
-  files_hash: e2f8613e13a081f63d35bdaa2e026358105f7c61f194969c99be4305bc73ed00
+  files_hash: e2f8613e13a0

@@ -1,4 +1,4 @@
-2a3c9161c2c69592e8b9ec327e8e5ac2d97c0c0eb16e2b31eb55c52bc82e74e2:
+2a3c9161c2c6:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a java test file as\
@@ -51,8 +51,8 @@
     ```'
   prompt_tokens: 686
   completion_tokens: 29
-  files_hash: 8fa8103663ed994de3c88d5011d598dbb0947cd2f020aa1e9ea01d6b3c8d48d5
-b065dd976319300a8bd59054fc201eb246c3679f5f7688caec2bdcb631241adb:
+  files_hash: 8fa8103663ed
+b065dd976319:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a java test file as\
@@ -121,8 +121,8 @@ b065dd976319300a8bd59054fc201eb246c3679f5f7688caec2bdcb631241adb:
     ```'
   prompt_tokens: 933
   completion_tokens: 47
-  files_hash: 8fa8103663ed994de3c88d5011d598dbb0947cd2f020aa1e9ea01d6b3c8d48d5
-afc2cbec50b9a2831dbd9ccf3b00086906fbddfa7afe60f80b052309288d21a3:
+  files_hash: 8fa8103663ed
+afc2cbec50b9:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a java source file,\
@@ -239,8 +239,8 @@ afc2cbec50b9a2831dbd9ccf3b00086906fbddfa7afe60f80b052309288d21a3:
     \ |\n    \"\"\n  test_tags: edge case\n```"
   prompt_tokens: 1561
   completion_tokens: 408
-  files_hash: 8fa8103663ed994de3c88d5011d598dbb0947cd2f020aa1e9ea01d6b3c8d48d5
-06a6287e69072ee8772673642a9200b930527c16a47becc3f2b4e98f622902be:
+  files_hash: 8fa8103663ed
+06a6287e6907:
   prompt:
     system: ''
     user: "## Overview\nYou are a specialized test analysis assistant focused on unit\
@@ -729,4 +729,4 @@ afc2cbec50b9a2831dbd9ccf3b00086906fbddfa7afe60f80b052309288d21a3:
     \     ```"
   prompt_tokens: 9557
   completion_tokens: 412
-  files_hash: 8fa8103663ed994de3c88d5011d598dbb0947cd2f020aa1e9ea01d6b3c8d48d5
+  files_hash: 8fa8103663ed

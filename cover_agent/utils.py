@@ -448,3 +448,20 @@ def get_original_caller():
             return f"{function_name}()"
 
     return "unknown_caller()"
+
+
+def truncate_hash(hash_value: str, hash_display_length: int) -> str:
+    """
+    Truncate a hash string to a specified length.
+
+    Parameters:
+    hash_value (str): The original hash string to be truncated.
+    hash_display_length (int): The desired length of the truncated hash.
+
+    Returns:
+    str: The truncated hash string.
+
+    Example:
+        truncate_hash("abcdef123456", 6)  # Returns "abcdef"
+    """
+    return hash_value[:hash_display_length]

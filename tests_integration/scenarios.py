@@ -1,4 +1,4 @@
-from tests_integration.constants import CoverageType
+from cover_agent.constants import CoverageType
 
 
 TESTS = [

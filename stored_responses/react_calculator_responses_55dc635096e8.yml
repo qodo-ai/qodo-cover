@@ -1,4 +1,4 @@
-b85becb4bf7655b300aeb14054aff3c94c53979bcca3b11e270fdaecc0956624:
+b85becb4bf76:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a javascript test file\
@@ -60,8 +60,8 @@ b85becb4bf7655b300aeb14054aff3c94c53979bcca3b11e270fdaecc0956624:
     ```'
   prompt_tokens: 772
   completion_tokens: 29
-  files_hash: 55dc635096e8c68978e4ac5a0bf630046965fed76234db83e8b8f9d3398532e8
-7eac12e1cf1004c88ebf492747ebd6d407dc755433761cd60d78bcf68c9f1052:
+  files_hash: 55dc635096e8
+7eac12e1cf10:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a javascript test file\
@@ -136,8 +136,8 @@ b85becb4bf7655b300aeb14054aff3c94c53979bcca3b11e270fdaecc0956624:
     ```'
   prompt_tokens: 1030
   completion_tokens: 46
-  files_hash: 55dc635096e8c68978e4ac5a0bf630046965fed76234db83e8b8f9d3398532e8
-cdfb3cc4ded7a9f258bb7677d73f4d609e08b75e3032690f01c8b401aee9a955:
+  files_hash: 55dc635096e8
+cdfb3cc4ded7:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a javascript source\
@@ -315,4 +315,4 @@ cdfb3cc4ded7a9f258bb7677d73f4d609e08b75e3032690f01c8b401aee9a955:
     \ |\n    \"\"\n  test_tags: edge case\n```"
   prompt_tokens: 2588
   completion_tokens: 479
-  files_hash: 55dc635096e8c68978e4ac5a0bf630046965fed76234db83e8b8f9d3398532e8
+  files_hash: 55dc635096e8

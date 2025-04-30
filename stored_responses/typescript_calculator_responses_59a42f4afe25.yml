@@ -1,4 +1,4 @@
-8b7b17a729c43dfe0c0ed3f578acff923eb7eec4ed205141d55912dfc7388769:
+8b7b17a729c4:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a typescript test file\
@@ -54,8 +54,8 @@
     ```'
   prompt_tokens: 711
   completion_tokens: 30
-  files_hash: 59a42f4afe25239fd60de6d6ce8417a54d699e96ea917bbd4e2c4d0b398b3c22
-daf934acdf2bafdcea4b1aed596a7fae27485577fa60035fc37b068cd392910b:
+  files_hash: 59a42f4afe25
+daf934acdf2b:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a typescript test file\
@@ -127,8 +127,8 @@ daf934acdf2bafdcea4b1aed596a7fae27485577fa60035fc37b068cd392910b:
     ```'
   prompt_tokens: 995
   completion_tokens: 47
-  files_hash: 59a42f4afe25239fd60de6d6ce8417a54d699e96ea917bbd4e2c4d0b398b3c22
-894f1e2b37deae14208230e50677de3a1957c045591cf45a732541a5c10861b3:
+  files_hash: 59a42f4afe25
+894f1e2b37de:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a typescript source\
@@ -337,4 +337,4 @@ daf934acdf2bafdcea4b1aed596a7fae27485577fa60035fc37b068cd392910b:
     \    });\n  new_imports_code: |\n    \"\"\n  test_tags: edge case\n```"
   prompt_tokens: 3295
   completion_tokens: 622
-  files_hash: 59a42f4afe25239fd60de6d6ce8417a54d699e96ea917bbd4e2c4d0b398b3c22
+  files_hash: 59a42f4afe25

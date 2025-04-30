@@ -1,4 +1,4 @@
-6b4a4b4e140e4e3fafa3d54253892de0d49e5249f6ddcd4553a1d783caf54da2:
+6b4a4b4e140e:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a java test file as\
@@ -43,8 +43,8 @@
     ```'
   prompt_tokens: 469
   completion_tokens: 31
-  files_hash: 3b9f8df901683a2667361d986e88ed17d53b3309f62cc004c3c55a5dc9ac5d29
-bf0e4da07630e7cd50776a7abf270eaf2ed539f40ea27515c900d5fffc6e0ec6:
+  files_hash: 3b9f8df90168
+bf0e4da07630:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a java test file as\
@@ -102,8 +102,8 @@ bf0e4da07630e7cd50776a7abf270eaf2ed539f40ea27515c900d5fffc6e0ec6:
     ```'
   prompt_tokens: 694
   completion_tokens: 48
-  files_hash: 3b9f8df901683a2667361d986e88ed17d53b3309f62cc004c3c55a5dc9ac5d29
-95d3989be2b29dc5fcdc883983ddfd1410b1a4bf729ee8066399f2ef8f300c7b:
+  files_hash: 3b9f8df90168
+95d3989be2b2:
   prompt:
     system: ''
     user: "## Overview\nYou are a code assistant that accepts a java source file,\
@@ -214,4 +214,4 @@ bf0e4da07630e7cd50776a7abf270eaf2ed539f40ea27515c900d5fffc6e0ec6:
     \ happy path\n```"
   prompt_tokens: 1296
   completion_tokens: 520
-  files_hash: 3b9f8df901683a2667361d986e88ed17d53b3309f62cc004c3c55a5dc9ac5d29
+  files_hash: 3b9f8df90168

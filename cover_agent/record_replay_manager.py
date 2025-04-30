@@ -6,12 +6,27 @@ import yaml
 from pathlib import Path
 from typing import Any, Optional
 
-import tests_integration.constants as constants
+from cover_agent import constants
 from cover_agent.CustomLogger import CustomLogger
+from cover_agent.utils import truncate_hash
 
 
 class RecordReplayManager:
-    HASH_DISPLAY_LENGTH = 12
+    """
+    A manager class for recording and replaying responses.
+
+    This class handles the logic for recording responses to YAML files and replaying them
+    based on a hash of the source file, test file, and prompt. It supports both "record"
+    and "replay" modes and ensures consistent hash truncation for file names and YAML keys.
+
+    Attributes:
+        HASH_DISPLAY_LENGTH (int): The length to which hashes are truncated for display and storage.
+        base_dir (Path): The base directory where response files are stored.
+        record_mode (bool): Indicates whether the manager is in record mode.
+        files_hash (Optional[str]): Cached hash of the source and test files.
+        logger (CustomLogger): Logger instance for logging messages.
+    """
+    HASH_DISPLAY_LENGTH = constants.RECORD_REPLAY_HASH_DISPLAY_LENGTH
 
     def __init__(
             self, record_mode: bool, base_dir: str=constants.RESPONSES_FOLDER, logger: Optional[CustomLogger]=None
@@ -81,15 +96,15 @@ class RecordReplayManager:
             with open(response_file, "r") as f:
                 cached_data = yaml.safe_load(f)
 
-            prompt_hash = hashlib.sha256(str(prompt).encode()).hexdigest()
-            self.logger.info(f"Looking for prompt hash: {prompt_hash[:self.HASH_DISPLAY_LENGTH]}...")
+            prompt_hash = truncate_hash(hashlib.sha256(str(prompt).encode()).hexdigest(), self.HASH_DISPLAY_LENGTH)
+            self.logger.info(f"Looking for prompt hash: {prompt_hash}...")
 
             if prompt_hash in cached_data:
-                self.logger.info(f"Record hit for prompt hash {prompt_hash[:self.HASH_DISPLAY_LENGTH]}.")
+                self.logger.info(f"Record hit for prompt hash {prompt_hash}.")
                 entry = cached_data[prompt_hash]
                 return entry["response"], entry["prompt_tokens"], entry["completion_tokens"]
 
-            self.logger.info(f"No record entry found for prompt hash {prompt_hash[:self.HASH_DISPLAY_LENGTH]}.")
+            self.logger.info(f"No record entry found for prompt hash {prompt_hash}.")
         except Exception as e:
             self.logger.error(f"Error loading recorded LLM response {e}", exc_info=True)
         return None
@@ -142,15 +157,15 @@ class RecordReplayManager:
                 self.logger.warning(f"Invalid YAML in {response_file}, starting fresh.")
 
         # Create entry
-        prompt_hash = hashlib.sha256(str(prompt).encode()).hexdigest()
-        self.logger.info(f"🔴 Recording new LLM response with prompt hash {prompt_hash[:self.HASH_DISPLAY_LENGTH]}...")
+        prompt_hash = truncate_hash(hashlib.sha256(str(prompt).encode()).hexdigest(), self.HASH_DISPLAY_LENGTH)
+        self.logger.info(f"🔴 Recording new LLM response with prompt hash {prompt_hash}...")
 
         cached_data[prompt_hash] = {
             "prompt": prompt,
             "response": response,
             "prompt_tokens": prompt_tokens,
             "completion_tokens": completion_tokens,
-            "files_hash": self._calculate_files_hash(source_file, test_file)
+            "files_hash":  truncate_hash(self._calculate_files_hash(source_file, test_file), self.HASH_DISPLAY_LENGTH)
         }
 
         # Save to file
@@ -175,7 +190,7 @@ class RecordReplayManager:
         """
         # Return cached hash if already calculated
         if self.files_hash:
-            self.logger.debug(f"Using cached files hash {self.files_hash}.")
+            self.logger.debug(f"Using cached files hash {truncate_hash(self.files_hash, self.HASH_DISPLAY_LENGTH)}.")
             return self.files_hash
 
         self.logger.debug(f"Calculating hash for files {source_file} and {test_file}...")
@@ -185,7 +200,7 @@ class RecordReplayManager:
             test_hash = hashlib.sha256(f.read()).hexdigest()
 
         self.files_hash = hashlib.sha256((source_hash + test_hash).encode()).hexdigest()
-        self.logger.info(f"Generated new files hash {self.files_hash[:self.HASH_DISPLAY_LENGTH]}.")
+        self.logger.info(f"Generated new files hash {truncate_hash(self.files_hash, self.HASH_DISPLAY_LENGTH)}.")
         return self.files_hash
 
     def _get_response_file_path(self, source_file: str, test_file: str) -> Path:
@@ -203,9 +218,14 @@ class RecordReplayManager:
         Returns:
             Path: The absolute path to the response file.
         """
-        response_dir = self.base_dir  # Create the subdirectory path
-        response_dir.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
-        files_hash = self._calculate_files_hash(source_file, test_file)  # Calculate the combined hash
+        # Create the subdirectory path
+        response_dir = self.base_dir
+
+        # Ensure the directory exists
+        response_dir.mkdir(parents=True, exist_ok=True)
+
+        # Calculate the combined hash
+        files_hash = truncate_hash(self._calculate_files_hash(source_file, test_file), self.HASH_DISPLAY_LENGTH)
         test_name = os.getenv("TEST_NAME", "default")  # Use TEST_NAME env variable or default to "default"
 
         # For debug needs when running tests not in a container. May be removed in the future.
