@@ -417,7 +417,7 @@ def stream_recorded_llm_response(content: str) -> None:
         print()
 
 
-def get_original_caller():
+def get_original_caller() -> str:
     """
     Gets the name of the original calling function by traversing the call stack
     and skipping framework/internal function calls.
@@ -445,9 +445,9 @@ def get_original_caller():
         if (not any(function_name.startswith(skip) for skip in ['__', 'wrap']) and
                 function_name not in frames_to_skip):
 
-            return f"{function_name}()"
+            return f"{function_name}"
 
-    return "unknown_caller()"
+    return "unknown_caller"
 
 
 def truncate_hash(hash_value: str, hash_display_length: int) -> str:

@@ -39,6 +39,8 @@ grep_ast = "^0.3.3"
 tree_sitter = "^0.21.3"
 tree_sitter_languages = "^1.10.2"
 jedi-language-server = "^0.41.4"
+fuzzywuzzy = "^0.18.0"
+python-levenshtein = "^0.27.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"

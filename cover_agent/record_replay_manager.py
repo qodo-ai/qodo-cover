@@ -6,6 +6,8 @@ import yaml
 from pathlib import Path
 from typing import Any, Optional
 
+from fuzzywuzzy import fuzz
+
 from cover_agent import constants
 from cover_agent.CustomLogger import CustomLogger
 from cover_agent.utils import truncate_hash
@@ -64,8 +66,13 @@ class RecordReplayManager:
         return exists
 
     def load_recorded_response(
-            self, source_file: str, test_file: str, prompt: dict[str, Any]
-    ) -> Optional[tuple[str, int, int]]:
+            self,
+            source_file: str,
+            test_file: str,
+            prompt: dict[str, Any],
+            caller_name: str="unknown_caller",
+            fuzzy_lookup: bool=True,
+    ) -> tuple[str, int, int] | None:
         """
         Load a recorded response if available.
 
@@ -77,6 +84,8 @@ class RecordReplayManager:
             source_file (str): The path to the source file.
             test_file (str): The path to the test file.
             prompt (dict[str, Any]): The prompt data used to generate the response.
+            caller_name (str): The name of the caller.
+            fuzzy_lookup (bool): If True, the fuzzy lookup will be applied.
 
         Returns:
             Optional[tuple[str, int, int]]: A tuple containing the response text, the number
@@ -89,22 +98,47 @@ class RecordReplayManager:
 
         response_file = self._get_response_file_path(source_file, test_file)
         if not response_file.exists():
-            self.logger.debug(f"Recorded response file not found: {response_file}.")
+            self.logger.debug(f"Recorded LLM response file not found: {response_file}.")
             return None
 
         try:
             with open(response_file, "r") as f:
                 cached_data = yaml.safe_load(f)
 
-            prompt_hash = truncate_hash(hashlib.sha256(str(prompt).encode()).hexdigest(), self.HASH_DISPLAY_LENGTH)
-            self.logger.info(f"Looking for prompt hash: {prompt_hash}...")
+            # Check if caller_name exists
+            if caller_name not in cached_data:
+                self.logger.info(f"No records found for caller {caller_name}.")
+                return None
 
-            if prompt_hash in cached_data:
-                self.logger.info(f"Record hit for prompt hash {prompt_hash}.")
-                entry = cached_data[prompt_hash]
+            caller = f"{caller_name}()"
+            prompt_hash = truncate_hash(hashlib.sha256(str(prompt).encode()).hexdigest(), self.HASH_DISPLAY_LENGTH)
+            self.logger.info(f"Do a direct hash lookup for prompt hash {prompt_hash} under caller {caller}...")
+
+            # Look for the prompt hash in the caller's records
+            if prompt_hash in cached_data[caller_name]:
+                self.logger.info(f"Record hit for caller {caller_name}() with prompt hash {prompt_hash}.")
+                entry = cached_data[caller_name][prompt_hash]
                 return entry["response"], entry["prompt_tokens"], entry["completion_tokens"]
 
-            self.logger.info(f"No record entry found for prompt hash {prompt_hash}.")
+            self.logger.info(
+                f"No record entry found for prompt hash {prompt_hash} under caller {caller}."
+            )
+
+            if fuzzy_lookup:
+                self.logger.info(f"Trying fuzzy lookup for prompt hash {prompt_hash} under caller {caller}...")
+                prompts = {k: v["prompt"]["user"] for k, v in cached_data[caller_name].items()}
+                fuzzy_prompt_hash = self._find_closest_prompt_match(prompt["user"], prompts)
+                if fuzzy_prompt_hash:
+                    self.logger.info(f"Found fuzzy match for prompt hash {fuzzy_prompt_hash} under caller {caller}.")
+                    entry = cached_data[caller_name][fuzzy_prompt_hash]
+
+                    return entry["response"], entry["prompt_tokens"], entry["completion_tokens"]
+                else:
+                    self.logger.warning(
+                        f"No record entry found for prompt hash {fuzzy_prompt_hash} under caller {caller} "
+                        f"after fuzzy lookup."
+                    )
+
         except Exception as e:
             self.logger.error(f"Error loading recorded LLM response {e}", exc_info=True)
         return None
@@ -117,6 +151,7 @@ class RecordReplayManager:
             response: str,
             prompt_tokens: int,
             completion_tokens: int,
+            caller_name: str="unknown_caller",
     ) -> None:
         """
         Record a response to a file.
@@ -132,6 +167,7 @@ class RecordReplayManager:
             response (str): The generated response to be recorded.
             prompt_tokens (int): The number of tokens in the prompt.
             completion_tokens (int): The number of tokens in the response.
+            caller_name (str): The name of the caller.
 
         Returns:
             None
@@ -144,34 +180,40 @@ class RecordReplayManager:
         self.logger.info(f"Recording LLM response to {response_file}...")
 
         # Load existing data or create new
-        cached_data = {}
+        meta_key_name = "metadata"
+        files_hash = truncate_hash(self._calculate_files_hash(source_file, test_file), self.HASH_DISPLAY_LENGTH)
+        cached_data = {meta_key_name: {"files_hash": files_hash}}
 
         if response_file.exists():
             try:
                 with open(response_file, "r") as f:
                     loaded_data = yaml.safe_load(f)
                     if isinstance(loaded_data, dict):
-                        cached_data = loaded_data
-                        self.logger.debug(f"Loaded existing LLM record with {len(cached_data)} entries.")
+                        # Preserve metadata and merge other data
+                        cached_data.update({k: v for k, v in loaded_data.items() if k != meta_key_name})
+                        self.logger.debug(f"Loaded existing LLM record with {len(cached_data) - 1} entries.")
             except yaml.YAMLError:
                 self.logger.warning(f"Invalid YAML in {response_file}, starting fresh.")
 
         # Create entry
         prompt_hash = truncate_hash(hashlib.sha256(str(prompt).encode()).hexdigest(), self.HASH_DISPLAY_LENGTH)
-        self.logger.info(f"🔴 Recording new LLM response with prompt hash {prompt_hash}...")
+        self.logger.info(f"🔴 Recording new LLM response for {caller_name}() (prompt hash {prompt_hash})...")
 
-        cached_data[prompt_hash] = {
+        if caller_name not in cached_data:
+            cached_data[caller_name] = {}
+
+        cached_data[caller_name][f"{prompt_hash}"] = {
             "prompt": prompt,
             "response": response,
             "prompt_tokens": prompt_tokens,
             "completion_tokens": completion_tokens,
-            "files_hash":  truncate_hash(self._calculate_files_hash(source_file, test_file), self.HASH_DISPLAY_LENGTH)
         }
 
         # Save to file
+        os.makedirs(os.path.dirname(response_file), exist_ok=True)
         with open(response_file, "w") as f:
             yaml.safe_dump(cached_data, f, sort_keys=False)
-        self.logger.debug(f"Record file updated successfully.")
+        self.logger.info(f"Record file updated successfully.")
 
     def _calculate_files_hash(self, source_file: str, test_file: str) -> str:
         """
@@ -237,3 +279,48 @@ class RecordReplayManager:
         self.logger.info(f"Response file path {response_file_path}.")
 
         return response_file_path
+
+    def _find_closest_prompt_match(
+            self,
+            current_prompt: str,
+            recorded_prompts: dict,
+            threshold: int=constants.FUZZY_LOOKUP_THRESHOLD,
+            prefix_length: int=constants.FUZZY_LOOKUP_PREFIX_LENGTH,
+            best_ratio: int=constants.FUZZY_LOOKUP_BEST_RATIO,
+    ) -> str | None:
+        """Find the closest matching recorded prompt using fuzzy string matching.
+
+        Args:
+            current_prompt: The current prompt text to match
+            recorded_prompts: Dictionary of recorded prompts with their hashes as keys
+            threshold: Minimum similarity ratio (0-100) required for a match
+            prefix_length: Minimum length of prefix to match against
+            best_ratio: Best ratio of matching records
+
+        Returns:
+            Hash of the closest matching prompt if found and above threshold, None otherwise
+        """
+        self.logger.info(f"Starting fuzzy prompt matching with {len(recorded_prompts)} recorded prompts...")
+        self.logger.info(f"Matching threshold set to {threshold}.")
+
+        # Start comparison with first N chars to improve performance
+        current_prefix = current_prompt[:prefix_length] if len(current_prompt) > prefix_length else current_prompt
+        self.logger.info(f"Using prefix length {prefix_length}, current prefix length {len(current_prefix)}.")
+
+        best_match = None
+        for prompt_hash, prompt_data in recorded_prompts.items():
+            recorded_prefix = prompt_data[:prefix_length] if len(prompt_data) > prefix_length else prompt_data
+
+            # Calculate a similarity ratio using token sort to handle reordered text
+            ratio = fuzz.token_sort_ratio(current_prefix, recorded_prefix)
+            self.logger.info(f"Comparing with {prompt_hash}: similarity ratio={ratio}...")
+
+            if ratio > best_ratio:
+                self.logger.info(f"New best match found for prompt hash {prompt_hash} with ratio {ratio}.")
+                best_ratio = ratio
+                best_match = prompt_hash
+
+        result = best_match if best_ratio >= threshold else None
+        self.logger.info(f"Final result: best_ratio={best_ratio}, match={'found' if result else 'not found'}")
+
+        return result

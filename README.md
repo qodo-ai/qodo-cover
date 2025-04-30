@@ -157,8 +157,8 @@ cover-agent \
   --max-iterations=1
 ```
 
-### 🚧 [W.I.P. Feature] Record & Replay
-To save LLM service credits, a response recording mode is available.
+### 🚧 [WIP Feature] Record & Replay
+To save LLM service credits, a response recording mode is available. The starting point is a group hash, generated from the hashes of the source and test files used in each test run. If either file changes, the corresponding LLM responses should be re-recorded. 
 Run the following command to execute all tests with LLM response recording enabled:
 ```shell
 poetry run python tests_integration/run_test_all.py --record-mode
@@ -201,6 +201,8 @@ Recorded responses are stored in the `stored_responses` folder. Files are named 
 # i.e.
 python_fastapi_responses_a9d9de927a82a7d776889738d2880bec7166c5f69d3518837183a20ef48b2a37.yml
 ```
+A response file corresponding to the same source and test files group hash in a file name is updated during each recording session with new prompt hash entries.
+To regenerate it from scratch, you can delete the existing response file and run a new recording session. 
 
 ### Outputs
 A few debug files will be outputted locally within the repository (that are part of the `.gitignore`)

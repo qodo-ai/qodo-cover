@@ -276,10 +276,9 @@ def run_docker_container(
         )
 
         container_info = {
-            "Started container": truncate_hash(container.id, HASH_DISPLAY_LENGTH),
+            "Started container ID": truncate_hash(container.id, HASH_DISPLAY_LENGTH),
             "Container image": container.attrs.get("Config", {}).get("Image"),
             "Container name": container.attrs.get("Name")[1:],
-            "Container ID": truncate_hash(container.attrs.get("Id"), HASH_DISPLAY_LENGTH),
             "Container created at": container.attrs.get("Created"),
             "Cmd": container.attrs.get("Config", {}).get("Cmd"),
         }

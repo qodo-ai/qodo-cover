@@ -2,7 +2,7 @@ from typing import Optional
 
 from cover_agent.CustomLogger import CustomLogger
 from cover_agent.record_replay_manager import RecordReplayManager
-from cover_agent.utils import stream_recorded_llm_response
+from cover_agent.utils import get_original_caller, stream_recorded_llm_response
 
 
 class AICallerReplay:
@@ -34,10 +34,13 @@ class AICallerReplay:
         Raises:
             KeyError: If no recorded response exists
         """
+        caller_name = get_original_caller()
+
         recorded_response = self.record_replay_manager.load_recorded_response(
             self.source_file,
             self.test_file,
             prompt,
+            caller_name=caller_name,
         )
 
         if not recorded_response:

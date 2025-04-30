@@ -82,6 +82,7 @@ class AICaller:
                 self.source_file,
                 self.test_file,
                 prompt,
+                caller_name=caller_name,
             )
             if recorded_response:
                 content, prompt_tokens, completion_tokens = recorded_response
@@ -143,7 +144,7 @@ class AICaller:
             completion_params["api_base"] = self.api_base
 
         try:
-            self.logger.info(f"📣 Calling LLM from {caller_name}...")
+            self.logger.info(f"📣 Calling LLM from {caller_name}()...")
             response = litellm.completion(**completion_params)
         except Exception as e:
             self.logger.error(f"Error calling LLM model: {e}")
@@ -203,6 +204,7 @@ class AICaller:
                 content,
                 prompt_tokens,
                 completion_tokens,
+                caller_name,
             )
 
         # Returns: Response, Prompt token count, and Completion token count
