@@ -13,14 +13,14 @@ class AICallerReplay:
             source_file: str,
             test_file: str,
             record_replay_manager: Optional[RecordReplayManager]=None,
-            logger: Optional[CustomLogger]=None
+            logger: Optional[CustomLogger]=None,
     ):
         self.source_file = source_file
         self.test_file = test_file
         self.record_replay_manager = record_replay_manager or RecordReplayManager(record_mode=False)
         self.logger = logger or CustomLogger.get_logger(__name__)
 
-    def call_model(self, prompt: dict, stream=True):
+    def call_model(self, prompt: dict, stream=True) -> tuple[str, int, int]:
         """
         Replay a recorded response for the given prompt.
 

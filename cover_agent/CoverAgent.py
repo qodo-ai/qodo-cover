@@ -51,16 +51,7 @@ class CoverAgent:
         if agent_completion:
             self.agent_completion = agent_completion
         else:
-            # Create a default AI caller with a specified model and parameters
-            self.ai_caller = AICaller(
-                model=args.model,
-                api_base=args.api_base,
-                max_tokens=8192,
-                source_file=args.source_file_path,
-                test_file=args.test_file_path,
-                record_mode=args.record_mode,
-            )
-            # self.ai_caller = self._initialize_ai_caller()
+            self.ai_caller = self._initialize_ai_caller()
             self.agent_completion = DefaultAgentCompletion(caller=self.ai_caller)
 
         # Modify test command for a single test execution if needed
@@ -90,7 +81,7 @@ class CoverAgent:
                     )
                 )
 
-        # Update test command if successfully modified
+        # Update the test command if successfully modified
         if new_command_line:
             args.test_command_original = test_command
             args.test_command = new_command_line
@@ -142,17 +133,18 @@ class CoverAgent:
         Returns:
             Union[AICaller, AICallerReplay]: The initialized AI caller instance
         """
+        ai_caller_params = {
+            "model": self.args.model,
+            "api_base": self.args.api_base,
+            "max_tokens": 8192,
+            "source_file": self.args.source_file_path,
+            "test_file": self.args.test_file_path,
+            "record_mode": True,
+        }
         if self.args.record_mode:
             # In record mode, always use AICaller
-            self.logger.info("Initializing AICaller in record mode...")
-            return AICaller(
-                model=self.args.model,
-                api_base=self.args.api_base,
-                max_tokens=8192,
-                source_file=self.args.source_file_path,
-                test_file=self.args.test_file_path,
-                record_mode=True,
-            )
+            self.logger.info("Initializing AICaller in Record mode...")
+            return AICaller(**ai_caller_params)
         else:
             # Try to use replay mode if a response file exists
             try:
@@ -170,14 +162,8 @@ class CoverAgent:
 
             # Fall back to regular AICaller without recording
             self.logger.info("Initializing AICaller without recording (no recorded responses found)")
-            return AICaller(
-                model=self.args.model,
-                api_base=self.args.api_base,
-                max_tokens=8192,
-                source_file=self.args.source_file_path,
-                test_file=self.args.test_file_path,
-                record_mode=False,
-            )
+            ai_caller_params["record_mode"] = False
+            return AICaller(**ai_caller_params)
 
     def _validate_paths(self):
         """

@@ -76,26 +76,6 @@ class AICaller:
         """
         caller_name = get_original_caller()
 
-        # Try to load the recorded response first
-        if self.source_file and self.test_file and not self.record_mode:
-            recorded_response = self.record_replay_manager.load_recorded_response(
-                self.source_file,
-                self.test_file,
-                prompt,
-                caller_name=caller_name,
-            )
-            if recorded_response:
-                content, prompt_tokens, completion_tokens = recorded_response
-
-                replay_msg = f"▶️  Replaying results from recorded LLM response..."
-                self.logger.info(replay_msg)
-                if stream:  # Optional: Delay to simulate more 'natural' response pacing
-                    stream_recorded_llm_response(content)
-                else:
-                    print(content)
-
-                return content, prompt_tokens, completion_tokens
-
         if "system" not in prompt or "user" not in prompt:
             raise KeyError(
                 "The prompt dictionary must contain 'system' and 'user' keys."
