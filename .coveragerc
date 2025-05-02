@@ -1,0 +1,12 @@
+[run]
+source =
+    cover_agent
+    tests_integration
+
+[report]
+omit =
+    templated_tests/*
+    */tests/*
+    */__init__.py
+    pass
+    abstractmethod
