@@ -284,9 +284,9 @@ class RecordReplayManager:
             self,
             current_prompt: str,
             recorded_prompts: dict,
-            threshold: int=constants.FUZZY_LOOKUP_THRESHOLD,
-            prefix_length: int=constants.FUZZY_LOOKUP_PREFIX_LENGTH,
-            best_ratio: int=constants.FUZZY_LOOKUP_BEST_RATIO,
+            threshold: int = constants.FUZZY_LOOKUP_THRESHOLD,
+            prefix_length: Optional[int] = constants.FUZZY_LOOKUP_PREFIX_LENGTH,
+            best_ratio: int = constants.FUZZY_LOOKUP_BEST_RATIO,
     ) -> str | None:
         """Find the closest matching recorded prompt using fuzzy string matching.
 
@@ -294,7 +294,7 @@ class RecordReplayManager:
             current_prompt: The current prompt text to match
             recorded_prompts: Dictionary of recorded prompts with their hashes as keys
             threshold: Minimum similarity ratio (0-100) required for a match
-            prefix_length: Minimum length of prefix to match against
+            prefix_length: Minimum length of prefix to match against, if None uses full prompt
             best_ratio: Best ratio of matching records
 
         Returns:
@@ -303,16 +303,23 @@ class RecordReplayManager:
         self.logger.info(f"Starting fuzzy prompt matching with {len(recorded_prompts)} recorded prompts...")
         self.logger.info(f"Matching threshold set to {threshold}.")
 
-        # Start comparison with first N chars to improve performance
-        current_prefix = current_prompt[:prefix_length] if len(current_prompt) > prefix_length else current_prompt
-        self.logger.info(f"Using prefix length {prefix_length}, current prefix length {len(current_prefix)}.")
+        # Use full prompt if prefix_length is None, otherwise use prefix
+        current_text = (
+            current_prompt[:prefix_length]
+            if prefix_length and len(current_prompt) > prefix_length
+            else current_prompt
+        )
 
         best_match = None
         for prompt_hash, prompt_data in recorded_prompts.items():
-            recorded_prefix = prompt_data[:prefix_length] if len(prompt_data) > prefix_length else prompt_data
+            recorded_text = (
+                prompt_data[:prefix_length]
+                if prefix_length and len(prompt_data) > prefix_length
+                else prompt_data
+            )
 
             # Calculate a similarity ratio using token sort to handle reordered text
-            ratio = fuzz.token_sort_ratio(current_prefix, recorded_prefix)
+            ratio = fuzz.token_sort_ratio(current_text, recorded_text)
             self.logger.info(f"Comparing with {prompt_hash}: similarity ratio={ratio}...")
 
             if ratio > best_ratio:
