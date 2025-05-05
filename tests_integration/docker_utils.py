@@ -14,6 +14,7 @@ from cover_agent import constants
 from cover_agent.CustomLogger import CustomLogger
 from cover_agent.utils import truncate_hash
 
+
 logger = CustomLogger.get_logger(__name__)
 
 HASH_DISPLAY_LENGTH = constants.DOCKER_HASH_DISPLAY_LENGTH
@@ -213,13 +214,20 @@ def get_docker_image_workdir(client: docker.DockerClient, image_tag: str) -> str
     """
     try:
         image = client.images.get(image_tag)
-        return image.attrs.get("Config", {}).get("WorkingDir", "/")
+        workdir = image.attrs.get("Config", {}).get("WorkingDir", "/")
+        logger.info(f"Working directory for image {image_tag}: {workdir}")
+
+        return workdir
     except docker.errors.ImageNotFound as e:
         logger.error(f"Docker image {image_tag} not found")
         raise DockerUtilityError(f"Failed to inspect Docker image {image_tag}") from e
     except docker.errors.APIError as e:
         logger.error(f"Docker API error while inspecting image {image_tag}: {e}")
         raise DockerUtilityError(f"Failed to inspect Docker image {image_tag}") from e
+    except AttributeError as e:
+        msg = f"Docker image attribute error for {image_tag}"
+        logger.error(f"{msg}: {e}")
+        raise DockerUtilityError(msg) from e
 
 
 def run_docker_container(
