@@ -117,7 +117,7 @@ def parse_args():
         help="The branch to compare against when using --diff-coverage. Default: %(default)s.",
     )
     parser.add_argument(
-        "--suppress-logs",
+        "--suppress-log-files",
         action="store_true",
         default=False,
         help="Suppress all generated log files (HTML, logs, DB files).",

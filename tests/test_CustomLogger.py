@@ -9,19 +9,19 @@ from cover_agent.CustomLogger import CustomLogger
 
 class TestCustomLogger:
 
-    @pytest.mark.parametrize("generate_logs,should_exist", [
+    @pytest.mark.parametrize("generate_log_files,should_exist", [
         (True, True),
         (False, False),
     ])
-    def test_logger_file_creation(self, generate_logs, should_exist):
+    def test_logger_file_creation(self, generate_log_files, should_exist):
         """
-        Test that log files are only created when generate_logs=True.
+        Test that log files are only created when generate_log_files=True.
 
         This test mocks the FileHandler to verify whether it is called
-        based on the generate_logs flag.
+        based on the generate_log_files flag.
 
         Args:
-            generate_logs (bool): Flag indicating whether logs should be generated.
+            generate_log_files (bool): Flag indicating whether logs should be generated.
             should_exist (bool): Expected outcome for whether the file handler should be created.
         """
         with patch("logging.FileHandler") as mock_handler:
@@ -34,7 +34,7 @@ class TestCustomLogger:
             logging.Logger.manager.loggerDict.pop("test_logger", None)
 
             # Create logger and write a test message
-            logger = CustomLogger.get_logger("test_logger", generate_logs=generate_logs)
+            logger = CustomLogger.get_logger("test_logger", generate_log_files=generate_log_files)
             logger.info("Test message")
 
             # Check if FileHandler was called as expected

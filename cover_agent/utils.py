@@ -338,7 +338,7 @@ def parse_args_full_repo():
         help="Enable record mode for LLM responses. Default: False.",
     )
     parser.add_argument(
-        "--suppress-logs",
+        "--suppress-log-files",
         action="store_true",
         default=False,
         help="Suppress all generated log files (HTML, logs, DB files).",

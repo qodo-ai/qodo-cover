@@ -38,7 +38,7 @@ class UnitTestValidator:
         comparison_branch: str = "main",
         num_attempts: int = 1,
         logger: Optional[CustomLogger]=None,
-        generate_logs: bool=True,
+        generate_log_files: bool=True,
     ):
         """
         Initialize the UnitTestValidator class with the provided parameters.
@@ -61,7 +61,7 @@ class UnitTestValidator:
                                                                This means we consider a test as good if it increases coverage for a different
                                                                file other than the source file. Defaults to False.
             logger (CustomLogger, optional): The logger object for logging messages.
-            generate_logs (bool): Whether or not to generate logs.
+            generate_log_files (bool): Whether or not to generate logs.
 
         Returns:
             None
@@ -89,10 +89,10 @@ class UnitTestValidator:
         self.num_attempts = num_attempts
         self.agent_completion = agent_completion
         self.max_run_time = max_run_time
-        self.generate_logs = generate_logs
+        self.generate_log_files = generate_log_files
 
         # Get the logger instance from CustomLogger
-        self.logger = logger or CustomLogger.get_logger(__name__, generate_logs=self.generate_logs)
+        self.logger = logger or CustomLogger.get_logger(__name__, generate_log_files=self.generate_log_files)
 
         # Override covertype to be 'diff' if diff_coverage is enabled
         if self.diff_coverage:
@@ -126,7 +126,7 @@ class UnitTestValidator:
             coverage_type=self.coverage_type,
             use_report_coverage_feature_flag=self.use_report_coverage_feature_flag,
             diff_coverage_report_path=self.diff_cover_report_path,
-            generate_logs=self.generate_logs,
+            generate_log_files=self.generate_log_files,
         )
 
     def get_coverage(self):

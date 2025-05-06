@@ -16,7 +16,7 @@ class CoverageProcessor:
         use_report_coverage_feature_flag: bool = False,
         diff_coverage_report_path: str = None,
         logger: Optional[CustomLogger] = None,
-        generate_logs: bool = True,
+        generate_log_files: bool = True,
     ):
         """
         Initializes a CoverageProcessor object.
@@ -26,7 +26,7 @@ class CoverageProcessor:
             src_file_path (str): The fully qualified path of the file for which coverage data is being processed.
             coverage_type (Literal["cobertura", "lcov"]): The type of coverage report being processed.
             logger (CustomLogger): The logger object for logging messages.
-            generate_logs (bool): Whether or not to generate logs.
+            generate_log_files (bool): Whether or not to generate logs.
 
         Attributes:
             file_path (str): The path to the coverage report file.
@@ -40,7 +40,7 @@ class CoverageProcessor:
         self.file_path = file_path
         self.src_file_path = src_file_path
         self.coverage_type = coverage_type
-        self.logger = logger or CustomLogger.get_logger(__name__, generate_logs=generate_logs)
+        self.logger = logger or CustomLogger.get_logger(__name__, generate_log_files=generate_log_files)
         self.use_report_coverage_feature_flag = use_report_coverage_feature_flag
         self.diff_coverage_report_path = diff_coverage_report_path
 

@@ -29,7 +29,7 @@ class UnitTestGenerator:
         use_report_coverage_feature_flag: bool = False,
         project_root: str = "",
         logger: Optional[CustomLogger]=None,
-        generate_logs: bool=True,
+        generate_log_files: bool=True,
     ):
         """
         Initialize the UnitTestGenerator class with the provided parameters.
@@ -51,7 +51,7 @@ class UnitTestGenerator:
                                                                This means we consider a test as good if it increases coverage for a different
                                                                file other than the source file. Defaults to False.
             logger (CustomLogger, optional): The logger object for logging messages.
-            generate_logs (bool): Whether or not to generate logs.
+            generate_log_files (bool): Whether or not to generate logs.
 
         Returns:
             None
@@ -71,10 +71,10 @@ class UnitTestGenerator:
         self.last_coverage_percentages = {}
         self.llm_model = llm_model
         self.agent_completion = agent_completion
-        self.generate_logs = generate_logs
+        self.generate_log_files = generate_log_files
 
         # Get the logger instance from CustomLogger
-        self.logger = logger or CustomLogger.get_logger(__name__, generate_logs=self.generate_logs)
+        self.logger = logger or CustomLogger.get_logger(__name__, generate_log_files=self.generate_log_files)
 
         # States to maintain within this class
         self.preprocessor = FilePreprocessor(self.test_file_path)

@@ -16,17 +16,17 @@ class DefaultAgentCompletion(AgentCompletionABC):
     to get the response.
     """
 
-    def __init__(self, caller: AICaller, logger: Optional[CustomLogger]=None, generate_logs: bool=True):
+    def __init__(self, caller: AICaller, logger: Optional[CustomLogger]=None, generate_log_files: bool=True):
         """
         Initializes the DefaultAgentCompletion.
 
         Args:
             caller (AICaller): A class responsible for sending the prompt to an AI model and returning the response.
             logger (CustomLogger, optional): The logger object for logging messages.
-            generate_logs (bool, optional): Whether or not to generate logs.
+            generate_log_files (bool, optional): Whether or not to generate logs.
         """
         self.caller = caller
-        self.logger = logger or CustomLogger.get_logger(__name__, generate_logs=generate_logs)
+        self.logger = logger or CustomLogger.get_logger(__name__, generate_log_files=generate_log_files)
 
     def _build_prompt(self, file: str, **kwargs) -> dict:
         """

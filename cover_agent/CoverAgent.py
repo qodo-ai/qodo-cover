@@ -42,10 +42,10 @@ class CoverAgent:
             FileNotFoundError: If required source files or directories are not found.
         """
         self.args = args
-        self.generate_logs = not args.suppress_logs
+        self.generate_log_files = not args.suppress_log_files
         # Initialize logger with file generation flag
-        self.logger = logger or CustomLogger.get_logger(__name__, generate_logs=self.generate_logs)
-        if args.suppress_logs:
+        self.logger = logger or CustomLogger.get_logger(__name__, generate_log_files=self.generate_log_files)
+        if args.suppress_log_files:
             self.logger.info("Suppressed all generated log files.")
 
         self._validate_paths()
@@ -56,7 +56,9 @@ class CoverAgent:
             self.agent_completion = agent_completion
         else:
             self.ai_caller = self._initialize_ai_caller()
-            self.agent_completion = DefaultAgentCompletion(caller=self.ai_caller, generate_logs=self.generate_logs)
+            self.agent_completion = DefaultAgentCompletion(
+            caller=self.ai_caller, generate_log_files=self.generate_log_files
+            )
 
         # Modify test command for a single test execution if needed
         test_command = args.test_command
@@ -107,7 +109,7 @@ class CoverAgent:
             llm_model=args.model,
             use_report_coverage_feature_flag=args.use_report_coverage_feature_flag,
             agent_completion=self.agent_completion,
-            generate_logs=self.generate_logs,
+            generate_log_files=self.generate_log_files,
         )
 
         # Initialize test validator with configuration
@@ -129,7 +131,7 @@ class CoverAgent:
             num_attempts=args.run_tests_multiple_times,
             agent_completion=self.agent_completion,
             max_run_time=args.max_run_time,
-            generate_logs=self.generate_logs,
+            generate_log_files=self.generate_log_files,
         )
 
     def _initialize_ai_caller(self):
@@ -203,7 +205,7 @@ class CoverAgent:
             self.args.log_db_path = "cover_agent_unit_test_runs.db"
         # Connect to the test DB
 
-        if self.generate_logs:
+        if self.generate_log_files:
             self.test_db = UnitTestDB(db_connection_string=f"sqlite:///{self.args.log_db_path}")
 
     def _duplicate_test_file(self):
@@ -337,7 +339,7 @@ class CoverAgent:
         )
 
         # Only generate report if file generation is enabled
-        if self.generate_logs:
+        if self.generate_log_files:
             # Generate report and cleanup
             self.test_db.dump_to_report(self.args.report_filepath)
 

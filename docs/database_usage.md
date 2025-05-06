@@ -21,7 +21,7 @@ cover-agent \
   --coverage-type "cobertura" \
   --desired-coverage 70 \
   --max-iterations 10 \
-  --suppress-logs \
+  --suppress-log-files \
   --log-db-path "run_tests.db"
 ```
 
