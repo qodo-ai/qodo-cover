@@ -2,14 +2,13 @@ from numpy.core.records import record
 
 from cover_agent.CoverAgent import CoverAgent
 from cover_agent.main import parse_args
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import argparse
 import os
 import pytest
 import tempfile
 
 from unittest.mock import mock_open
-import unittest
 
 
 class TestCoverAgent:
