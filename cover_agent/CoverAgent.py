@@ -42,8 +42,7 @@ class CoverAgent:
             FileNotFoundError: If required source files or directories are not found.
         """
         self.args = args
-        self.generate_log_files = not args.disable_file_generation
-
+        self.generate_log_files = not args.suppress_logs
         # Initialize logger with file generation flag
         self.logger = logger or CustomLogger.get_logger(__name__, generate_log_files=self.generate_log_files)
 

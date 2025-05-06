@@ -15,7 +15,7 @@ cover-agent \
 --coverage-type "cobertura" \
 --desired-coverage 90 \
 --max-iterations 5 \
---disable-file-generation
+--suppress-logs
 ```
 
 ## Example 2: Running only on a specific module
@@ -31,7 +31,7 @@ cover-agent \
 --coverage-type "cobertura" \
 --desired-coverage 90 \
 --max-iterations 5 \
---disable-file-generation
+--suppress-logs
 ```
 
 ## Example 3: Utilizing additional instructions
@@ -52,7 +52,7 @@ cover-agent \
 --coverage-type "cobertura" \
 --desired-coverage 90 \
 --max-iterations 5 \
---disable-file-generation \
+--suppress-logs \
 --additional-instructions="add tests to the class 'TestUnitTestGenerator'"
 ```
 
@@ -71,6 +71,6 @@ cover-agent \
 --coverage-type "cobertura" \
 --desired-coverage 96 \
 --max-iterations  8 \
---disable-file-generation
+--suppress-logs
 ```
 

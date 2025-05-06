@@ -36,7 +36,7 @@ class TestCoverAgent:
                 "pytest",
                 "--max-iterations",
                 "10",
-                "--disable-file-generation",
+                "--suppress-logs",
             ],
         ):
             args = parse_args()
@@ -73,7 +73,7 @@ class TestCoverAgent:
             desired_coverage=90,
             max_iterations=10,
             max_run_time=30,
-            disable_file_generation=False,
+            supress_logs=False,
         )
         parse_args = lambda: args
         mock_isfile.return_value = False
@@ -113,7 +113,7 @@ class TestCoverAgent:
             max_iterations=10,
             prompt_only=False,
             max_run_time=30,
-            disable_file_generation=False,
+            supress_logs=False,
         )
         parse_args = lambda: args
         mock_isfile.side_effect = [True, False]
@@ -162,6 +162,7 @@ class TestCoverAgent:
                     max_run_time=30,
                     record_mode=False,
                     disable_file_generation=False,
+                    supress_logs=False,
                 )
 
                 with pytest.raises(AssertionError) as exc_info:
@@ -225,6 +226,7 @@ class TestCoverAgent:
                 max_run_time=30,
                 record_mode=False,
                 disable_file_generation=False,
+                supress_logs=False,
             )
             # Mock the methods used in run
             validator = mock_unit_test_validator.return_value
@@ -262,7 +264,7 @@ class TestCoverAgent:
             desired_coverage=90,
             max_iterations=10,
             max_run_time=30,
-            disable_file_generation=False,
+            supress_logs=False,
         )
 
         with pytest.raises(FileNotFoundError) as exc_info:
@@ -315,6 +317,7 @@ class TestCoverAgent:
                 max_run_time=30,
                 record_mode=False,
                 disable_file_generation=False,
+                supress_logs=False,
             )
             mock_test_validator.return_value.current_coverage = 0.5
             mock_test_validator.return_value.desired_coverage = 90
@@ -383,6 +386,7 @@ class TestCoverAgent:
                 max_run_time=30,
                 record_mode=False,
                 disable_file_generation=False,
+                supress_logs=False,
             )
 
             # Initialize CoverAgent
