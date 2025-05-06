@@ -215,6 +215,9 @@ A few debug files will be outputted locally within the repository (that are part
   * `stdout`
   * Generated test
 
+You can suppress logs using the `--suppress-logs` flag. This prevents the creation of the `run.log` and `the test_results.html` files, and the test results database.
+
+
 ### Additional logging
 If you set an environment variable `WANDB_API_KEY`, the prompts, responses, and additional information will be logged to [Weights and Biases](https://wandb.ai/).
 

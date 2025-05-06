@@ -41,6 +41,7 @@ def main():
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
             dockerfile=test.get("docker_file_path", ""),
             log_db_path=os.getenv("LOG_DB_PATH", ""),
+            suppress_logs=test.get("suppress_logs", False),
         )
         run_test(test_args)
 

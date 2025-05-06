@@ -42,9 +42,11 @@ class CoverAgent:
             FileNotFoundError: If required source files or directories are not found.
         """
         self.args = args
-        self.generate_log_files = not args.suppress_logs
+        self.generate_logs = not args.suppress_logs
         # Initialize logger with file generation flag
-        self.logger = logger or CustomLogger.get_logger(__name__, generate_log_files=self.generate_log_files)
+        self.logger = logger or CustomLogger.get_logger(__name__, generate_logs=self.generate_logs)
+        if args.suppress_logs:
+            self.logger.info("Suppressed all generated log files.")
 
         self._validate_paths()
         self._duplicate_test_file()
@@ -198,9 +200,9 @@ class CoverAgent:
         if not self.args.log_db_path:
             self.args.log_db_path = "cover_agent_unit_test_runs.db"
         # Connect to the test DB
-        self.test_db = UnitTestDB(
-            db_connection_string=f"sqlite:///{self.args.log_db_path}"
-        )
+
+        if self.generate_logs:
+            self.test_db = UnitTestDB(db_connection_string=f"sqlite:///{self.args.log_db_path}")
 
     def _duplicate_test_file(self):
         """
@@ -265,12 +267,22 @@ class CoverAgent:
             ]
             
             # Insert results into database
-            for result in test_results:
-                result["prompt"] = self.test_gen.prompt
-                self.test_db.insert_attempt(result)
+            if self.has_test_db():
+                for result in test_results:
+                    result["prompt"] = self.test_gen.prompt
+                    self.test_db.insert_attempt(result)
                 
         except AttributeError as e:
             self.logger.error(f"Failed to validate the tests within {generated_tests_dict}. Error: {e}")
+
+    def has_test_db(self) -> bool:
+        """
+        Check if the test database is initialized.
+
+        Returns:
+            bool: True if the test database is initialized, False otherwise.
+        """
+        return hasattr(self, "test_db") and self.test_db is not None
 
     def check_iteration_progress(self):
         """
@@ -323,7 +335,7 @@ class CoverAgent:
         )
 
         # Only generate report if file generation is enabled
-        if not self.generate_log_files:
+        if self.generate_logs:
             # Generate report and cleanup
             self.test_db.dump_to_report(self.args.report_filepath)
 

@@ -275,6 +275,10 @@ def compose_test_command(test_args: argparse.Namespace) -> list:
     if test_args.record_mode:
         command.extend(["--record-mode"])
 
+    if test_args.suppress_logs:
+        command.extend(["--suppress-logs"])
+        logger.info('Suppressed all generated log files for this test run.')
+
     return command
 
 

@@ -4,12 +4,13 @@ import os
 
 class CustomLogger:
     @classmethod
-    def get_logger(cls, name, generate_log_files=False):
+    def get_logger(cls, name, generate_logs=True):
         """
         Return a logger object with specified name.
 
         Parameters:
             name (str): The name of the logger.
+            generate_logs (bool): Whether to generate log files.
 
         Returns:
             logging.Logger: The logger object.
@@ -36,15 +37,13 @@ class CustomLogger:
         # Check if handlers are already set up to avoid adding them multiple times
         if not logger.handlers:
             # Only add file handler if file generation is enabled
-            if not generate_log_files:
+            if generate_logs:
                 # File handler for writing to a file
                 file_handler = logging.FileHandler(
                     log_file_path, mode="w"
                 )  # Use 'w' to overwrite the log file on each run
                 file_handler.setLevel(logging.INFO)
-                file_formatter = logging.Formatter(
-                    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-                )
+                file_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
                 file_handler.setFormatter(file_formatter)
                 logger.addHandler(file_handler)
 
