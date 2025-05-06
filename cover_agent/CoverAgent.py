@@ -47,8 +47,7 @@ class CoverAgent:
         self.logger = logger or CustomLogger.get_logger(__name__, generate_log_files=self.generate_log_files)
 
         self._validate_paths()
-        if not self.generate_log_files:
-            self._duplicate_test_file()
+        self._duplicate_test_file()
 
         # Configure the AgentCompletion object
         if agent_completion:
