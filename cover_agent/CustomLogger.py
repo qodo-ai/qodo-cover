@@ -3,6 +3,14 @@ import os
 
 
 class CustomLogger:
+    VALID_LOG_LEVELS = {
+        "DEBUG": logging.DEBUG,
+        "INFO": logging.INFO,
+        "WARNING": logging.WARNING,
+        "ERROR": logging.ERROR,
+        "CRITICAL": logging.CRITICAL,
+    }
+
     @classmethod
     def get_logger(cls, name, generate_logs=True):
         """
@@ -15,31 +23,20 @@ class CustomLogger:
         Returns:
             logging.Logger: The logger object.
 
-        Note:
-            This method sets up the logger to handle all messages of DEBUG level and above.
-            It adds a file handler to write log messages to a file specified by 'log_file_path'
-            and a stream handler to output log messages to the console. The log file is overwritten on each run.
-
-        Example:
-            logger = CustomLogger.get_logger('my_logger')
-            logger.debug('This is a debug message')
-            logger.info('This is an info message')
-            logger.warning('This is a warning message')
-            logger.error('This is an error message')
-            logger.critical('This is a critical message')
+        Raises:
+            ValueError: If LOG_LEVEL environment variable contains invalid value.
         """
-        log_levels = {
-            "DEBUG": logging.DEBUG,
-            "INFO": logging.INFO,
-            "WARNING": logging.WARNING,
-            "ERROR": logging.ERROR,
-            "CRITICAL": logging.CRITICAL,
-        }
-
         logger = logging.getLogger(name)
 
-        log_level = log_levels.get(os.environ.get("LOG_LEVEL", "").upper(), logging.DEBUG)
+        # Get LOG_LEVEL from environment, default to empty string if not set
+        env_log_level = os.environ.get("LOG_LEVEL", "").upper()
 
+        # Check if provided log level is valid when it's not empty
+        if env_log_level and env_log_level not in cls.VALID_LOG_LEVELS:
+            valid_levels = ", ".join(cls.VALID_LOG_LEVELS.keys())
+            raise ValueError(f"Invalid LOG_LEVEL: {env_log_level}. Valid levels are: {valid_levels}")
+
+        log_level = cls.VALID_LOG_LEVELS.get(env_log_level, logging.DEBUG)
         logger.setLevel(log_level)
 
         # Specify the log file path
