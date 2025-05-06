@@ -52,6 +52,7 @@ class TestCoverAgent:
             assert args.report_filepath == "test_results.html"
             assert args.desired_coverage == 90
             assert args.max_iterations == 10
+            assert args.suppress_logs is True
 
     @patch("cover_agent.CoverAgent.UnitTestGenerator")
     @patch("cover_agent.CoverAgent.os.path.isfile")
@@ -88,6 +89,8 @@ class TestCoverAgent:
         )
 
         mock_unit_cover_agent.assert_not_called()
+
+        assert args.suppress_logs is False
 
     @patch("cover_agent.CoverAgent.os.path.exists")
     @patch("cover_agent.CoverAgent.os.path.isfile")
