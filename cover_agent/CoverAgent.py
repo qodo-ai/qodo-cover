@@ -107,6 +107,7 @@ class CoverAgent:
             llm_model=args.model,
             use_report_coverage_feature_flag=args.use_report_coverage_feature_flag,
             agent_completion=self.agent_completion,
+            generate_logs=self.generate_logs,
         )
 
         # Initialize test validator with configuration
@@ -128,6 +129,7 @@ class CoverAgent:
             num_attempts=args.run_tests_multiple_times,
             agent_completion=self.agent_completion,
             max_run_time=args.max_run_time,
+            generate_logs=self.generate_logs,
         )
 
     def _initialize_ai_caller(self):
