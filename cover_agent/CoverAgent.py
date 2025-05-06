@@ -56,7 +56,7 @@ class CoverAgent:
             self.agent_completion = agent_completion
         else:
             self.ai_caller = self._initialize_ai_caller()
-            self.agent_completion = DefaultAgentCompletion(caller=self.ai_caller)
+            self.agent_completion = DefaultAgentCompletion(caller=self.ai_caller, generate_logs=self.generate_logs)
 
         # Modify test command for a single test execution if needed
         test_command = args.test_command
