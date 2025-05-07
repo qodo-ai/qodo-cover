@@ -14,6 +14,7 @@ from cover_agent.CustomLogger import CustomLogger
 from cover_agent.record_replay_manager import RecordReplayManager
 from cover_agent.utils import get_original_caller
 
+# TODO: Why hardcoded here?
 MODEL_RETRIES = 3
 
 
@@ -102,7 +103,7 @@ class AICaller:
             "model": self.model,
             "messages": messages,
             "stream": stream,  # Use the stream parameter passed to the method
-            "temperature": 0.2,
+            "temperature": 0.2,  # TODO: Why hardcoded here?
             "max_tokens": self.max_tokens,
         }
 
