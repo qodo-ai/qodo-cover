@@ -43,7 +43,7 @@ def main():
             desired_coverage=test.get("desired_coverage", constants.DESIRED_COVERAGE),
             model=test.get("model", model),
             api_base=os.getenv("API_BASE", ""),
-            max_run_time=test.get("max_run_time", constants.MAX_RUN_TIME_SEC),
+            max_run_time_sec=test.get("max_run_time_sec", constants.MAX_RUN_TIME_SEC),
             openai_api_key=os.getenv("OPENAI_API_KEY", ""),
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
             dockerfile=test.get("docker_file_path", ""),

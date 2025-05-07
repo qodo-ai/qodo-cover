@@ -130,7 +130,7 @@ class CoverAgent:
             comparison_branch=self.config.branch,
             num_attempts=self.config.run_tests_multiple_times,
             agent_completion=self.agent_completion,
-            max_run_time=self.config.max_run_time,
+            max_run_time_sec=self.config.max_run_time_sec,
             generate_log_files=self.generate_log_files,
         )
 

@@ -170,7 +170,7 @@ def merge_settings(args: argparse.Namespace, settings) -> dict[str, Any]:
         "report_filepath": args.report_filepath or settings.get("default.report_filepath"),
         "desired_coverage": args.desired_coverage or settings.get("default.desired_coverage"),
         "max_iterations": args.max_iterations or settings.get("default.max_iterations"),
-        "max_run_time": args.max_run_time or settings.get("default.max_run_time"),
+        "max_run_time_sec": args.max_run_time_sec or settings.get("default.max_run_time_sec"),
         "additional_instructions": args.additional_instructions,
         "model": args.model or settings.get("default.model"),
         "api_base": args.api_base or settings.get("default.api_base"),

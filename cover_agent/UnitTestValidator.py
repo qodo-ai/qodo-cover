@@ -25,7 +25,7 @@ class UnitTestValidator:
         code_coverage_report_path: str,
         test_command: str,
         llm_model: str,
-        max_run_time: int,
+        max_run_time_sec: int,
         agent_completion: AgentCompletionABC,
         test_command_dir: str = os.getcwd(),
         included_files: list = None,
@@ -49,7 +49,7 @@ class UnitTestValidator:
             code_coverage_report_path (str): The path to the code coverage report file.
             test_command (str): The command to run tests.
             llm_model (str): The language model to be used for test generation.
-            max_run_time (int): The maximum time in seconds to run the test command.
+            max_run_time_sec (int): The maximum time in seconds to run the test command.
             agent_completion (AgentCompletionABC): The agent completion object to use for test generation.
             api_base (str, optional): The base API url to use in case model is set to Ollama or Hugging Face. Defaults to an empty string.
             test_command_dir (str, optional): The directory where the test command should be executed. Defaults to the current working directory.
@@ -88,7 +88,7 @@ class UnitTestValidator:
         self.comparison_branch = comparison_branch
         self.num_attempts = num_attempts
         self.agent_completion = agent_completion
-        self.max_run_time = max_run_time
+        self.max_run_time_sec = max_run_time_sec
         self.generate_log_files = generate_log_files
 
         # Get the logger instance from CustomLogger
@@ -303,7 +303,7 @@ class UnitTestValidator:
         )
         stdout, stderr, exit_code, time_of_test_command = Runner.run_command(
             command=self.test_command,
-            max_run_time=self.max_run_time,
+            max_run_time_sec=self.max_run_time_sec,
             cwd=self.test_command_dir,
         )
         assert (
@@ -491,7 +491,7 @@ class UnitTestValidator:
                         Runner.run_command(
                             command=self.test_command,
                             cwd=self.test_command_dir,
-                            max_run_time=self.max_run_time,
+                            max_run_time_sec=self.max_run_time_sec,
                         )
                     )
                     if exit_code != 0:
