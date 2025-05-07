@@ -35,7 +35,7 @@ class CoverAgentConfig:
         report_filepath (str): Path to the output report file.
         desired_coverage (int): The desired coverage percentage
         max_iterations (int): The maximum number of iterations.
-        max_run_time (int): Maximum time (in seconds) allowed for test execution.
+        max_run_time_sec (int): Maximum time (in seconds) allowed for test execution.
         additional_instructions (str): Any additional instructions you wish to append at the end of the prompt.
         model (str): The API url to use for Ollama or Hugging Face.
         api_base (str): Base URL for the API.
@@ -61,7 +61,7 @@ class CoverAgentConfig:
     report_filepath: str
     desired_coverage: int
     max_iterations: int
-    max_run_time: int
+    max_run_time_sec: int
     additional_instructions: str
     model: str
     api_base: str
