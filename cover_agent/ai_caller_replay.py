@@ -1,8 +1,10 @@
+import time
+
 from typing import Optional
 
 from cover_agent.CustomLogger import CustomLogger
 from cover_agent.record_replay_manager import RecordReplayManager
-from cover_agent.utils import get_original_caller, stream_recorded_llm_response
+from cover_agent.utils import get_original_caller
 
 
 class AICallerReplay:
@@ -55,8 +57,44 @@ class AICallerReplay:
         replay_msg = "▶️  Replaying results from recorded LLM response..."
         self.logger.info(replay_msg)
         if stream:
-            stream_recorded_llm_response(content)
+            self.stream_recorded_llm_response(content)
         else:
             print(content)
 
         return content, prompt_tokens, completion_tokens
+
+    @staticmethod
+    def stream_recorded_llm_response(content: str) -> None:
+        """
+        Stream and print the content of a recorded LLM response line by line with a slight delay for each word.
+
+        Parameters:
+        content (str): The content to be streamed and printed.
+
+        Behavior:
+        - Splits the input content into lines.
+        - For each line:
+            - If the line is empty, prints a blank line and continues.
+            - Calculates the indentation of the line and prints it.
+            - Splits the line into words and prints each word with a small delay.
+        - Ensures the output maintains the original indentation and formatting.
+
+        Example:
+            stream_recorded_llm_response("Hello\n  World")
+            Output:
+            Hello
+              World
+        """
+        for line in content.splitlines():
+            if not line:
+                print()
+                continue
+
+            indent = len(line) - len(line.lstrip())
+            print(" " * indent, end="")
+
+            for word in line.lstrip().split():
+                print(word, end=" ", flush=True)
+                time.sleep(0.01)
+
+            print()

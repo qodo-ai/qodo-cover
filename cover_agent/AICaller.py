@@ -12,7 +12,7 @@ from wandb.sdk.data_types.trace_tree import Trace
 
 from cover_agent.CustomLogger import CustomLogger
 from cover_agent.record_replay_manager import RecordReplayManager
-from cover_agent.utils import stream_recorded_llm_response, get_original_caller
+from cover_agent.utils import get_original_caller
 
 MODEL_RETRIES = 3
 

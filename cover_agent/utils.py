@@ -3,7 +3,6 @@ import inspect
 import logging
 import os
 import re
-import time
 import yaml
 
 from typing import List
@@ -399,22 +398,6 @@ def find_test_files(args) -> list:
         test_files = test_files[:MAX_TEST_FILES]
 
     return test_files
-
-
-def stream_recorded_llm_response(content: str) -> None:
-    for line in content.splitlines():
-        if not line:
-            print()
-            continue
-
-        indent = len(line) - len(line.lstrip())
-        print(" " * indent, end="")
-
-        for word in line.lstrip().split():
-            print(word, end=" ", flush=True)
-            time.sleep(0.01)
-
-        print()
 
 
 def get_original_caller() -> str:
