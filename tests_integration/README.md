@@ -21,6 +21,7 @@ To run the full test suite, simply run the following command from the root of th
 ```shell
 poetry run python tests_integration/run_test_all.py
 ```
+There's a file with sample test scenarios `tests_integration/scenarios.py` where each test maybe adjusted to your needs. All the scenarios will be executed running this command.
 
 Or run each test individually:
 #### Python Fast API Example
@@ -29,7 +30,8 @@ poetry run python tests_integration/run_test_with_docker.py \
   --dockerfile "templated_tests/python_fastapi/Dockerfile"\
   --source-file-path "app.py" \
   --test-file-path "test_app.py" \
-  --test-command "pytest --cov=. --cov-report=xml --cov-report=term"
+  --test-command "pytest --cov=. --cov-report=xml --cov-report=term" \
+  --model "gpt-4o-mini"
 ```
 
 #### Go Webservice Example
@@ -82,8 +84,36 @@ You can use a different LLM by passing in the `--model` and `--api-base` paramet
 ```shell
 --model "ollama/mistral" --api-base "http://host.docker.internal:11434"
 ```
-
 For any other LLM that requires more environment variables to be set, you will need to update the shell script and pass in the variables within the Docker command.
+
+### Suppressing Log Files
+You can suppress logs using the `--suppress-log-files` flag. This prevents the creation of the `run.log`, `test_results.html`, and the test results `db` files:
+* Running all tests:
+```shell
+poetry run python tests_integration/run_test_all.py --suppress-log-files
+```
+* Running a single test:
+```shell
+poetry run python tests_integration/run_test_with_docker.py \
+  --dockerfile "templated_tests/python_fastapi/Dockerfile"\
+  --source-file-path "app.py" \
+  --test-file-path "test_app.py" \
+  --test-command "pytest --cov=. --cov-report=xml --cov-report=term" \
+  --model "gpt-4o-mini" \
+  --suppress-log-files
+```
+* If you run all scenarios, this flag may be added there:
+```python
+    # Python FastAPI Example
+    {
+        "docker_image": "embeddeddevops/python_fastapi:latest",
+        "source_file_path": "app.py",
+        "test_file_path": "test_app.py",
+        "test_command": r"pytest --cov=. --cov-report=xml --cov-report=term",
+        "model": "gpt-4o-mini",
+        "suppress_log_files": True,
+    }
+```
 
 ## When to Run
 This test suite is intended to run with real LLMs (either locally hosted or online). If choosing cloud-provided LLMs, keep in mind that there is a cost associated with running these tests.

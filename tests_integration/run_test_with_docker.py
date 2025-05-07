@@ -414,12 +414,18 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Maximum time (in seconds) allowed for test execution. Overrides the value in configuration.toml "
             "if provided. Defaults to 30 seconds."
-        ),
+        )
     )
     parser.add_argument(
         "--record-mode",
         action="store_true",
         help="Enable record mode for LLM responses. Default: False.",
+    )
+    parser.add_argument(
+        "--suppress-log-files",
+        action="store_true",
+        default=False,
+        help="Suppress all generated log files (HTML, logs, DB files).",
     )
 
     return parser.parse_args()
