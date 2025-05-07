@@ -14,6 +14,7 @@ from cover_agent.CustomLogger import CustomLogger
 from cover_agent.FilePreprocessor import FilePreprocessor
 from cover_agent.Runner import Runner
 from cover_agent.settings.config_loader import get_settings
+from cover_agent.settings.config_schema import CoverageType
 from cover_agent.utils import load_yaml
 
 
@@ -27,11 +28,14 @@ class UnitTestValidator:
         llm_model: str,
         max_run_time_sec: int,
         agent_completion: AgentCompletionABC,
-        test_command_dir: str = os.getcwd(),
-        included_files: list = None,
-        coverage_type="cobertura",
-        desired_coverage: int = 90,  # Default to 90% coverage if not specified
-        additional_instructions: str = "",
+        desired_coverage: int,
+        comparison_branch: str,
+        coverage_type: CoverageType,
+        diff_coverage: bool,
+        num_attempts: int,
+        test_command_dir: str,
+        additional_instructions: str,
+        included_files: list,
         use_report_coverage_feature_flag: bool = False,
         project_root: str = "",
         diff_coverage: bool = False,
@@ -198,6 +202,7 @@ class UnitTestValidator:
         """
         try:
             test_headers_indentation = None
+            # TODO: Why hardcoded?
             allowed_attempts = 3
             counter_attempts = 0
             while (
@@ -231,6 +236,7 @@ class UnitTestValidator:
 
             relevant_line_number_to_insert_tests_after = None
             relevant_line_number_to_insert_imports_after = None
+            # TODO: Why hardcoded?
             allowed_attempts = 3
             counter_attempts = 0
             while (

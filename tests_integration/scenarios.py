@@ -1,4 +1,4 @@
-from cover_agent.constants import CoverageType
+from cover_agent.settings.config_schema import CoverageType
 
 
 TESTS = [

@@ -6,8 +6,8 @@ from pathlib import Path
 import docker
 from dotenv import load_dotenv
 
-from cover_agent import constants
 from cover_agent.CustomLogger import CustomLogger
+from cover_agent.settings.config_loader import get_settings
 from tests_integration.docker_utils import (
     clean_up_docker_container,
     copy_file_to_docker_container,
@@ -310,103 +310,37 @@ def log_test_args(test_args: argparse.Namespace, max_value_len=60) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    """
-    Parses command-line arguments for configuring and running tests with Docker.
+    settings = get_settings()
+    settings_branch = "default"
 
-    This function defines and parses the required and optional arguments needed
-    to execute tests inside a Docker container. It includes arguments for file paths,
-    Docker configuration, API keys, and other test-related settings.
-
-    Returns:
-        argparse.Namespace: An object containing the parsed arguments as attributes.
-                            Each attribute corresponds to a command-line argument.
-
-    Command-line Arguments:
-        --source-file-path (str, required): Path to the source file.
-        --test-file-path (str, required): Path to the input test file.
-        --code-coverage-report-path (str, required): Path to the code coverage report file.
-        --test-command (str, required): The command to run tests and generate a coverage report.
-        --coverage-type (str, optional): Type of coverage report. Defaults to "cobertura".
-        --desired-coverage (int, optional): The desired coverage percentage. Defaults to a constant.
-        --max-iterations (int, optional): The maximum number of iterations. Defaults to a constant.
-        --model (str, optional): Which LLM model to use. Defaults to a constant.
-        --api-base (str, optional): The API URL to use for Ollama or Hugging Face. Defaults to a constant.
-        --log-db-path (str, optional): Path to an optional log database. Defaults to an environment variable.
-        --dockerfile (str, optional): Path to the Dockerfile. Defaults to an empty string.
-        --docker-image (str, optional): Docker image name. Defaults to an empty string.
-        --openai-api-key (str, optional): OpenAI API key. Defaults to an environment variable.
-        --anthropic-api-key (str, optional): Anthropic API key. Defaults to an environment variable.
-    """
     parser = argparse.ArgumentParser(description="Test with Docker.")
+    parser.add_argument("--source-file-path", required=True, help="Path to the source file.")
+    parser.add_argument("--test-file-path", required=True, help="Path to the input test file.")
+    parser.add_argument("--code-coverage-report-path", required=True, help="Path to the code coverage report file.")
+    parser.add_argument("--test-command", required=True, help="The command to run tests and generate coverage report.")
     parser.add_argument(
-        "--source-file-path", required=True, help="Path to the source file."
-    )
-    parser.add_argument(
-        "--test-file-path", required=True, help="Path to the input test file."
-    )
-    parser.add_argument(
-        "--code-coverage-report-path",
-        required=True,
-        help="Path to the code coverage report file.",
-    )
-    parser.add_argument(
-        "--test-command",
-        required=True,
-        help="The command to run tests and generate coverage report.",
-    )
-    parser.add_argument(
-        "--coverage-type",
-        default="cobertura",
-        help="Type of coverage report.",
+        "--coverage-type", default=settings.get(f"{settings_branch}.coverage_type"), help="Type of coverage report."
     )
     parser.add_argument(
         "--desired-coverage",
         type=int,
-        default=constants.DESIRED_COVERAGE,
+        default=settings.get(f"{settings_branch}.desired_coverage"),
         help="The desired coverage percentage.",
     )
     parser.add_argument(
-        "--max-iterations",
-        type=int,
-        default=constants.MAX_ITERATIONS,
-        help="The maximum number of iterations.",
+        "--max-iterations", type=int, default=settings.max_iterations, help="The maximum number of iterations."
     )
-    parser.add_argument(
-        "--model",
-        default=constants.MODEL,
-        help="Which LLM model to use.",
-    )
+    parser.add_argument("--model", default=settings.get(f"{settings_branch}.model"), help="Which LLM model to use.")
     parser.add_argument(
         "--api-base",
-        default=constants.API_BASE,
+        default=settings.get(f"{settings_branch}.api_base"),
         help="The API url to use for Ollama or Hugging Face.",
     )
-    parser.add_argument(
-        "--log-db-path",
-        default=os.getenv("LOG_DB_PATH", ""),
-        help="Path to optional log database.",
-    )
-
-    parser.add_argument(
-        "--dockerfile",
-        default="",
-        help="Path to Dockerfile.",
-    )
-    parser.add_argument(
-        "--docker-image",
-        default="",
-        help="Docker image name.",
-    )
-    parser.add_argument(
-        "--openai-api-key",
-        default=os.getenv("OPENAI_API_KEY", ""),
-        help="OpenAI API key.",
-    )
-    parser.add_argument(
-        "--anthropic-api-key",
-        default=os.getenv("ANTHROPIC_API_KEY", ""),
-        help="Anthropic API key.",
-    )
+    parser.add_argument("--log-db-path", default=os.getenv("LOG_DB_PATH", ""), help="Path to optional log database.")
+    parser.add_argument("--dockerfile", default="", help="Path to Dockerfile.")
+    parser.add_argument("--docker-image", default="", help="Docker image name.")
+    parser.add_argument("--openai-api-key", default=os.getenv("OPENAI_API_KEY", ""), help="OpenAI API key.",)
+    parser.add_argument("--anthropic-api-key", default=os.getenv("ANTHROPIC_API_KEY", ""), help="Anthropic API key.")
     parser.add_argument(
         "--max-run-time",
         type=int,
