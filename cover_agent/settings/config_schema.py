@@ -50,6 +50,8 @@ class CoverAgentConfig:
     
     # Logging settings
     log_db_path: str
+
+    test_command_original: Optional[str] = None
     
     @classmethod
     def from_args(cls, args: argparse.Namespace) -> 'CoverAgentConfig':

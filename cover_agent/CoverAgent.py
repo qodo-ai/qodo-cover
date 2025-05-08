@@ -87,7 +87,7 @@ class CoverAgent:
 
         # Update test command if successfully modified
         if new_command_line:
-            self.test_command_original = test_command
+            self.config.test_command_original = test_command
             self.config.test_command = new_command_line
             print(
                 f"Converting test command: `{test_command}`\n to run only a single test: `{new_command_line}`"

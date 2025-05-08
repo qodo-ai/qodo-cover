@@ -378,7 +378,7 @@ class TestCoverAgent:
 
             # Verify the test command was modified correctly
             #assert hasattr(args, "test_command_original")
-            assert agent.test_command_original == "pytest --cov=myapp --cov-report=xml"
+            assert agent.config.test_command_original == "pytest --cov=myapp --cov-report=xml"
             assert (
                 config.test_command
                 == "pytest tests/test_output.py --cov=myapp --cov-report=xml"
