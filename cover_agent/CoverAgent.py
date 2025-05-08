@@ -43,7 +43,6 @@ class CoverAgent:
         """
         self.logger = logger or CustomLogger.get_logger(__name__)
 
-        # self.args = args
         self.config = config
 
         self._validate_paths()
