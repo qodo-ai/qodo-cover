@@ -1,0 +1,9 @@
+coverage_service: cobertura_xml
+xcodeproj: swift_counter.xcodeproj
+scheme: swift_counter
+configuration: Debug
+build_directory: .derivedData
+source_directory: swift_counter
+output_directory: .report
+ignore:
+  - swift_counterTests/*
