@@ -94,7 +94,6 @@ class TestMain:
             report_filepath="test_results.html",
             desired_coverage=90,
             max_iterations=10,
-            prompt_only=False,
         )
         parse_args = lambda: args  # Mocking parse_args function
         mock_isfile.side_effect = [True, False]
@@ -108,9 +107,10 @@ class TestMain:
         assert str(exc_info.value) == f"Test file not found at {args.test_file_path}"
 
     @patch("cover_agent.main.CoverAgent")
+    @patch("cover_agent.main.CoverAgentConfig")
     @patch("cover_agent.main.parse_args")
     @patch("cover_agent.main.os.path.isfile")
-    def test_main_calls_agent_run(self, mock_isfile, mock_parse_args, mock_cover_agent):
+    def test_main_calls_agent_run(self, mock_isfile, mock_parse_args, mock_config_class, mock_cover_agent):
         """
         Test the main function to ensure it correctly initializes and runs the CoverAgent.
         """
@@ -133,6 +133,11 @@ class TestMain:
             run_tests_multiple_times=1,
             use_report_coverage_feature_flag=False,
             log_db_path="",
+            project_root="",
+            diff_coverage=False,
+            branch="main",
+            run_each_test_separately=False,
+            max_run_time=30,
         )
         mock_parse_args.return_value = args
         # Mock os.path.isfile to return True for both source and test file paths
@@ -140,13 +145,24 @@ class TestMain:
             args.source_file_path,
             args.test_file_path,
         ]
+        
+        # Create a mock config object
+        mock_config = MagicMock()
+        mock_config_class.from_args_with_defaults.return_value = mock_config
+        
+        # Create a mock agent instance
         mock_agent_instance = MagicMock()
         mock_cover_agent.return_value = mock_agent_instance
 
         main()
 
-        # Assert that the CoverAgent is initialized and run correctly
-        mock_cover_agent.assert_called_once_with(args)
+        # Assert that CoverAgentConfig.from_args_with_defaults is called with args
+        mock_config_class.from_args_with_defaults.assert_called_once_with(args)
+        
+        # Assert that the CoverAgent is initialized with the config object
+        mock_cover_agent.assert_called_once_with(mock_config)
+        
+        # Assert that run is called on the agent instance
         mock_agent_instance.run.assert_called_once()
 
     def test_parse_args_with_max_run_time(self):

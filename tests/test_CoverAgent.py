@@ -3,6 +3,7 @@ from cover_agent.main import parse_args
 from unittest.mock import patch, MagicMock
 import argparse
 import os
+from cover_agent.settings.config_schema import CoverAgentConfig
 import pytest
 import tempfile
 
@@ -71,12 +72,11 @@ class TestCoverAgent:
             max_iterations=10,
             max_run_time=30,
         )
-        parse_args = lambda: args
-        mock_isfile.return_value = False
-
-        with patch("cover_agent.main.parse_args", parse_args):
-            with pytest.raises(FileNotFoundError) as exc_info:
-                agent = CoverAgent(args)
+        config = CoverAgentConfig.from_args_with_defaults(args)
+         # Configure the mock to simulate file not found for source file
+        mock_isfile.side_effect = lambda path: path != args.source_file_path
+        with pytest.raises(FileNotFoundError) as exc_info:
+            CoverAgent(config=config)
 
         # Assert that the correct error message is raised
         assert (
@@ -107,16 +107,15 @@ class TestCoverAgent:
             report_filepath="test_results.html",
             desired_coverage=90,
             max_iterations=10,
-            prompt_only=False,
             max_run_time=30,
         )
-        parse_args = lambda: args
+        config = CoverAgentConfig.from_args_with_defaults(args)
         mock_isfile.side_effect = [True, False]
         mock_exists.return_value = True
 
-        with patch("cover_agent.main.parse_args", parse_args):
-            with pytest.raises(FileNotFoundError) as exc_info:
-                agent = CoverAgent(args)
+        
+        with pytest.raises(FileNotFoundError) as exc_info:
+            CoverAgent(config=config)
 
         # Assert that the correct error message is raised
         assert str(exc_info.value) == f"Test file not found at {args.test_file_path}"
@@ -156,15 +155,15 @@ class TestCoverAgent:
                     run_tests_multiple_times=1,
                     max_run_time=30,
                 )
-
+                config = CoverAgentConfig.from_args_with_defaults(args)
                 with pytest.raises(AssertionError) as exc_info:
-                    agent = CoverAgent(args)
+                    agent = CoverAgent(config=config)
                     failed_test_runs = agent.test_validator.get_coverage()
                     agent._duplicate_test_file()
 
                 # Assert that the correct error message is raised
                 assert "Fatal: Coverage report" in str(exc_info.value)
-                assert args.test_file_output_path == args.test_file_path
+                assert config.test_file_output_path == config.test_file_path
 
         # Clean up the temp files
         os.remove(temp_source_file.name)
@@ -224,7 +223,8 @@ class TestCoverAgent:
             validator.get_coverage.return_value = [{}, "python", "pytest", ""]
             generator = mock_unit_test_generator.return_value
             generator.generate_tests.return_value = {"new_tests": [{}]}
-            agent = CoverAgent(args)
+            config = CoverAgentConfig.from_args_with_defaults(args)
+            agent = CoverAgent(config=config)
             agent.run()
             # Assertions to ensure sys.exit was called
             mock_sys_exit.assert_called_once_with(2)
@@ -254,9 +254,9 @@ class TestCoverAgent:
             max_iterations=10,
             max_run_time=30,
         )
-
+        config = CoverAgentConfig.from_args_with_defaults(args)
         with pytest.raises(FileNotFoundError) as exc_info:
-            agent = CoverAgent(args)
+            agent = CoverAgent(config=config)
 
         # Assert that the correct error message is raised
         assert str(exc_info.value) == f"Project root not found at {args.project_root}"
@@ -313,7 +313,8 @@ class TestCoverAgent:
                 "",
             ]
             mock_test_gen.return_value.generate_tests.return_value = {"new_tests": [{}]}
-            agent = CoverAgent(args)
+            config = CoverAgentConfig.from_args_with_defaults(args)
+            agent = CoverAgent(config=config)
             agent.run()
             mock_logger.get_logger.return_value.info.assert_any_call(
                 f"Current Diff Coverage: {round(mock_test_validator.return_value.current_coverage * 100, 2)}%"
@@ -372,13 +373,14 @@ class TestCoverAgent:
             )
 
             # Initialize CoverAgent
-            agent = CoverAgent(args)
+            config = CoverAgentConfig.from_args_with_defaults(args)
+            agent = CoverAgent(config=config)
 
             # Verify the test command was modified correctly
-            assert hasattr(args, "test_command_original")
-            assert args.test_command_original == "pytest --cov=myapp --cov-report=xml"
+            #assert hasattr(args, "test_command_original")
+            assert agent.test_command_original == "pytest --cov=myapp --cov-report=xml"
             assert (
-                args.test_command
+                config.test_command
                 == "pytest tests/test_output.py --cov=myapp --cov-report=xml"
             )
 

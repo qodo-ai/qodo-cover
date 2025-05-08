@@ -1,6 +1,50 @@
 [include_files]
-limit_tokens=true
-max_tokens=20000
+limit_tokens = true
+max_tokens = 20000
 
 [tests]
-max_allowed_runtime_seconds=30
+max_allowed_runtime_seconds = 30
+
+[default]
+# Required file paths - no defaults, these must be provided
+source_file_path = ""
+test_file_path = ""
+code_coverage_report_path = ""
+test_command = ""
+
+# Test execution settings
+test_command_dir = ""
+
+# Project settings
+project_root = ""
+test_file_output_path = ""
+
+# Coverage settings
+included_files = []
+coverage_type = "cobertura"
+report_filepath = "test_results.html"
+desired_coverage = 90
+
+# Execution limits
+max_iterations = 10
+max_run_time = 30
+
+# LLM model configuration
+model = "gpt-4o"
+api_base = "http://localhost:11434"
+additional_instructions = ""
+
+# Test execution options
+strict_coverage = false
+run_tests_multiple_times = 1
+run_each_test_separately = false
+
+# Coverage evaluation modes (mutually exclusive)
+use_report_coverage_feature_flag = false
+diff_coverage = false
+
+# Git branch for diff coverage
+branch = "main"
+
+# Logging settings
+log_db_path = "cover_agent_unit_test_runs.db"

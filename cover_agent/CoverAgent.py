@@ -13,6 +13,7 @@ from cover_agent.UnitTestDB import UnitTestDB
 from cover_agent.AICaller import AICaller
 from cover_agent.AgentCompletionABC import AgentCompletionABC
 from cover_agent.DefaultAgentCompletion import DefaultAgentCompletion
+from cover_agent.settings.config_schema import CoverAgentConfig
 
 
 class CoverAgent:
@@ -23,12 +24,12 @@ class CoverAgent:
     and tracks the progress of coverage improvements over multiple iterations.
     """
     
-    def __init__(self, args, agent_completion: AgentCompletionABC = None):
+    def __init__(self, config: CoverAgentConfig, agent_completion: AgentCompletionABC = None):
         """
         Initialize the CoverAgent with configuration and set up test generation environment.
 
         Parameters:
-            args (Namespace): Command-line arguments containing:
+            config (CoverAgentConfig): Configuration object containing:
                 - paths for source and test files
                 - project configuration
                 - coverage requirements
@@ -39,7 +40,7 @@ class CoverAgent:
         Raises:
             FileNotFoundError: If required source files or directories are not found.
         """
-        self.args = args
+        self.config = config
         self.logger = CustomLogger.get_logger(__name__)
 
         self._validate_paths()
@@ -51,17 +52,17 @@ class CoverAgent:
         else:
             # Create default AI caller with specified model and parameters
             self.ai_caller = AICaller(
-                model=args.model, api_base=args.api_base, max_tokens=8192
+                model=config.model, api_base=config.api_base, max_tokens=8192
             )
             self.agent_completion = DefaultAgentCompletion(caller=self.ai_caller)
 
         # Modify test command for single test execution if needed
-        test_command = args.test_command
+        test_command = config.test_command
         new_command_line = None
-        if hasattr(args, "run_each_test_separately") and args.run_each_test_separately:
+        if config.run_each_test_separately:
             # Calculate relative path for test file
             test_file_relative_path = os.path.relpath(
-                args.test_file_output_path, args.project_root
+                config.test_file_output_path, config.project_root
             )
             # Handle pytest commands specifically
             if "pytest" in test_command:
@@ -80,53 +81,53 @@ class CoverAgent:
                     self.agent_completion.adapt_test_command_for_a_single_test_via_ai(
                         test_file_relative_path=test_file_relative_path,
                         test_command=test_command,
-                        project_root_dir=self.args.test_command_dir,
+                        project_root_dir=self.config.test_command_dir,
                     )
                 )
 
         # Update test command if successfully modified
         if new_command_line:
-            args.test_command_original = test_command
-            args.test_command = new_command_line
+            self.test_command_original = test_command
+            self.config.test_command = new_command_line
             print(
                 f"Converting test command: `{test_command}`\n to run only a single test: `{new_command_line}`"
             )
 
         # Initialize test generator with configuration
         self.test_gen = UnitTestGenerator(
-            source_file_path=args.source_file_path,
-            test_file_path=args.test_file_output_path,
-            project_root=args.project_root,
-            code_coverage_report_path=args.code_coverage_report_path,
-            test_command=args.test_command,
-            test_command_dir=args.test_command_dir,
-            included_files=args.included_files,
-            coverage_type=args.coverage_type,
-            additional_instructions=args.additional_instructions,
-            llm_model=args.model,
-            use_report_coverage_feature_flag=args.use_report_coverage_feature_flag,
+            source_file_path=config.source_file_path,
+            test_file_path=config.test_file_output_path,
+            project_root=config.project_root,
+            code_coverage_report_path=config.code_coverage_report_path,
+            test_command=config.test_command,
+            test_command_dir=config.test_command_dir,
+            included_files=config.included_files,
+            coverage_type=config.coverage_type,
+            additional_instructions=config.additional_instructions,
+            llm_model=config.model,
+            use_report_coverage_feature_flag=config.use_report_coverage_feature_flag,
             agent_completion=self.agent_completion,
         )
 
         # Initialize test validator with configuration
         self.test_validator = UnitTestValidator(
-            source_file_path=args.source_file_path,
-            test_file_path=args.test_file_output_path,
-            project_root=args.project_root,
-            code_coverage_report_path=args.code_coverage_report_path,
-            test_command=args.test_command,
-            test_command_dir=args.test_command_dir,
-            included_files=args.included_files,
-            coverage_type=args.coverage_type,
-            desired_coverage=args.desired_coverage,
-            additional_instructions=args.additional_instructions,
-            llm_model=args.model,
-            use_report_coverage_feature_flag=args.use_report_coverage_feature_flag,
-            diff_coverage=args.diff_coverage,
-            comparison_branch=args.branch,
-            num_attempts=args.run_tests_multiple_times,
+            source_file_path=config.source_file_path,
+            test_file_path=config.test_file_output_path,
+            project_root=config.project_root,
+            code_coverage_report_path=config.code_coverage_report_path,
+            test_command=config.test_command,
+            test_command_dir=config.test_command_dir,
+            included_files=config.included_files,
+            coverage_type=config.coverage_type,
+            desired_coverage=config.desired_coverage,
+            additional_instructions=config.additional_instructions,
+            llm_model=config.model,
+            use_report_coverage_feature_flag=config.use_report_coverage_feature_flag,
+            diff_coverage=config.diff_coverage,
+            comparison_branch=config.branch,
+            num_attempts=config.run_tests_multiple_times,
             agent_completion=self.agent_completion,
-            max_run_time=args.max_run_time,
+            max_run_time=config.max_run_time,
         )
 
     def _validate_paths(self):
@@ -140,28 +141,25 @@ class CoverAgent:
             FileNotFoundError: If any required files or directories are missing.
         """
         # Ensure the source file exists
-        if not os.path.isfile(self.args.source_file_path):
+        if not os.path.isfile(self.config.source_file_path):
             raise FileNotFoundError(
-                f"Source file not found at {self.args.source_file_path}"
+                f"Source file not found at {self.config.source_file_path}"
             )
         # Ensure the test file exists
-        if not os.path.isfile(self.args.test_file_path):
+        if not os.path.isfile(self.config.test_file_path):
             raise FileNotFoundError(
-                f"Test file not found at {self.args.test_file_path}"
+                f"Test file not found at {self.config.test_file_path}"
             )
 
         # Ensure the project root exists
-        if self.args.project_root and not os.path.isdir(self.args.project_root):
+        if self.config.project_root and not os.path.isdir(self.config.project_root):
             raise FileNotFoundError(
-                f"Project root not found at {self.args.project_root}"
+                f"Project root not found at {self.config.project_root}"
             )
 
-        # Create default DB file if not provided
-        if not self.args.log_db_path:
-            self.args.log_db_path = "cover_agent_unit_test_runs.db"
         # Connect to the test DB
         self.test_db = UnitTestDB(
-            db_connection_string=f"sqlite:///{self.args.log_db_path}"
+            db_connection_string=f"sqlite:///{self.config.log_db_path}"
         )
 
     def _duplicate_test_file(self):
@@ -172,11 +170,11 @@ class CoverAgent:
         This allows for non-destructive test generation without modifying the original file.
         """
         # If the test file output path is set, copy the test file there
-        if self.args.test_file_output_path != "":
-            shutil.copy(self.args.test_file_path, self.args.test_file_output_path)
+        if self.config.test_file_output_path != "":
+            shutil.copy(self.config.test_file_path, self.config.test_file_output_path)
         else:
             # Otherwise, set the test file output path to the current test file
-            self.args.test_file_output_path = self.args.test_file_path
+            self.config.test_file_output_path = self.config.test_file_path
 
     def init(self):
         """
@@ -194,7 +192,7 @@ class CoverAgent:
             # Initialize the Weights & Biases run
             wandb.login(key=os.environ["WANDB_API_KEY"])
             time_and_date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            run_name = f"{self.args.model}_" + time_and_date
+            run_name = f"{self.config.model}_" + time_and_date
             wandb.init(project="cover-agent", name=run_name)
 
         # Run initial test suite analysis
@@ -266,11 +264,11 @@ class CoverAgent:
             self.logger.info(
                 f"Reached above target coverage of {desired_coverage}% (Current Coverage: {current_coverage}%) in {iteration_count} iterations."
             )
-        elif iteration_count == self.args.max_iterations:
-            coverage_type = "diff coverage" if self.args.diff_coverage else "coverage"
+        elif iteration_count == self.config.max_iterations:
+            coverage_type = "diff coverage" if self.config.diff_coverage else "coverage"
             failure_message = f"Reached maximum iteration limit without achieving desired {coverage_type}. Current Coverage: {current_coverage}%"
             
-            if self.args.strict_coverage:
+            if self.config.strict_coverage:
                 self.logger.error(failure_message)
                 sys.exit(2)
             else:
@@ -278,20 +276,20 @@ class CoverAgent:
 
         # Log token usage
         self.logger.info(
-            f"Total number of input tokens used for LLM model {self.args.model}: {self.test_gen.total_input_token_count + self.test_validator.total_input_token_count}"
+            f"Total number of input tokens used for LLM model {self.config.model}: {self.test_gen.total_input_token_count + self.test_validator.total_input_token_count}"
         )
         self.logger.info(
-            f"Total number of output tokens used for LLM model {self.args.model}: {self.test_gen.total_output_token_count + self.test_validator.total_output_token_count}"
+            f"Total number of output tokens used for LLM model {self.config.model}: {self.test_gen.total_output_token_count + self.test_validator.total_output_token_count}"
         )
 
         # Generate report and cleanup
-        self.test_db.dump_to_report(self.args.report_filepath)
+        self.test_db.dump_to_report(self.config.report_filepath)
         if "WANDB_API_KEY" in os.environ:
             wandb.finish()
 
     def log_coverage(self):
         """Log current coverage metrics, differentiating between diff coverage and full coverage."""
-        if self.args.diff_coverage:
+        if self.config.diff_coverage:
             self.logger.info(
                 f"Current Diff Coverage: {round(self.test_validator.current_coverage * 100, 2)}%"
             )
@@ -314,7 +312,7 @@ class CoverAgent:
         iteration_count = 0
         failed_test_runs, language, test_framework, coverage_report = self.init()
 
-        while iteration_count < self.args.max_iterations:
+        while iteration_count < self.config.max_iterations:
             self.generate_and_validate_tests(failed_test_runs, language, test_framework, coverage_report)
             
             failed_test_runs, language, test_framework, coverage_report, target_reached = self.check_iteration_progress()

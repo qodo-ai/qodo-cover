@@ -1,6 +1,7 @@
 import argparse
 import os
 from cover_agent.CoverAgent import CoverAgent
+from cover_agent.settings.config_schema import CoverAgentConfig
 from cover_agent.version import __version__
 
 
@@ -141,7 +142,8 @@ def parse_args():
 
 def main():
     args = parse_args()
-    agent = CoverAgent(args)
+    config = CoverAgentConfig.from_args_with_defaults(args)
+    agent = CoverAgent(config)
     agent.run()
 
 
