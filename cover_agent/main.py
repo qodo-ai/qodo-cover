@@ -3,81 +3,115 @@ import os
 
 from typing import Any
 
+from dynaconf import Dynaconf
+
 from cover_agent.CoverAgent import CoverAgent
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.settings.config_schema import CoverAgentConfig
 from cover_agent.version import __version__
 
 
-def parse_args():
+def parse_args(settings: Dynaconf) -> argparse.Namespace:
     """
     Parse command line arguments.
     """
+    settings_branch = "default"
+
     parser = argparse.ArgumentParser(description=f"Cover Agent v{__version__}")
-    parser.add_argument("--source-file-path", required=True, help="Path to the source file.")
-    parser.add_argument("--test-file-path", required=True, help="Path to the input test file.")
-    parser.add_argument("--project-root", required=False, help="Path to the root of the project.", default="")
-    parser.add_argument(
-        "--test-file-output-path",
-        required=False,
-        help="Path to the output test file.",
-        default="",
-        type=str,
-    )
-    parser.add_argument("--code-coverage-report-path", required=True, help="Path to the code coverage report file.")
-    parser.add_argument("--test-command", required=True, help="The command to run tests and generate coverage report.")
-    parser.add_argument(
-        "--test-command-dir",
-        default=os.getcwd(),
-        help="The directory to run the test command in. Default: %(default)s.",
-    )
-    parser.add_argument(
-        "--included-files",
-        default=None,
-        nargs="*",
-        help=(
-            'List of files to include in the coverage. For example, "--included-files library1.c library2.c." '
-            'Default: %(default)s.'
-        ),
-    )
 
-    parser.add_argument(
-        "--coverage-type",
-        # default="cobertura",
-        help="Type of coverage report. Default: %(default)s.",
-    )
+    arg_definitions = [
+        ("--source-file-path", dict(type=str, required=True, help="Path to the source file.")),
+        ("--test-file-path", dict(type=str, required=True, help="Path to the input test file.")),
+        ("--project-root", dict(type=str, default="", help="Path to the root of the project.")),
+        ("--test-file-output-path", dict(type=str, default="", help="Path to the output test file.",)),
+        ("--code-coverage-report-path", dict(type=str, required=True, help="Path to the code coverage report file.")),
+        ("--test-command", dict(
+            type=str, required=True, help="The command to run tests and generate coverage report."
+        )),
+        ("--test-command-dir", dict(
+            type=str, default=os.getcwd(), help="The directory to run the test command in. Default: %(default)s."
+        )),
+        ("--included-files", dict(
+            type=list,
+            default=settings.get(f"{settings_branch}.included_files"),
+            nargs="*",
+            help=(
+                'List of files to include in the coverage. For example, "--included-files library1.c library2.c." '
+                'Default: %(default)s.'
+            ),
+        )),
+        ("--coverage-type", dict(
+            type=str,
+            default=settings.get(f"{settings_branch}.coverage_type"),
+            help="Type of coverage report. Default: %(default)s.",
+        )),
+        ("--report-filepath", dict(
+            type=str,
+            default=settings.get(f"{settings_branch}.report_filepath"),
+            help="Path to the output report file. Default: %(default)s.",
+        )),
+        ("--desired-coverage", dict(
+            type=int,
+            default=settings.get(f"{settings_branch}.desired_coverage"),
+            help="The desired coverage percentage. Default: %(default)s.",
+        )),
+        ("--max-iterations", dict(
+            type=int,
+            default=settings.get(f"{settings_branch}.max_iterations"),
+            help="The maximum number of iterations. Default: %(default)s.",
+        )),
+        ("--max-run-time", dict(
+            type=int,
+            default=settings.get(f"{settings_branch}.max_run_time_sec"),
+            help=(
+                "Maximum time (in seconds) allowed for test execution. Overrides the value in configuration.toml "
+                "if provided. Default: %(default)s."
+            ),
+        )),
+        ("--additional-instructions", dict(
+            type=str,
+            default="",
+            help="Any additional instructions you wish to append at the end of the prompt. Default: %(default)s.",
+        )),
+        ("--model", dict(
+            type=str,
+            default=settings.get(f"{settings_branch}.model"),
+            help="Which LLM model to use. Default: %(default)s.",
+        )),
+        ("--api-base", dict(
+            type=str,
+            default=settings.get(f"{settings_branch}.api_base"),
+            help="The API url to use for Ollama or Hugging Face. Default: %(default)s.",
+        )),
+        ("--strict-coverage", dict(
+            action="store_true",
+            help="If set, Cover-Agent will return a non-zero exit code if the desired code coverage is not achieved."
+        )),
+        ("--run-tests-multiple-times", dict(
+            type=int,
+            default=settings.get(f"{settings_branch}.run_tests_multiple_times"),
+            help="Number of times to run the tests generated by Cover Agent. Default: %(default)s.",
+        )),
+        ("--log-db-path", dict(
+            type=str,
+            default=settings.get(f"{settings_branch}.log_db_path"),
+            help="Path to optional log database. Default: %(default)s.",
+        )),
+        ("--branch", dict(
+            type=str,
+            default=settings.get(f"{settings_branch}.branch"),
+            help="The branch to compare against when using --diff-coverage. Default: %(default)s.",
+        )),
+        # TODO: Check if `store_true` is correct for this argument
+        ("--run-each-test-separately", dict(
+            type=bool,
+            default=settings.get(f"{settings_branch}.run_each_test_separately. Default: %(default)s."),
+            help="Run each test separately.",
+        )),
+    ]
 
-    parser.add_argument("--report-filepath", help="Path to the output report file.")
-    parser.add_argument("--desired-coverage", type=int, help="The desired coverage percentage.")
-    parser.add_argument("--max-iterations", type=int, help="The maximum number of iterations.")
-    parser.add_argument(
-        "--max-run-time",
-        type=int,
-        help=(
-            "Maximum time (in seconds) allowed for test execution. Overrides the value in configuration.toml "
-            "if provided."
-        ),
-    )
-    parser.add_argument(
-        "--additional-instructions",
-        default="",
-        help="Any additional instructions you wish to append at the end of the prompt. Default: %(default)s.",
-    )
-    parser.add_argument("--model", help="Which LLM model to use.")
-    parser.add_argument("--api-base", help="The API url to use for Ollama or Hugging Face.")
-    parser.add_argument(
-        "--strict-coverage",
-        action="store_true",
-        help="If set, Cover-Agent will return a non-zero exit code if the desired code coverage is not achieved.",
-    )
-    parser.add_argument(
-        "--run-tests-multiple-times",
-        type=int,
-        help="Number of times to run the tests generated by Cover Agent.",
-    )
-    parser.add_argument("--log-db-path", default="", help="Path to optional log database. Default: %(default)s.")
-    parser.add_argument("--branch", type=str, help="The branch to compare against when using --diff-coverage.")
-    parser.add_argument("--run-each-test-separately", type=bool, help="Run each test separately.")
+    for name, kwargs in arg_definitions:
+        parser.add_argument(name, **kwargs)
     parser.add_argument(
         "--suppress-log-files",
         action="store_true",
@@ -98,6 +132,7 @@ def parse_args():
     )
     group.add_argument(
         "--diff-coverage",
+        default=settings.get(f"{settings_branch}.diff_coverage. Default: %(default)s."),
         action="store_true",
         help=(
             "If set, Cover-Agent will only generate tests based on the diff between branches. Default: False. "
@@ -113,9 +148,11 @@ def parse_args():
     return parser.parse_args()
 
 
-def merge_settings(args: argparse.Namespace, settings) -> dict[str, Any]:
+def merge_settings(args: argparse.Namespace, settings: Dynaconf) -> dict[str, Any]:
 
     settings_branch = "default"
+    # CLI overrides TOML settings
+    # TODO: Remove TOML options because CLI already has defaults from TOML. The function potentially is not required
     return {
         "source_file_path": args.source_file_path,
         "test_file_path": args.test_file_path,
@@ -148,12 +185,10 @@ def merge_settings(args: argparse.Namespace, settings) -> dict[str, Any]:
 
 
 def main():
-    args = parse_args()
     settings = get_settings()
+    args = parse_args(settings)
     merged_config = merge_settings(args, settings)
-
     final_config = CoverAgentConfig(**merged_config)
-
     agent = CoverAgent(final_config)
     agent.run()
 

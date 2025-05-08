@@ -258,7 +258,7 @@ def compose_test_command(test_args: argparse.Namespace) -> list:
         "--coverage-type", test_args.coverage_type,
         "--desired-coverage", str(test_args.desired_coverage),
         "--max-iterations", str(test_args.max_iterations),
-        "--max-run-time", str(test_args.max_run_time_sec),
+        "--max-run-time", str(test_args.max_run_time),
         "--strict-coverage",
     ]
 
@@ -314,6 +314,7 @@ def parse_args() -> argparse.Namespace:
     settings_branch = "default"
 
     parser = argparse.ArgumentParser(description="Test with Docker.")
+
     parser.add_argument("--source-file-path", required=True, help="Path to the source file.")
     parser.add_argument("--test-file-path", required=True, help="Path to the input test file.")
     parser.add_argument("--code-coverage-report-path", required=True, help="Path to the code coverage report file.")
@@ -328,7 +329,19 @@ def parse_args() -> argparse.Namespace:
         help="The desired coverage percentage.",
     )
     parser.add_argument(
-        "--max-iterations", type=int, default=settings.max_iterations, help="The maximum number of iterations."
+        "--max-iterations",
+        type=int,
+        default=settings.get(f"{settings_branch}.max_iterations"),
+        help="The maximum number of iterations.",
+    )
+    parser.add_argument(
+        "--max-run-time",
+        type=int,
+        default=settings.get(f"{settings_branch}.max_run_time_sec"),
+        help=(
+            "Maximum time (in seconds) allowed for test execution. Overrides the value in configuration.toml "
+            "if provided."
+        ),
     )
     parser.add_argument("--model", default=settings.get(f"{settings_branch}.model"), help="Which LLM model to use.")
     parser.add_argument(
