@@ -14,6 +14,12 @@ from cover_agent.CustomLogger import CustomLogger
 from cover_agent.record_replay_manager import RecordReplayManager
 from cover_agent.utils import get_original_caller
 
+from cover_agent import (
+    NO_SUPPORT_TEMPERATURE_MODELS,
+    USER_MESSAGE_ONLY_MODELS,
+    NO_SUPPORT_STREAMING_MODELS,
+)
+
 MODEL_RETRIES = 3
 
 
@@ -62,6 +68,10 @@ class AICaller:
         self.record_replay_manager = record_replay_manager or RecordReplayManager(record_mode=record_mode)
         self.logger = logger or CustomLogger.get_logger(__name__)
 
+        self.user_message_only_models = USER_MESSAGE_ONLY_MODELS
+        self.no_support_temperature_models = NO_SUPPORT_TEMPERATURE_MODELS
+        self.no_support_streaming_models = NO_SUPPORT_STREAMING_MODELS
+
     @conditional_retry  # You can access self.enable_retry here
     def call_model(self, prompt: dict, stream=True):
         """
@@ -83,14 +93,10 @@ class AICaller:
         if prompt["system"] == "":
             messages = [{"role": "user", "content": prompt["user"]}]
         else:
-            if self.model in ["o1-preview", "o1-mini"]:
-                # o1 doesn't accept a system message so we add it to the prompt
-                messages = [
-                    {
-                        "role": "user",
-                        "content": prompt["system"] + "\n" + prompt["user"],
-                    },
-                ]
+            if self.model in self.user_message_only_models:
+                # Combine system and user messages for models that only support user messages
+                combined_content = (prompt["system"] + "\n" + prompt["user"]).strip()
+                messages = [{"role": "user", "content": combined_content}]
             else:
                 messages = [
                     {"role": "system", "content": prompt["system"]},
@@ -106,11 +112,14 @@ class AICaller:
             "max_tokens": self.max_tokens,
         }
 
+        # Remove temperature for models that don't support it
+        if self.model in self.no_support_temperature_models:
+            completion_params.pop("temperature", None)
+
         # Model-specific adjustments
-        if self.model in ["o1-preview", "o1-mini", "o1", "o3-mini"]:
-            stream = False  # o1 doesn't support streaming
-            completion_params["temperature"] = 1
-            completion_params["stream"] = False  # o1 doesn't support streaming
+        if self.model in self.no_support_streaming_models:
+            stream = False
+            completion_params["stream"] = False
             completion_params["max_completion_tokens"] = 2 * self.max_tokens
             # completion_params["reasoning_effort"] = "high"
             completion_params.pop("max_tokens", None)  # Remove 'max_tokens' if present
