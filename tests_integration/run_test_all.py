@@ -3,10 +3,11 @@ import os
 
 from dotenv import load_dotenv
 
-from cover_agent import constants
 from cover_agent.CustomLogger import CustomLogger
 from tests_integration.run_test_with_docker import run_test
 from tests_integration.scenarios import TESTS
+from cover_agent.settings.config_loader import get_settings
+from cover_agent.settings.config_schema import CoverageType
 
 
 load_dotenv()
@@ -14,8 +15,10 @@ logger = CustomLogger.get_logger(__name__)
 
 
 def main():
+    settings = get_settings().get("default")
+
     parser = argparse.ArgumentParser(description="Args for running tests with Docker.")
-    parser.add_argument("--model", default=constants.MODEL, help="Which LLM model to use.")
+    parser.add_argument("--model", default=settings.model, help="Which LLM model to use.")
     parser.add_argument("--record-mode", action="store_true", help="Enable LLM responses record mode for tests.")
     args = parser.parse_args()
 
@@ -31,12 +34,12 @@ def main():
             test_file_path=test["test_file_path"],
             code_coverage_report_path=test.get("code_coverage_report_path", "coverage.xml"),
             test_command=test["test_command"],
-            coverage_type=test.get("coverage_type", constants.CoverageType.COBERTURA.value),
-            max_iterations=test.get("max_iterations", constants.MAX_ITERATIONS),
-            desired_coverage=test.get("desired_coverage", constants.DESIRED_COVERAGE),
+            coverage_type=test.get("coverage_type", CoverageType.COBERTURA.value),
+            max_iterations=test.get("max_iterations", settings.get("max_iterations")),
+            desired_coverage=test.get("desired_coverage", settings.get("desired_coverage")),
             model=test.get("model", model),
             api_base=os.getenv("API_BASE", ""),
-            max_run_time=test.get("max_run_time", constants.MAX_RUN_TIME_SEC),
+            max_run_time_sec=test.get("max_run_time_sec", settings.get("max_run_time_sec")),
             openai_api_key=os.getenv("OPENAI_API_KEY", ""),
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
             dockerfile=test.get("docker_file_path", ""),

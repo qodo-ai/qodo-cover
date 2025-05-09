@@ -13,6 +13,7 @@ from cover_agent.CustomLogger import CustomLogger
 from cover_agent.FilePreprocessor import FilePreprocessor
 from cover_agent.Runner import Runner
 from cover_agent.settings.config_loader import get_settings
+from cover_agent.settings.config_schema import CoverageType
 from cover_agent.utils import load_yaml
 
 
@@ -24,18 +25,18 @@ class UnitTestValidator:
         code_coverage_report_path: str,
         test_command: str,
         llm_model: str,
-        max_run_time: int,
+        max_run_time_sec: int,
         agent_completion: AgentCompletionABC,
-        test_command_dir: str = os.getcwd(),
-        included_files: list = None,
-        coverage_type="cobertura",
-        desired_coverage: int = 90,  # Default to 90% coverage if not specified
-        additional_instructions: str = "",
+        desired_coverage: int,
+        comparison_branch: str,
+        coverage_type: CoverageType,
+        diff_coverage: bool,
+        num_attempts: int,
+        test_command_dir: str,
+        additional_instructions: str,
+        included_files: list,
         use_report_coverage_feature_flag: bool = False,
         project_root: str = "",
-        diff_coverage: bool = False,
-        comparison_branch: str = "main",
-        num_attempts: int = 1,
     ):
         """
         Initialize the UnitTestValidator class with the provided parameters.
@@ -46,7 +47,7 @@ class UnitTestValidator:
             code_coverage_report_path (str): The path to the code coverage report file.
             test_command (str): The command to run tests.
             llm_model (str): The language model to be used for test generation.
-            max_run_time (int): The maximum time in seconds to run the test command.
+            max_run_time_sec (int): The maximum time in seconds to run the test command.
             agent_completion (AgentCompletionABC): The agent completion object to use for test generation.
             api_base (str, optional): The base API url to use in case model is set to Ollama or Hugging Face. Defaults to an empty string.
             test_command_dir (str, optional): The directory where the test command should be executed. Defaults to the current working directory.
@@ -83,7 +84,7 @@ class UnitTestValidator:
         self.comparison_branch = comparison_branch
         self.num_attempts = num_attempts
         self.agent_completion = agent_completion
-        self.max_run_time = max_run_time
+        self.max_run_time_sec = max_run_time_sec
 
         # Get the logger instance from CustomLogger
         self.logger = CustomLogger.get_logger(__name__)
@@ -191,6 +192,7 @@ class UnitTestValidator:
         """
         try:
             test_headers_indentation = None
+            # TODO: Why hardcoded?
             allowed_attempts = 3
             counter_attempts = 0
             while (
@@ -224,6 +226,7 @@ class UnitTestValidator:
 
             relevant_line_number_to_insert_tests_after = None
             relevant_line_number_to_insert_imports_after = None
+            # TODO: Why hardcoded?
             allowed_attempts = 3
             counter_attempts = 0
             while (
@@ -296,7 +299,7 @@ class UnitTestValidator:
         )
         stdout, stderr, exit_code, time_of_test_command = Runner.run_command(
             command=self.test_command,
-            max_run_time=self.max_run_time,
+            max_run_time_sec=self.max_run_time_sec,
             cwd=self.test_command_dir,
         )
         assert (
@@ -484,7 +487,7 @@ class UnitTestValidator:
                         Runner.run_command(
                             command=self.test_command,
                             cwd=self.test_command_dir,
-                            max_run_time=self.max_run_time,
+                            max_run_time_sec=self.max_run_time_sec,
                         )
                     )
                     if exit_code != 0:

@@ -1,4 +1,4 @@
-from cover_agent.constants import CoverageType
+from cover_agent.settings.config_schema import CoverageType
 
 
 TESTS = [
@@ -53,7 +53,7 @@ TESTS = [
         "test_command": r"./gradlew clean test jacocoTestReport",
         "coverage_type": CoverageType.JACOCO.value,
         "code_coverage_report_path": "build/reports/jacoco/test/jacocoTestReport.csv",
-        "max_run_time": 240,
+        "max_run_time_sec": 240,
     },
     # Java Spring Calculator example
     {

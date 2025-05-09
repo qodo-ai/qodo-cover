@@ -10,14 +10,16 @@ from docker.errors import APIError, BuildError, DockerException
 from docker.models.containers import Container
 from rich.progress import Progress, TextColumn
 
-from cover_agent import constants
 from cover_agent.CustomLogger import CustomLogger
+from cover_agent.settings.config_loader import get_settings
 from cover_agent.utils import truncate_hash
 
 
 logger = CustomLogger.get_logger(__name__)
 
-HASH_DISPLAY_LENGTH = constants.DOCKER_HASH_DISPLAY_LENGTH
+
+settings = get_settings().get("default")
+HASH_DISPLAY_LENGTH = settings.docker_hash_display_length
 
 
 class DockerUtilityError(Exception):

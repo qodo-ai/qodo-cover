@@ -2,6 +2,7 @@ import sys
 from os.path import dirname, abspath, join, exists
 from dynaconf import Dynaconf
 
+
 SETTINGS_FILES = [
     "test_generation_prompt.toml",
     "language_extensions.toml",
@@ -56,5 +57,5 @@ class SingletonSettings:
             )
 
 
-def get_settings():
+def get_settings() -> Dynaconf:
     return SingletonSettings().settings

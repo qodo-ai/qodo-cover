@@ -4,13 +4,13 @@ import time
 
 class Runner:
     @staticmethod
-    def run_command(command: str, max_run_time: int, cwd: str = None):
+    def run_command(command: str, max_run_time_sec: int, cwd: str = None):
         """
         Executes a shell command in a specified working directory and returns its output, error, and exit code.
 
         Parameters:
             command (str): The shell command to execute.
-            max_run_time (int): Maximum allowed runtime in seconds before timeout.
+            max_run_time_sec (int): Maximum allowed runtime in seconds before timeout.
             cwd (str, optional): The working directory in which to execute the command. Defaults to None.
 
         Returns:
@@ -28,7 +28,7 @@ class Runner:
                 cwd=cwd,
                 text=True,
                 capture_output=True,
-                timeout=max_run_time,
+                timeout=max_run_time_sec,
             )
             return result.stdout, result.stderr, result.returncode, command_start_time
         except subprocess.TimeoutExpired:

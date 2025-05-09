@@ -71,7 +71,7 @@ class TestCoverAgent:
             report_filepath="test_results.html",
             desired_coverage=90,
             max_iterations=10,
-            max_run_time=30,
+            max_run_time_sec=30,
         )
         parse_args = lambda: args
         mock_isfile.return_value = False
@@ -110,7 +110,7 @@ class TestCoverAgent:
             desired_coverage=90,
             max_iterations=10,
             prompt_only=False,
-            max_run_time=30,
+            max_run_time_sec=30,
         )
         parse_args = lambda: args
         mock_isfile.side_effect = [True, False]
@@ -156,7 +156,7 @@ class TestCoverAgent:
                     diff_coverage=False,
                     branch="main",
                     run_tests_multiple_times=1,
-                    max_run_time=30,
+                    max_run_time_sec=30,
                     record_mode=False,
                 )
 
@@ -218,7 +218,7 @@ class TestCoverAgent:
                 strict_coverage=True,
                 diff_coverage=False,
                 branch="main",
-                max_run_time=30,
+                max_run_time_sec=30,
                 record_mode=False,
             )
             # Mock the methods used in run
@@ -256,7 +256,7 @@ class TestCoverAgent:
             report_filepath="test_results.html",
             desired_coverage=90,
             max_iterations=10,
-            max_run_time=30,
+            max_run_time_sec=30,
         )
 
         with pytest.raises(FileNotFoundError) as exc_info:
@@ -306,7 +306,7 @@ class TestCoverAgent:
                 strict_coverage=False,
                 diff_coverage=True,
                 branch="main",
-                max_run_time=30,
+                max_run_time_sec=30,
                 record_mode=False,
             )
             mock_test_validator.return_value.current_coverage = 0.5
@@ -373,7 +373,7 @@ class TestCoverAgent:
                 branch="main",
                 run_tests_multiple_times=1,
                 run_each_test_separately=True,
-                max_run_time=30,
+                max_run_time_sec=30,
                 record_mode=False,
             )
 
