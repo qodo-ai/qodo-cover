@@ -1,3 +1,5 @@
+from numpy.core.records import record
+
 from cover_agent.CoverAgent import CoverAgent
 from cover_agent.main import parse_args
 from unittest.mock import patch, MagicMock
@@ -155,6 +157,7 @@ class TestCoverAgent:
                     branch="main",
                     run_tests_multiple_times=1,
                     max_run_time=30,
+                    record_mode=False,
                 )
 
                 with pytest.raises(AssertionError) as exc_info:
@@ -216,6 +219,7 @@ class TestCoverAgent:
                 diff_coverage=False,
                 branch="main",
                 max_run_time=30,
+                record_mode=False,
             )
             # Mock the methods used in run
             validator = mock_unit_test_validator.return_value
@@ -303,6 +307,7 @@ class TestCoverAgent:
                 diff_coverage=True,
                 branch="main",
                 max_run_time=30,
+                record_mode=False,
             )
             mock_test_validator.return_value.current_coverage = 0.5
             mock_test_validator.return_value.desired_coverage = 90
@@ -369,6 +374,7 @@ class TestCoverAgent:
                 run_tests_multiple_times=1,
                 run_each_test_separately=True,
                 max_run_time=30,
+                record_mode=False,
             )
 
             # Initialize CoverAgent

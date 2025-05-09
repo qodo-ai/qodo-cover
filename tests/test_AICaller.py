@@ -187,24 +187,28 @@ class TestAICaller:
     @patch.dict(os.environ, {"WANDB_API_KEY": "test_key"})
     @patch("cover_agent.AICaller.Trace.log")
     def test_call_model_wandb_logging_exception(
-        self, mock_log, mock_completion, ai_caller
+            self, mock_log, mock_completion, ai_caller
     ):
         """
         Test the call_model method with W&B logging and handle logging exceptions.
         """
-        mock_completion.return_value = [
-            {"choices": [{"delta": {"content": "response"}}]}
-        ]
+        # Create a proper mock chunk with the correct structure
+        mock_chunk = Mock()
+        mock_chunk.choices = [Mock(delta=Mock(content="response"))]
+        mock_completion.return_value = [mock_chunk]
+
         mock_log.side_effect = Exception("Logging error")
         prompt = {"system": "", "user": "Hello, world!"}
-        with patch("cover_agent.AICaller.litellm.stream_chunk_builder") as mock_builder:
+
+        with patch("cover_agent.AICaller.litellm.stream_chunk_builder") as mock_builder, \
+                patch.object(ai_caller.logger, 'error') as mock_logger:
             mock_builder.return_value = {
                 "choices": [{"message": {"content": "response"}}],
                 "usage": {"prompt_tokens": 2, "completion_tokens": 10},
             }
-            with patch("builtins.print") as mock_print:
-                response, prompt_tokens, response_tokens = ai_caller.call_model(prompt)
-                assert response == "response"
-                assert prompt_tokens == 2
-                assert response_tokens == 10
-                mock_print.assert_any_call("Error logging to W&B: Logging error")
+            response, prompt_tokens, response_tokens = ai_caller.call_model(prompt)
+
+            assert response == "response"
+            assert prompt_tokens == 2
+            assert response_tokens == 10
+            mock_logger.assert_called_once_with("Error logging to W&B: Logging error")

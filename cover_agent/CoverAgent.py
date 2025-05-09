@@ -4,7 +4,7 @@ import shutil
 import sys
 import wandb
 
-from typing import List
+from typing import Optional
 
 from cover_agent.CustomLogger import CustomLogger
 from cover_agent.UnitTestGenerator import UnitTestGenerator
@@ -13,6 +13,8 @@ from cover_agent.UnitTestDB import UnitTestDB
 from cover_agent.AICaller import AICaller
 from cover_agent.AgentCompletionABC import AgentCompletionABC
 from cover_agent.DefaultAgentCompletion import DefaultAgentCompletion
+from cover_agent.ai_caller_replay import AICallerReplay
+from cover_agent.record_replay_manager import RecordReplayManager
 
 
 class CoverAgent:
@@ -23,7 +25,7 @@ class CoverAgent:
     and tracks the progress of coverage improvements over multiple iterations.
     """
     
-    def __init__(self, args, agent_completion: AgentCompletionABC = None):
+    def __init__(self, args, agent_completion: AgentCompletionABC=None, logger: Optional[CustomLogger]=None):
         """
         Initialize the CoverAgent with configuration and set up test generation environment.
 
@@ -40,7 +42,7 @@ class CoverAgent:
             FileNotFoundError: If required source files or directories are not found.
         """
         self.args = args
-        self.logger = CustomLogger.get_logger(__name__)
+        self.logger = logger or CustomLogger.get_logger(__name__)
 
         self._validate_paths()
         self._duplicate_test_file()
@@ -49,31 +51,26 @@ class CoverAgent:
         if agent_completion:
             self.agent_completion = agent_completion
         else:
-            # Create default AI caller with specified model and parameters
-            self.ai_caller = AICaller(
-                model=args.model, api_base=args.api_base, max_tokens=8192
-            )
+            self.ai_caller = self._initialize_ai_caller()
             self.agent_completion = DefaultAgentCompletion(caller=self.ai_caller)
 
-        # Modify test command for single test execution if needed
+        # Modify test command for a single test execution if needed
         test_command = args.test_command
         new_command_line = None
         if hasattr(args, "run_each_test_separately") and args.run_each_test_separately:
-            # Calculate relative path for test file
+            # Calculate a relative path for a test file
             test_file_relative_path = os.path.relpath(
                 args.test_file_output_path, args.project_root
             )
             # Handle pytest commands specifically
             if "pytest" in test_command:
                 try:
-                    # Modify pytest command to target single test file
+                    # Modify pytest command to target a single test file
                     ind1 = test_command.index("pytest")
                     ind2 = test_command[ind1:].index("--")
                     new_command_line = f"{test_command[:ind1]}pytest {test_file_relative_path} {test_command[ind1 + ind2:]}"
                 except ValueError:
-                    print(
-                        f"Failed to adapt test command for running a single test: {test_command}"
-                    )
+                    self.logger.error(f"Failed to adapt test command for running a single test: {test_command}")
             else:
                 # Use AI to adapt non-pytest test commands
                 new_command_line, _, _, _ = (
@@ -84,11 +81,11 @@ class CoverAgent:
                     )
                 )
 
-        # Update test command if successfully modified
+        # Update the test command if successfully modified
         if new_command_line:
             args.test_command_original = test_command
             args.test_command = new_command_line
-            print(
+            self.logger.info(
                 f"Converting test command: `{test_command}`\n to run only a single test: `{new_command_line}`"
             )
 
@@ -128,6 +125,45 @@ class CoverAgent:
             agent_completion=self.agent_completion,
             max_run_time=args.max_run_time,
         )
+
+    def _initialize_ai_caller(self):
+        """
+        Initialize the appropriate AI caller based on mode and response file availability.
+
+        Returns:
+            Union[AICaller, AICallerReplay]: The initialized AI caller instance
+        """
+        ai_caller_params = {
+            "model": self.args.model,
+            "api_base": self.args.api_base,
+            "max_tokens": 8192,
+            "source_file": self.args.source_file_path,
+            "test_file": self.args.test_file_path,
+            "record_mode": True,
+        }
+        if self.args.record_mode:
+            # In record mode, always use AICaller
+            self.logger.info("Initializing AICaller in Record mode...")
+            return AICaller(**ai_caller_params)
+        else:
+            # Try to use replay mode if a response file exists
+            try:
+                replay_manager = RecordReplayManager(record_mode=False)
+                replay_manager.source_file = self.args.source_file_path
+                replay_manager.test_file = self.args.test_file_path
+
+                if replay_manager.has_response_file(
+                        source_file=self.args.source_file_path, test_file=self.args.test_file_path
+                ):
+                    self.logger.info("Initializing AICallerReplay (found recorded responses)...")
+                    return AICallerReplay(source_file=self.args.source_file_path, test_file=self.args.test_file_path)
+            except Exception as e:
+                self.logger.debug(f"Failed to initialize replay mode: {e}")
+
+            # Fall back to regular AICaller without recording
+            self.logger.info("Initializing AICaller without recording (no recorded responses found)")
+            ai_caller_params["record_mode"] = False
+            return AICaller(**ai_caller_params)
 
     def _validate_paths(self):
         """

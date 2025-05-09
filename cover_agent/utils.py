@@ -1,4 +1,5 @@
 import argparse
+import inspect
 import logging
 import os
 import re
@@ -331,12 +332,17 @@ def parse_args_full_repo():
         type=str,
         default="main",
     )
-    parser.add_argument(
-        "--max-run-time",
-        type=int,
-        default=30,
-        help="Maximum time (in seconds) allowed for test execution. Overrides the value in configuration.toml if provided. Defaults to 30 seconds.",
-    )
+parser.add_argument(
+    "--max-run-time",
+    type=int,
+    default=30,
+    help="Maximum time (in seconds) allowed for test execution. Overrides the value in configuration.toml if provided. Defaults to 30 sec",
+)
+parser.add_argument(
+    "--record-mode",
+    action="store_true",
+    help="Enable record mode for LLM responses. Default: False.",
+)
     return parser.parse_args()
 
 
@@ -398,3 +404,53 @@ def find_test_files(args) -> list:
         test_files = test_files[:MAX_TEST_FILES]
 
     return test_files
+
+
+def get_original_caller() -> str:
+    """
+    Gets the name of the original calling function by traversing the call stack
+    and skipping framework/internal function calls.
+
+    Returns:
+        str: The name of the original calling function with parentheses
+    """
+    frames_to_skip = {
+        "retry_wrapper",
+        "wrapper",
+        "call_model",
+        "get_original_caller",
+        "__call__",
+        "decorator",
+        "wrapped_f",
+        "wrap",
+        "wrapper_descriptor",
+        "actualfunc",
+        "wrapped",
+        "inner",
+    }
+
+    for frame in inspect.stack()[1:]:
+        function_name = frame.function
+        if (not any(function_name.startswith(skip) for skip in ['__', 'wrap']) and
+                function_name not in frames_to_skip):
+
+            return f"{function_name}"
+
+    return "unknown_caller"
+
+
+def truncate_hash(hash_value: str, hash_display_length: int) -> str:
+    """
+    Truncate a hash string to a specified length.
+
+    Parameters:
+    hash_value (str): The original hash string to be truncated.
+    hash_display_length (int): The desired length of the truncated hash.
+
+    Returns:
+    str: The truncated hash string.
+
+    Example:
+        truncate_hash("abcdef123456", 6)  # Returns "abcdef"
+    """
+    return hash_value[:hash_display_length]

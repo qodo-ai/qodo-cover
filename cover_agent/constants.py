@@ -1,0 +1,26 @@
+from enum import Enum
+
+
+class CoverageType(Enum):
+    LCOV = "lcov"
+    COBERTURA = "cobertura"
+    JACOCO = "jacoco"
+
+
+MODEL = "gpt-4o-2024-11-20"
+MAX_ITERATIONS = 3
+DESIRED_COVERAGE = 70
+API_BASE = "http://localhost:11434"
+MAX_RUN_TIME_SEC = 30
+
+RESPONSES_FOLDER = "stored_responses"
+
+COVER_AGENT_HOST_FOLDER = "dist/cover-agent"
+COVER_AGENT_CONTAINER_FOLDER = "/usr/local/bin/cover-agent"
+
+DOCKER_HASH_DISPLAY_LENGTH = 12
+RECORD_REPLAY_HASH_DISPLAY_LENGTH = 12
+
+FUZZY_LOOKUP_THRESHOLD = 95
+FUZZY_LOOKUP_PREFIX_LENGTH = 1000
+FUZZY_LOOKUP_BEST_RATIO = 0

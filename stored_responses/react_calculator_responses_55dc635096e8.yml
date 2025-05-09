@@ -1,0 +1,321 @@
+analyze_suite_test_headers_indentation:
+  b85becb4bf76:
+    prompt:
+      system: ''
+      user: "## Overview\nYou are a code assistant that accepts a javascript test\
+        \ file as input.\nYour goal is to analyze this file, and provide several feedbacks:\
+        \ the programming language of the test file, the testing framework needed\
+        \ to run the tests in the test file, the number of tests in the test file,\
+        \ and the indentation of the test headers in the test file.\n\nHere is the\
+        \ file that contains the existing tests, called `src/tests/Calculator.test.js`:\n\
+        =========\nimport React from 'react';\nimport { shallow } from 'enzyme';\n\
+        import Calculator from '../modules/Calculator'; \n\ndescribe('Calculator Component',\
+        \ () => {\n    let wrapper;\n    beforeEach(() => {\n        wrapper = shallow(<Calculator\
+        \ />);\n    });\n\n    test('correctly calculates exponentiation', () => {\n\
+        \        wrapper.instance().handleInput('2');\n        wrapper.instance().handleOperation('**');\n\
+        \        wrapper.instance().handleInput('3');\n        wrapper.instance().handleEquals();\n\
+        \        expect(wrapper.state('onDisplay')).toBe('8');\n    });\n\n    test('correctly\
+        \ calculates modulus', () => {\n        wrapper.instance().handleInput('10');\n\
+        \        wrapper.instance().handleOperation('%');\n        wrapper.instance().handleInput('3');\n\
+        \        wrapper.instance().handleEquals();\n        expect(wrapper.state('onDisplay')).toBe('1');\n\
+        \    });\n\n    test('resets display to 0 on clear', () => {\n        wrapper.instance().handleInput('123');\n\
+        \        wrapper.instance().handleClear();\n        expect(wrapper.state('onDisplay')).toBe('0');\n\
+        \    });\n\n    test('resets currentTotal to 0 on clear', () => {\n      \
+        \  wrapper.instance().handleInput('123');\n        wrapper.instance().handleOperation('+');\n\
+        \        wrapper.instance().handleInput('456');\n        wrapper.instance().handleEquals();\n\
+        \        wrapper.instance().handleClear();\n        expect(wrapper.state('currentTotal')).toBe(0);\n\
+        \    });\n\n    test('resets currentOperator to null on clear', () => {\n\
+        \        wrapper.instance().handleInput('123');\n        wrapper.instance().handleOperation('+');\n\
+        \        wrapper.instance().handleClear();\n        expect(wrapper.state('currentOperator')).toBeNull();\n\
+        \    });\n\n    test('resets lastActionEquals to false on clear', () => {\n\
+        \        wrapper.instance().handleInput('123');\n        wrapper.instance().handleOperation('+');\n\
+        \        wrapper.instance().handleInput('456');\n        wrapper.instance().handleEquals();\n\
+        \        wrapper.instance().handleClear();\n        expect(wrapper.state('lastActionEquals')).toBe(false);\n\
+        \    });\n\n    test('throws error for invalid operator', () => {\n      \
+        \  expect(() => {\n            wrapper.instance().evaluate('5', '3', 'invalid_operator');\n\
+        \        }).toThrow(\"Invalid operator\");\n    });\n});\n=========\n\n\n\
+        Now, you need to analyze the test file and provide a YAML object equivalent\
+        \ to type $TestsAnalysis, according to the following Pydantic definitions:\n\
+        =====\n\nclass TestsAnalysis(BaseModel):\n    language: str = Field(description=\"\
+        The programming language used by the test file\")\n    testing_framework:\
+        \ str = Field(description=\"The testing framework needed to run the tests\
+        \ in the test file\")\n    number_of_tests: int = Field(description=\"The\
+        \ number of tests in the test file\")\n    test_headers_indentation: int =\
+        \ Field(description=\"The indentation of the test headers in the test file.For\
+        \ example, \"def test_...\" has an indentation of 0, \"  def test_...\" has\
+        \ an indentation of 2, \"    def test_...\" has an indentation of 4, and so\
+        \ on.\")\n\n=====\n\n\nExample output:\n\n```yaml\nlanguage: javascript\n\
+        testing_framework: ...\nnumber_of_tests: ...\ntest_headers_indentation: ...\n\
+        ```\n\nThe Response should be only a valid YAML object, without any introduction\
+        \ text or follow-up text.\n\nAnswer:\n```yaml"
+    response: '```yaml
+
+      language: javascript
+
+      testing_framework: jest
+
+      number_of_tests: 7
+
+      test_headers_indentation: 4
+
+      ```'
+    prompt_tokens: 772
+    completion_tokens: 29
+analyze_test_insert_line:
+  7eac12e1cf10:
+    prompt:
+      system: ''
+      user: "## Overview\nYou are a code assistant that accepts a javascript test\
+        \ file as input.\nYour goal is to analyze this file and provide the following:\
+        \ \n* The programming language of the test file\n* The testing framework needed\
+        \ to run the tests in the test file\n* The number of tests in the test file\n\
+        * The line number in the test file where the new test should be inserted.\
+        \ \n\nIMPORTANT: Ensure that you account for block delimiters (e.g., curly\
+        \ braces in Java, `end` in Ruby) to correctly place the new test before the\
+        \ end of the relevant block, such as a class or method definition. If a test\
+        \ should live within a class then the insertion happens BEFORE the last delimiter\
+        \ (if relevant).\n\nHere is the file that contains the existing tests, called\
+        \ `src/tests/Calculator.test.js`. Note that we have manually added line numbers\
+        \ for each line of code, to help you understand the structure of the file.\
+        \ Those numbers are not a part of the original code.\n=========\n1 import\
+        \ React from 'react';\n2 import { shallow } from 'enzyme';\n3 import Calculator\
+        \ from '../modules/Calculator'; \n4 \n5 describe('Calculator Component', ()\
+        \ => {\n6     let wrapper;\n7     beforeEach(() => {\n8         wrapper =\
+        \ shallow(<Calculator />);\n9     });\n10 \n11     test('correctly calculates\
+        \ exponentiation', () => {\n12         wrapper.instance().handleInput('2');\n\
+        13         wrapper.instance().handleOperation('**');\n14         wrapper.instance().handleInput('3');\n\
+        15         wrapper.instance().handleEquals();\n16         expect(wrapper.state('onDisplay')).toBe('8');\n\
+        17     });\n18 \n19     test('correctly calculates modulus', () => {\n20 \
+        \        wrapper.instance().handleInput('10');\n21         wrapper.instance().handleOperation('%');\n\
+        22         wrapper.instance().handleInput('3');\n23         wrapper.instance().handleEquals();\n\
+        24         expect(wrapper.state('onDisplay')).toBe('1');\n25     });\n26 \n\
+        27     test('resets display to 0 on clear', () => {\n28         wrapper.instance().handleInput('123');\n\
+        29         wrapper.instance().handleClear();\n30         expect(wrapper.state('onDisplay')).toBe('0');\n\
+        31     });\n32 \n33     test('resets currentTotal to 0 on clear', () => {\n\
+        34         wrapper.instance().handleInput('123');\n35         wrapper.instance().handleOperation('+');\n\
+        36         wrapper.instance().handleInput('456');\n37         wrapper.instance().handleEquals();\n\
+        38         wrapper.instance().handleClear();\n39         expect(wrapper.state('currentTotal')).toBe(0);\n\
+        40     });\n41 \n42     test('resets currentOperator to null on clear', ()\
+        \ => {\n43         wrapper.instance().handleInput('123');\n44         wrapper.instance().handleOperation('+');\n\
+        45         wrapper.instance().handleClear();\n46         expect(wrapper.state('currentOperator')).toBeNull();\n\
+        47     });\n48 \n49     test('resets lastActionEquals to false on clear',\
+        \ () => {\n50         wrapper.instance().handleInput('123');\n51         wrapper.instance().handleOperation('+');\n\
+        52         wrapper.instance().handleInput('456');\n53         wrapper.instance().handleEquals();\n\
+        54         wrapper.instance().handleClear();\n55         expect(wrapper.state('lastActionEquals')).toBe(false);\n\
+        56     });\n57 \n58     test('throws error for invalid operator', () => {\n\
+        59         expect(() => {\n60             wrapper.instance().evaluate('5',\
+        \ '3', 'invalid_operator');\n61         }).toThrow(\"Invalid operator\");\n\
+        62     });\n63 });\n=========\n\n\nNow, you need to analyze the test file\
+        \ and provide a YAML object equivalent to type $TestsAnalysis, according to\
+        \ the following Pydantic definitions:\n=====\nclass TestsAnalysis(BaseModel):\n\
+        \    language: str = Field(description=\"The programming language used by\
+        \ the test file\")\n    testing_framework: str = Field(description=\"The testing\
+        \ framework needed to run the tests in the test file\")\n    number_of_tests:\
+        \ int = Field(description=\"The number of tests in the test file\")\n    relevant_line_number_to_insert_tests_after:\
+        \ int = Field(description=\"The line number in the test file, **after which**\
+        \ the new tests should be inserted, so they will be a part of the existing\
+        \ test suite. Place the new tests after the last test in the suite.\")\n \
+        \   relevant_line_number_to_insert_imports_after: int = Field(description=\"\
+        The line number in the test file, **after which**  new imports should be inserted,\
+        \ so they will be a legal valid code, and the new test file will be able to\
+        \ run. The new imports should be introduced as independent import lines, and\
+        \ not as part of the existing imports.\")\n=====\n\n\nExample output:\n\n\
+        ```yaml\nlanguage: javascript\ntesting_framework: ...\nnumber_of_tests: ...\n\
+        relevant_line_number_to_insert_tests_after: ...\nrelevant_line_number_to_insert_imports_after:\
+        \ ...\n```\n\nThe Response should be only a valid YAML object, without any\
+        \ introduction text or follow-up text.\n\nAnswer:\n```yaml"
+    response: '```yaml
+
+      language: javascript
+
+      testing_framework: jest
+
+      number_of_tests: 8
+
+      relevant_line_number_to_insert_tests_after: 62
+
+      relevant_line_number_to_insert_imports_after: 3
+
+      ```'
+    prompt_tokens: 1030
+    completion_tokens: 46
+generate_tests:
+  cdfb3cc4ded7:
+    prompt:
+      system: ''
+      user: "## Overview\nYou are a code assistant that accepts a javascript source\
+        \ file, and a javascript test file.\nYour goal is to generate additional comprehensive\
+        \ unit tests to complement the existing test suite, in order to increase the\
+        \ code coverage against the source file.\n\nAdditional guidelines:\n- Carefully\
+        \ analyze the provided code. Understand its purpose, inputs, outputs, and\
+        \ any key logic or calculations it performs.\n- Brainstorm a list of diverse\
+        \ and meaningful test cases you think will be necessary to fully validate\
+        \ the correctness and functionality of the code, and achieve 100% code coverage.\n\
+        - After each individual test has been added, review all tests to ensure they\
+        \ cover the full range of scenarios, including how to handle exceptions or\
+        \ errors.\n- If the original test file contains a test suite, assume that\
+        \ each generated test will be a part of the same suite. Ensure that the new\
+        \ tests are consistent with the existing test suite in terms of style, naming\
+        \ conventions, and structure.\n\n## Source File\nHere is the source file that\
+        \ you will be writing tests against, called `src/modules/Calculator.js`.\n\
+        Note that we have manually added line numbers for each line of code, to help\
+        \ you understand the code coverage report.\nThose numbers are not a part of\
+        \ the original code.\n=========\n1 import React from 'react';\n2 import './Calculator.css';\n\
+        3 \n4 type OperationFunction = (a: number, b: number) => number;\n5 \n6 const\
+        \ operations: { [key: string]: OperationFunction } = {\n7     \"+\": (a, b)\
+        \ => a + b,\n8     \"-\": (a, b) => a - b,\n9     \"*\": (a, b) => a * b,\n\
+        10     \"/\": (a, b) => a / b,\n11     \"**\": (a, b) => a ** b, // Exponentiation\n\
+        12     \"%\": (a, b) => a % b, // Modulus\n13 };\n14 \n15 interface CalculatorState\
+        \ {\n16     currentTotal: number;\n17     currentOperator: string | null;\n\
+        18     onDisplay: string;\n19     lastActionEquals: boolean;\n20 }\n21 \n\
+        22 class Calculator extends React.Component<{}, CalculatorState> {\n23   \
+        \  constructor(props: {}) {\n24         super(props);\n25         this.state\
+        \ = {\n26             currentTotal: 0,\n27             currentOperator: null,\n\
+        28             onDisplay: \"0\",\n29             lastActionEquals: false,\n\
+        30         };\n31     }\n32 \n33     handleInput = (value: string) => {\n\
+        34         this.setState((prevState: CalculatorState) => {\n35           \
+        \  if (prevState.lastActionEquals) {\n36                 return {\n37    \
+        \                 onDisplay: value,\n38                     lastActionEquals:\
+        \ false,\n39                 };\n40             }\n41             if (value\
+        \ === '.') {\n42                 if (prevState.onDisplay.includes('.')) {\n\
+        43                     return {};\n44                 }\n45              \
+        \   if (prevState.onDisplay === '0') {\n46                     return { onDisplay:\
+        \ '0.' };\n47                 }\n48             }\n49             return {\n\
+        50                 onDisplay: prevState.onDisplay === \"0\" ? value : prevState.onDisplay\
+        \ + value,\n51             };\n52         });\n53     };\n54 \n55     handleOperation\
+        \ = (operator: string) => {\n56         this.setState((prevState: CalculatorState)\
+        \ => ({\n57             currentTotal: prevState.currentOperator ? this.evaluate(prevState.currentTotal,\
+        \ prevState.onDisplay, prevState.currentOperator) : parseFloat(prevState.onDisplay),\n\
+        58             currentOperator: operator,\n59             onDisplay: \"0\"\
+        ,\n60             lastActionEquals: false,\n61         }));\n62     };\n63\
+        \ \n64     handleClear = () => {\n65         this.setState({\n66         \
+        \    currentTotal: 0,\n67             currentOperator: null,\n68         \
+        \    onDisplay: \"0\",\n69             lastActionEquals: false,\n70      \
+        \   });\n71     };\n72 \n73     handleEquals = () => {\n74         this.setState((prevState:\
+        \ CalculatorState) => ({\n75             currentTotal: this.evaluate(prevState.currentTotal,\
+        \ prevState.onDisplay, prevState.currentOperator),\n76             currentOperator:\
+        \ null,\n77             onDisplay: String(this.evaluate(prevState.currentTotal,\
+        \ prevState.onDisplay, prevState.currentOperator)),\n78             lastActionEquals:\
+        \ true,\n79         }));\n80     };\n81 \n82     evaluate = (left, right,\
+        \ operator) => {\n83       const leftNum = parseFloat(left);\n84       const\
+        \ rightNum = parseFloat(right);\n85       if (!operator || !operations[operator])\
+        \ {\n86         throw new Error(\"Invalid operator\");\n87       }\n88   \
+        \    const operation = operations[operator];\n89       return operation(leftNum,\
+        \ rightNum);\n90     };\n91 \n92     render() {\n93         return (\n94 \
+        \            <div className=\"calculator\">\n95                 <div className=\"\
+        display\">{this.state.onDisplay}</div>\n96                 <div className=\"\
+        keypad\">\n97                     <button onClick={() => this.handleInput('1')}>1</button>\n\
+        98                     <button onClick={() => this.handleInput('2')}>2</button>\n\
+        99                     <button onClick={() => this.handleInput('3')}>3</button>\n\
+        100                     <button onClick={() => this.handleOperation('+')}>+</button>\n\
+        101                     <button onClick={() => this.handleInput('4')}>4</button>\n\
+        102                     <button onClick={() => this.handleInput('5')}>5</button>\n\
+        103                     <button onClick={() => this.handleInput('6')}>6</button>\n\
+        104                     <button onClick={() => this.handleOperation('-')}>-</button>\n\
+        105                     <button onClick={() => this.handleInput('7')}>7</button>\n\
+        106                     <button onClick={() => this.handleInput('8')}>8</button>\n\
+        107                     <button onClick={() => this.handleInput('9')}>9</button>\n\
+        108                     <button onClick={() => this.handleOperation('*')}>*</button>\n\
+        109                     <button onClick={() => this.handleInput('0')}>0</button>\n\
+        110                     <button onClick={() => this.handleOperation('/')}>/</button>\n\
+        111                     <button onClick={() => this.handleOperation('**')}>^</button>\n\
+        112                     <button onClick={() => this.handleOperation('%')}>%</button>\n\
+        113                     <button onClick={this.handleClear}>C</button>\n114\
+        \                     <button onClick={this.handleEquals}>=</button>\n115\
+        \                 </div>\n116             </div>\n117         );\n118    \
+        \ }\n119 };\n120 \n121 export default Calculator;\n=========\n\n## Test File\n\
+        Here is the file that contains the existing tests, called `src/tests/Calculator.test.js`:\n\
+        =========\nimport React from 'react';\nimport { shallow } from 'enzyme';\n\
+        import Calculator from '../modules/Calculator'; \n\ndescribe('Calculator Component',\
+        \ () => {\n    let wrapper;\n    beforeEach(() => {\n        wrapper = shallow(<Calculator\
+        \ />);\n    });\n\n    test('correctly calculates exponentiation', () => {\n\
+        \        wrapper.instance().handleInput('2');\n        wrapper.instance().handleOperation('**');\n\
+        \        wrapper.instance().handleInput('3');\n        wrapper.instance().handleEquals();\n\
+        \        expect(wrapper.state('onDisplay')).toBe('8');\n    });\n\n    test('correctly\
+        \ calculates modulus', () => {\n        wrapper.instance().handleInput('10');\n\
+        \        wrapper.instance().handleOperation('%');\n        wrapper.instance().handleInput('3');\n\
+        \        wrapper.instance().handleEquals();\n        expect(wrapper.state('onDisplay')).toBe('1');\n\
+        \    });\n\n    test('resets display to 0 on clear', () => {\n        wrapper.instance().handleInput('123');\n\
+        \        wrapper.instance().handleClear();\n        expect(wrapper.state('onDisplay')).toBe('0');\n\
+        \    });\n\n    test('resets currentTotal to 0 on clear', () => {\n      \
+        \  wrapper.instance().handleInput('123');\n        wrapper.instance().handleOperation('+');\n\
+        \        wrapper.instance().handleInput('456');\n        wrapper.instance().handleEquals();\n\
+        \        wrapper.instance().handleClear();\n        expect(wrapper.state('currentTotal')).toBe(0);\n\
+        \    });\n\n    test('resets currentOperator to null on clear', () => {\n\
+        \        wrapper.instance().handleInput('123');\n        wrapper.instance().handleOperation('+');\n\
+        \        wrapper.instance().handleClear();\n        expect(wrapper.state('currentOperator')).toBeNull();\n\
+        \    });\n\n    test('resets lastActionEquals to false on clear', () => {\n\
+        \        wrapper.instance().handleInput('123');\n        wrapper.instance().handleOperation('+');\n\
+        \        wrapper.instance().handleInput('456');\n        wrapper.instance().handleEquals();\n\
+        \        wrapper.instance().handleClear();\n        expect(wrapper.state('lastActionEquals')).toBe(false);\n\
+        \    });\n\n    test('throws error for invalid operator', () => {\n      \
+        \  expect(() => {\n            wrapper.instance().evaluate('5', '3', 'invalid_operator');\n\
+        \        }).toThrow(\"Invalid operator\");\n    });\n});\n=========\n\n###\
+        \ Test Framework\nThe test framework used for running tests is `jest`.\n##\
+        \ Additional Includes\nHere are the additional files needed to provide context\
+        \ for the source code:\n======\nNone\n======\n\n\n## Code Coverage\nBased\
+        \ on the code coverage report below, your goal is to suggest new test cases\
+        \ for the test file `src/tests/Calculator.test.js` against the source file\
+        \ `src/modules/Calculator.js` that would increase the coverage, meaning cover\
+        \ missing lines of code.\n=========\nLines covered: [6, 7, 11, 12, 23, 24,\
+        \ 25, 33, 34, 35, 41, 49, 55, 56, 64, 65, 73, 74, 82, 83, 84, 85, 86, 88,\
+        \ 89, 92, 93]\nLines missed: [8, 9, 10, 36, 42, 43, 45, 46, 97, 98, 99, 100,\
+        \ 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112]\nPercentage\
+        \ covered: 52.94%\n=========\n\n## Response\nThe output must be a YAML object\
+        \ equivalent to type $NewTests, according to the following Pydantic definitions:\n\
+        =====\nclass SingleTest(BaseModel):\n    test_behavior: str = Field(description=\"\
+        Short description of the behavior the test covers\")\n    test_name: str =\
+        \ Field(description=\" A short unique test name, that should reflect the test\
+        \ objective\")\n    test_code: str = Field(description=\"A new 'jest' test\
+        \ function that extends the existing test suite, and tests the behavior described\
+        \ in 'test_behavior'. The test should be written like it's part of the existing\
+        \ test suite, if there is one, and it can use existing helper functions, setup,\
+        \ or teardown code. Don't include new imports here, use 'new_imports_code'\
+        \ section instead.\")\n    new_imports_code: str = Field(description=\"New\
+        \ imports that are required to run the new test function, and are not already\
+        \ imported in the test file. Give an empty string if no new imports are required.\
+        \ If relevant, add new imports as 'import ...' lines.\")\n    test_tags: str\
+        \ = Field(description=\"A single label that best describes the test, out of:\
+        \ ['happy path', 'edge case','other']\")\n\nclass NewTests(BaseModel):\n \
+        \   language: str = Field(description=\"The programming language of the source\
+        \ code\")\n    existing_test_function_signature: str = Field(description=\"\
+        A single line repeating a signature header of one of the existing test functions\"\
+        )\n    new_tests: List[SingleTest] = Field(min_items=1, max_items=4, description=\"\
+        A list of new test functions to append to the existing test suite, aiming\
+        \ to increase the code coverage. Each test should run as-is, without requiring\
+        \ any additional inputs or setup code. Don't introduce new dependencies\"\
+        )\n=====\n\nExample output:\n\n```yaml\nlanguage: javascript\nexisting_test_function_signature:\
+        \ |\n  ...\nnew_tests:\n- test_behavior: |\n    Test that the function returns\
+        \ the correct output for a single element list\n  test_name: |\n    ...\n\
+        \  test_code: |\n    ...\n  new_imports_code: |\n    \"\"\n  test_tags: happy\
+        \ path\n    ...\n```\n\n\nUse block scalar('|') to format each YAML output.\n\
+        \nResponse (should be a valid YAML, and nothing else):\n```yaml"
+    response: "```yaml\nlanguage: javascript\nexisting_test_function_signature: |\n\
+      \  test('correctly calculates exponentiation', () => {\nnew_tests:\n- test_behavior:\
+      \ |\n    Test that the calculator correctly handles subtraction operations.\n\
+      \  test_name: |\n    correctly_calculates_subtraction\n  test_code: |\n    test('correctly\
+      \ calculates subtraction', () => {\n        wrapper.instance().handleInput('10');\n\
+      \        wrapper.instance().handleOperation('-');\n        wrapper.instance().handleInput('3');\n\
+      \        wrapper.instance().handleEquals();\n        expect(wrapper.state('onDisplay')).toBe('7');\n\
+      \    });\n  new_imports_code: |\n    \"\"\n  test_tags: happy path\n\n- test_behavior:\
+      \ |\n    Test that the calculator correctly handles multiplication operations.\n\
+      \  test_name: |\n    correctly_calculates_multiplication\n  test_code: |\n \
+      \   test('correctly calculates multiplication', () => {\n        wrapper.instance().handleInput('4');\n\
+      \        wrapper.instance().handleOperation('*');\n        wrapper.instance().handleInput('5');\n\
+      \        wrapper.instance().handleEquals();\n        expect(wrapper.state('onDisplay')).toBe('20');\n\
+      \    });\n  new_imports_code: |\n    \"\"\n  test_tags: happy path\n\n- test_behavior:\
+      \ |\n    Test that the calculator correctly handles division operations.\n \
+      \ test_name: |\n    correctly_calculates_division\n  test_code: |\n    test('correctly\
+      \ calculates division', () => {\n        wrapper.instance().handleInput('20');\n\
+      \        wrapper.instance().handleOperation('/');\n        wrapper.instance().handleInput('4');\n\
+      \        wrapper.instance().handleEquals();\n        expect(wrapper.state('onDisplay')).toBe('5');\n\
+      \    });\n  new_imports_code: |\n    \"\"\n  test_tags: happy path\n\n- test_behavior:\
+      \ |\n    Test that the calculator correctly handles decimal inputs and prevents\
+      \ multiple decimal points.\n  test_name: |\n    correctly_handles_decimal_input\n\
+      \  test_code: |\n    test('correctly handles decimal input', () => {\n     \
+      \   wrapper.instance().handleInput('3');\n        wrapper.instance().handleInput('.');\n\
+      \        wrapper.instance().handleInput('1');\n        wrapper.instance().handleInput('.');\n\
+      \        expect(wrapper.state('onDisplay')).toBe('3.1');\n    });\n  new_imports_code:\
+      \ |\n    \"\"\n  test_tags: edge case\n```"
+    prompt_tokens: 2588
+    completion_tokens: 467

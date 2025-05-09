@@ -1,0 +1,747 @@
+analyze_suite_test_headers_indentation:
+  2a3c9161c2c6:
+    prompt:
+      system: ''
+      user: "## Overview\nYou are a code assistant that accepts a java test file as\
+        \ input.\nYour goal is to analyze this file, and provide several feedbacks:\
+        \ the programming language of the test file, the testing framework needed\
+        \ to run the tests in the test file, the number of tests in the test file,\
+        \ and the indentation of the test headers in the test file.\n\nHere is the\
+        \ file that contains the existing tests, called `src/test/java/com/example/calculator/controller/CalculatorControllerTest.java`:\n\
+        =========\npackage com.example.calculator.controller;\n\nimport com.example.calculator.controller.CalculatorController;\n\
+        import com.example.calculator.service.CalculatorService;\nimport org.junit.jupiter.api.BeforeEach;\n\
+        import org.junit.jupiter.api.Test;\nimport org.springframework.beans.factory.annotation.Autowired;\n\
+        import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;\n\
+        import org.springframework.boot.test.mock.mockito.MockBean;\nimport org.springframework.test.web.servlet.MockMvc;\n\
+        \nimport static org.mockito.Mockito.when;\nimport static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;\n\
+        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;\n\
+        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;\n\
+        \n@WebMvcTest(CalculatorController.class)\npublic class CalculatorControllerTest\
+        \ {\n\n    @Autowired\n    private MockMvc mockMvc;\n\n    @MockBean\n   \
+        \ private CalculatorService calculatorService;\n\n    @BeforeEach\n    public\
+        \ void setUp() {\n        when(calculatorService.add(2, 3)).thenReturn(5.0);\n\
+        \        when(calculatorService.subtract(5, 4)).thenReturn(1.0);\n       \
+        \ when(calculatorService.multiply(2, 3)).thenReturn(6.0);\n        when(calculatorService.divide(6,\
+        \ 3)).thenReturn(2.0);\n    }\n\n    @Test\n    public void testAdd() throws\
+        \ Exception {\n        mockMvc.perform(get(\"/add?a=2&b=3\"))\n          \
+        \      .andExpect(status().isOk())\n                .andExpect(content().string(\"\
+        5.0\"));\n    }\n\n    @Test\n    public void testSubtract() throws Exception\
+        \ {\n        mockMvc.perform(get(\"/subtract?a=5&b=4\"))\n               \
+        \ .andExpect(status().isOk())\n                .andExpect(content().string(\"\
+        1.0\"));\n    }\n\n}\n=========\n\n\nNow, you need to analyze the test file\
+        \ and provide a YAML object equivalent to type $TestsAnalysis, according to\
+        \ the following Pydantic definitions:\n=====\n\nclass TestsAnalysis(BaseModel):\n\
+        \    language: str = Field(description=\"The programming language used by\
+        \ the test file\")\n    testing_framework: str = Field(description=\"The testing\
+        \ framework needed to run the tests in the test file\")\n    number_of_tests:\
+        \ int = Field(description=\"The number of tests in the test file\")\n    test_headers_indentation:\
+        \ int = Field(description=\"The indentation of the test headers in the test\
+        \ file.For example, \"def test_...\" has an indentation of 0, \"  def test_...\"\
+        \ has an indentation of 2, \"    def test_...\" has an indentation of 4, and\
+        \ so on.\")\n\n=====\n\n\nExample output:\n\n```yaml\nlanguage: java\ntesting_framework:\
+        \ ...\nnumber_of_tests: ...\ntest_headers_indentation: ...\n```\n\nThe Response\
+        \ should be only a valid YAML object, without any introduction text or follow-up\
+        \ text.\n\nAnswer:\n```yaml"
+    response: 'language: java
+
+      testing_framework: junit
+
+      number_of_tests: 2
+
+      test_headers_indentation: 4
+
+      ```'
+    prompt_tokens: 686
+    completion_tokens: 26
+analyze_test_insert_line:
+  b065dd976319:
+    prompt:
+      system: ''
+      user: "## Overview\nYou are a code assistant that accepts a java test file as\
+        \ input.\nYour goal is to analyze this file and provide the following: \n\
+        * The programming language of the test file\n* The testing framework needed\
+        \ to run the tests in the test file\n* The number of tests in the test file\n\
+        * The line number in the test file where the new test should be inserted.\
+        \ \n\nIMPORTANT: Ensure that you account for block delimiters (e.g., curly\
+        \ braces in Java, `end` in Ruby) to correctly place the new test before the\
+        \ end of the relevant block, such as a class or method definition. If a test\
+        \ should live within a class then the insertion happens BEFORE the last delimiter\
+        \ (if relevant).\n\nHere is the file that contains the existing tests, called\
+        \ `src/test/java/com/example/calculator/controller/CalculatorControllerTest.java`.\
+        \ Note that we have manually added line numbers for each line of code, to\
+        \ help you understand the structure of the file. Those numbers are not a part\
+        \ of the original code.\n=========\n1 package com.example.calculator.controller;\n\
+        2 \n3 import com.example.calculator.controller.CalculatorController;\n4 import\
+        \ com.example.calculator.service.CalculatorService;\n5 import org.junit.jupiter.api.BeforeEach;\n\
+        6 import org.junit.jupiter.api.Test;\n7 import org.springframework.beans.factory.annotation.Autowired;\n\
+        8 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;\n\
+        9 import org.springframework.boot.test.mock.mockito.MockBean;\n10 import org.springframework.test.web.servlet.MockMvc;\n\
+        11 \n12 import static org.mockito.Mockito.when;\n13 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;\n\
+        14 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;\n\
+        15 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;\n\
+        16 \n17 @WebMvcTest(CalculatorController.class)\n18 public class CalculatorControllerTest\
+        \ {\n19 \n20     @Autowired\n21     private MockMvc mockMvc;\n22 \n23    \
+        \ @MockBean\n24     private CalculatorService calculatorService;\n25 \n26\
+        \     @BeforeEach\n27     public void setUp() {\n28         when(calculatorService.add(2,\
+        \ 3)).thenReturn(5.0);\n29         when(calculatorService.subtract(5, 4)).thenReturn(1.0);\n\
+        30         when(calculatorService.multiply(2, 3)).thenReturn(6.0);\n31   \
+        \      when(calculatorService.divide(6, 3)).thenReturn(2.0);\n32     }\n33\
+        \ \n34     @Test\n35     public void testAdd() throws Exception {\n36    \
+        \     mockMvc.perform(get(\"/add?a=2&b=3\"))\n37                 .andExpect(status().isOk())\n\
+        38                 .andExpect(content().string(\"5.0\"));\n39     }\n40 \n\
+        41     @Test\n42     public void testSubtract() throws Exception {\n43   \
+        \      mockMvc.perform(get(\"/subtract?a=5&b=4\"))\n44                 .andExpect(status().isOk())\n\
+        45                 .andExpect(content().string(\"1.0\"));\n46     }\n47 \n\
+        48 }\n49\n=========\n\n\nNow, you need to analyze the test file and provide\
+        \ a YAML object equivalent to type $TestsAnalysis, according to the following\
+        \ Pydantic definitions:\n=====\nclass TestsAnalysis(BaseModel):\n    language:\
+        \ str = Field(description=\"The programming language used by the test file\"\
+        )\n    testing_framework: str = Field(description=\"The testing framework\
+        \ needed to run the tests in the test file\")\n    number_of_tests: int =\
+        \ Field(description=\"The number of tests in the test file\")\n    relevant_line_number_to_insert_tests_after:\
+        \ int = Field(description=\"The line number in the test file, **after which**\
+        \ the new tests should be inserted, so they will be a part of the existing\
+        \ test suite. Place the new tests after the last test in the suite.\")\n \
+        \   relevant_line_number_to_insert_imports_after: int = Field(description=\"\
+        The line number in the test file, **after which**  new imports should be inserted,\
+        \ so they will be a legal valid code, and the new test file will be able to\
+        \ run. The new imports should be introduced as independent import lines, and\
+        \ not as part of the existing imports.\")\n=====\n\n\nExample output:\n\n\
+        ```yaml\nlanguage: java\ntesting_framework: ...\nnumber_of_tests: ...\nrelevant_line_number_to_insert_tests_after:\
+        \ ...\nrelevant_line_number_to_insert_imports_after: ...\n```\n\nThe Response\
+        \ should be only a valid YAML object, without any introduction text or follow-up\
+        \ text.\n\nAnswer:\n```yaml"
+    response: '```yaml
+
+      language: java
+
+      testing_framework: junit.jupiter
+
+      number_of_tests: 2
+
+      relevant_line_number_to_insert_tests_after: 46
+
+      relevant_line_number_to_insert_imports_after: 16
+
+      ```'
+    prompt_tokens: 933
+    completion_tokens: 47
+generate_tests:
+  afc2cbec50b9:
+    prompt:
+      system: ''
+      user: "## Overview\nYou are a code assistant that accepts a java source file,\
+        \ and a java test file.\nYour goal is to generate additional comprehensive\
+        \ unit tests to complement the existing test suite, in order to increase the\
+        \ code coverage against the source file.\n\nAdditional guidelines:\n- Carefully\
+        \ analyze the provided code. Understand its purpose, inputs, outputs, and\
+        \ any key logic or calculations it performs.\n- Brainstorm a list of diverse\
+        \ and meaningful test cases you think will be necessary to fully validate\
+        \ the correctness and functionality of the code, and achieve 100% code coverage.\n\
+        - After each individual test has been added, review all tests to ensure they\
+        \ cover the full range of scenarios, including how to handle exceptions or\
+        \ errors.\n- If the original test file contains a test suite, assume that\
+        \ each generated test will be a part of the same suite. Ensure that the new\
+        \ tests are consistent with the existing test suite in terms of style, naming\
+        \ conventions, and structure.\n\n## Source File\nHere is the source file that\
+        \ you will be writing tests against, called `src/main/java/com/example/calculator/controller/CalculatorController.java`.\n\
+        Note that we have manually added line numbers for each line of code, to help\
+        \ you understand the code coverage report.\nThose numbers are not a part of\
+        \ the original code.\n=========\n1 package com.example.calculator.controller;\n\
+        2 \n3 import com.example.calculator.service.CalculatorService;\n4 import org.springframework.beans.factory.annotation.Autowired;\n\
+        5 import org.springframework.web.bind.annotation.GetMapping;\n6 import org.springframework.web.bind.annotation.RequestParam;\n\
+        7 import org.springframework.web.bind.annotation.RestController;\n8 \n9 @RestController\n\
+        10 public class CalculatorController {\n11 \n12     @Autowired\n13     private\
+        \ CalculatorService calculatorService;\n14 \n15     @GetMapping(\"/add\")\n\
+        16     public double add(@RequestParam double a, @RequestParam double b) {\n\
+        17         return calculatorService.add(a, b);\n18     }\n19 \n20     @GetMapping(\"\
+        /subtract\")\n21     public double subtract(@RequestParam double a, @RequestParam\
+        \ double b) {\n22         return calculatorService.subtract(a, b);\n23   \
+        \  }\n24 \n25     @GetMapping(\"/multiply\")\n26     public double multiply(@RequestParam\
+        \ double a, @RequestParam double b) {\n27         return calculatorService.multiply(a,\
+        \ b);\n28     }\n29 \n30     @GetMapping(\"/divide\")\n31     public double\
+        \ divide(@RequestParam double a, @RequestParam double b) {\n32         return\
+        \ calculatorService.divide(a, b);\n33     }\n34 }\n35\n=========\n\n## Test\
+        \ File\nHere is the file that contains the existing tests, called `src/test/java/com/example/calculator/controller/CalculatorControllerTest.java`:\n\
+        =========\npackage com.example.calculator.controller;\n\nimport com.example.calculator.controller.CalculatorController;\n\
+        import com.example.calculator.service.CalculatorService;\nimport org.junit.jupiter.api.BeforeEach;\n\
+        import org.junit.jupiter.api.Test;\nimport org.springframework.beans.factory.annotation.Autowired;\n\
+        import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;\n\
+        import org.springframework.boot.test.mock.mockito.MockBean;\nimport org.springframework.test.web.servlet.MockMvc;\n\
+        \nimport static org.mockito.Mockito.when;\nimport static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;\n\
+        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;\n\
+        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;\n\
+        \n@WebMvcTest(CalculatorController.class)\npublic class CalculatorControllerTest\
+        \ {\n\n    @Autowired\n    private MockMvc mockMvc;\n\n    @MockBean\n   \
+        \ private CalculatorService calculatorService;\n\n    @BeforeEach\n    public\
+        \ void setUp() {\n        when(calculatorService.add(2, 3)).thenReturn(5.0);\n\
+        \        when(calculatorService.subtract(5, 4)).thenReturn(1.0);\n       \
+        \ when(calculatorService.multiply(2, 3)).thenReturn(6.0);\n        when(calculatorService.divide(6,\
+        \ 3)).thenReturn(2.0);\n    }\n\n    @Test\n    public void testAdd() throws\
+        \ Exception {\n        mockMvc.perform(get(\"/add?a=2&b=3\"))\n          \
+        \      .andExpect(status().isOk())\n                .andExpect(content().string(\"\
+        5.0\"));\n    }\n\n    @Test\n    public void testSubtract() throws Exception\
+        \ {\n        mockMvc.perform(get(\"/subtract?a=5&b=4\"))\n               \
+        \ .andExpect(status().isOk())\n                .andExpect(content().string(\"\
+        1.0\"));\n    }\n\n}\n=========\n\n### Test Framework\nThe test framework\
+        \ used for running tests is `junit.jupiter`.\n## Additional Includes\nHere\
+        \ are the additional files needed to provide context for the source code:\n\
+        ======\nNone\n======\n\n\n## Code Coverage\nBased on the code coverage report\
+        \ below, your goal is to suggest new test cases for the test file `src/test/java/com/example/calculator/controller/CalculatorControllerTest.java`\
+        \ against the source file `src/main/java/com/example/calculator/controller/CalculatorController.java`\
+        \ that would increase the coverage, meaning cover missing lines of code.\n\
+        =========\nLines covered: []\nLines missed: []\nPercentage covered: 60.0%\n\
+        =========\n\n## Response\nThe output must be a YAML object equivalent to type\
+        \ $NewTests, according to the following Pydantic definitions:\n=====\nclass\
+        \ SingleTest(BaseModel):\n    test_behavior: str = Field(description=\"Short\
+        \ description of the behavior the test covers\")\n    lines_to_cover: str\
+        \ = Field(description=\"A list of line numbers, currently uncovered, that\
+        \ this specific new test aims to cover\")\n    test_name: str = Field(description=\"\
+        \ A short test name, in snake case, that reflects the behaviour to test\"\
+        )\n    test_code: str = Field(description=\"A new 'junit.jupiter' test function\
+        \ that extends the existing test suite, and tests the behavior described in\
+        \ 'test_behavior'. The test should be written like it's part of the existing\
+        \ test suite, if there is one, and it can use existing helper functions, setup,\
+        \ or teardown code. Don't include new imports here, use 'new_imports_code'\
+        \ section instead.\")\n    new_imports_code: str = Field(description=\"New\
+        \ imports that are required to run the new test function, and are not already\
+        \ imported in the test file. Give an empty string if no new imports are required.\
+        \ If relevant, add new imports as 'import ...' lines.\")\n    test_tags: str\
+        \ = Field(description=\"A single label that best describes the test, out of:\
+        \ ['happy path', 'edge case','other']\")\n\nclass NewTests(BaseModel):\n \
+        \   language: str = Field(description=\"The programming language of the source\
+        \ code\")\n    existing_test_function_signature: str = Field(description=\"\
+        A single line repeating a signature header of one of the existing test functions\"\
+        )\n    new_tests: List[SingleTest] = Field(min_items=1, max_items=4, description=\"\
+        A list of new test functions to append to the existing test suite, aiming\
+        \ to increase the code coverage. Each test should run as-is, without requiring\
+        \ any additional inputs or setup code. Don't introduce new dependencies\"\
+        )\n=====\n\nExample output:\n\n```yaml\nlanguage: java\nexisting_test_function_signature:\
+        \ |\n  ...\nnew_tests:\n- test_behavior: |\n    Test that the function returns\
+        \ the correct output for a single element list\n  lines_to_cover: |\n    [1,2,5,\
+        \ ...]\n  test_name: |\n    test_single_element_list\n  test_code: |\n   \
+        \ ...\n  new_imports_code: |\n    \"\"\n  test_tags: happy path\n    ...\n\
+        ```\n\n\nUse block scalar('|') to format each YAML output.\n\nResponse (should\
+        \ be a valid YAML, and nothing else):\n```yaml"
+    response: "```yaml\nlanguage: java\nexisting_test_function_signature: |\n  public\
+      \ void testAdd() throws Exception {\nnew_tests:\n- test_behavior: |\n    Test\
+      \ the multiply endpoint to ensure it returns the correct result for valid inputs.\n\
+      \  lines_to_cover: |\n    [25, 26, 27]\n  test_name: |\n    test_multiply\n\
+      \  test_code: |\n    @Test\n    public void testMultiply() throws Exception\
+      \ {\n        mockMvc.perform(get(\"/multiply?a=2&b=3\"))\n                .andExpect(status().isOk())\n\
+      \                .andExpect(content().string(\"6.0\"));\n    }\n  new_imports_code:\
+      \ |\n    \"\"\n  test_tags: happy path\n\n- test_behavior: |\n    Test the divide\
+      \ endpoint to ensure it returns the correct result for valid inputs.\n  lines_to_cover:\
+      \ |\n    [30, 31, 32]\n  test_name: |\n    test_divide\n  test_code: |\n   \
+      \ @Test\n    public void testDivide() throws Exception {\n        mockMvc.perform(get(\"\
+      /divide?a=6&b=3\"))\n                .andExpect(status().isOk())\n         \
+      \       .andExpect(content().string(\"2.0\"));\n    }\n  new_imports_code: |\n\
+      \    \"\"\n  test_tags: happy path\n\n- test_behavior: |\n    Test the divide\
+      \ endpoint to ensure it handles division by zero gracefully.\n  lines_to_cover:\
+      \ |\n    [30, 31, 32]\n  test_name: |\n    test_divide_by_zero\n  test_code:\
+      \ |\n    @Test\n    public void testDivideByZero() throws Exception {\n    \
+      \    when(calculatorService.divide(6, 0)).thenThrow(new ArithmeticException(\"\
+      Division by zero\"));\n        mockMvc.perform(get(\"/divide?a=6&b=0\"))\n \
+      \               .andExpect(status().isInternalServerError());\n    }\n  new_imports_code:\
+      \ |\n    \"\"\n  test_tags: edge case\n```"
+    prompt_tokens: 1561
+    completion_tokens: 398
+analyze_test_failure:
+  ad278e95c274:
+    prompt:
+      system: ''
+      user: "## Overview\nYou are a specialized test analysis assistant focused on\
+        \ unit test regression results.\nYour role is to examine both standard output\
+        \ (stdout) and error output (stderr) from test executions, identify failures,\
+        \ and provide clear, actionable summaries to help understand and resolve test\
+        \ regressions effectively.\n\n\nHere is the file that contains the existing\
+        \ tests, called `src/test/java/com/example/calculator/controller/CalculatorControllerTest.java`:\n\
+        =========\npackage com.example.calculator.controller;\n\nimport com.example.calculator.controller.CalculatorController;\n\
+        import com.example.calculator.service.CalculatorService;\nimport org.junit.jupiter.api.BeforeEach;\n\
+        import org.junit.jupiter.api.Test;\nimport org.springframework.beans.factory.annotation.Autowired;\n\
+        import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;\n\
+        import org.springframework.boot.test.mock.mockito.MockBean;\nimport org.springframework.test.web.servlet.MockMvc;\n\
+        \nimport static org.mockito.Mockito.when;\nimport static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;\n\
+        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;\n\
+        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;\n\
+        \n@WebMvcTest(CalculatorController.class)\npublic class CalculatorControllerTest\
+        \ {\n\n    @Autowired\n    private MockMvc mockMvc;\n\n    @MockBean\n   \
+        \ private CalculatorService calculatorService;\n\n    @BeforeEach\n    public\
+        \ void setUp() {\n        when(calculatorService.add(2, 3)).thenReturn(5.0);\n\
+        \        when(calculatorService.subtract(5, 4)).thenReturn(1.0);\n       \
+        \ when(calculatorService.multiply(2, 3)).thenReturn(6.0);\n        when(calculatorService.divide(6,\
+        \ 3)).thenReturn(2.0);\n    }\n\n    @Test\n    public void testAdd() throws\
+        \ Exception {\n        mockMvc.perform(get(\"/add?a=2&b=3\"))\n          \
+        \      .andExpect(status().isOk())\n                .andExpect(content().string(\"\
+        5.0\"));\n    }\n\n    @Test\n    public void testSubtract() throws Exception\
+        \ {\n        mockMvc.perform(get(\"/subtract?a=5&b=4\"))\n               \
+        \ .andExpect(status().isOk())\n                .andExpect(content().string(\"\
+        1.0\"));\n    }\n\n    @Test\n    public void testDivideByZero() throws Exception\
+        \ {\n        when(calculatorService.divide(6, 0)).thenThrow(new ArithmeticException(\"\
+        Division by zero\"));\n        mockMvc.perform(get(\"/divide?a=6&b=0\"))\n\
+        \                .andExpect(status().isInternalServerError());\n    }\n\n\n\
+        \    @Test\n    public void testDivide() throws Exception {\n        mockMvc.perform(get(\"\
+        /divide?a=6&b=3\"))\n                .andExpect(status().isOk())\n       \
+        \         .andExpect(content().string(\"2.0\"));\n    }\n\n\n    @Test\n \
+        \   public void testMultiply() throws Exception {\n        mockMvc.perform(get(\"\
+        /multiply?a=2&b=3\"))\n                .andExpect(status().isOk())\n     \
+        \           .andExpect(content().string(\"6.0\"));\n    }\n\n\n}\n=========\n\
+        \n\nHere is the source file that we are writing tests against, called `src/main/java/com/example/calculator/controller/CalculatorController.java`.\n\
+        =========\npackage com.example.calculator.controller;\n\nimport com.example.calculator.service.CalculatorService;\n\
+        import org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.web.bind.annotation.GetMapping;\n\
+        import org.springframework.web.bind.annotation.RequestParam;\nimport org.springframework.web.bind.annotation.RestController;\n\
+        \n@RestController\npublic class CalculatorController {\n\n    @Autowired\n\
+        \    private CalculatorService calculatorService;\n\n    @GetMapping(\"/add\"\
+        )\n    public double add(@RequestParam double a, @RequestParam double b) {\n\
+        \        return calculatorService.add(a, b);\n    }\n\n    @GetMapping(\"\
+        /subtract\")\n    public double subtract(@RequestParam double a, @RequestParam\
+        \ double b) {\n        return calculatorService.subtract(a, b);\n    }\n\n\
+        \    @GetMapping(\"/multiply\")\n    public double multiply(@RequestParam\
+        \ double a, @RequestParam double b) {\n        return calculatorService.multiply(a,\
+        \ b);\n    }\n\n    @GetMapping(\"/divide\")\n    public double divide(@RequestParam\
+        \ double a, @RequestParam double b) {\n        return calculatorService.divide(a,\
+        \ b);\n    }\n}\n=========\n\n\n`stdout` output when running the tests:\n\
+        =========\n[INFO] Scanning for projects...\n[INFO] \n[INFO] -----------------------<\
+        \ com.example:calculator >-----------------------\n[INFO] Building calculator\
+        \ 1.0-SNAPSHOT\n[INFO]   from pom.xml\n[INFO] --------------------------------[\
+        \ jar ]---------------------------------\n[WARNING] 1 problem was encountered\
+        \ while building the effective model for org.javassist:javassist:jar:3.20.0-GA\n\
+        [INFO] \n[INFO] --- jacoco:0.8.7:prepare-agent (default) @ calculator ---\n\
+        [INFO] argLine set to -javaagent:/root/.m2/repository/org/jacoco/org.jacoco.agent/0.8.7/org.jacoco.agent-0.8.7-runtime.jar=destfile=/app/target/jacoco.exec\n\
+        [INFO] \n[INFO] --- resources:3.2.0:resources (default-resources) @ calculator\
+        \ ---\n[INFO] Using 'UTF-8' encoding to copy filtered resources.\n[INFO] Using\
+        \ 'UTF-8' encoding to copy filtered properties files.\n[INFO] skip non existing\
+        \ resourceDirectory /app/src/main/resources\n[INFO] skip non existing resourceDirectory\
+        \ /app/src/main/resources\n[INFO] \n[INFO] --- compiler:3.8.1:compile (default-compile)\
+        \ @ calculator ---\n[INFO] Nothing to compile - all classes are up to date\n\
+        [INFO] \n[INFO] --- resources:3.2.0:testResources (default-testResources)\
+        \ @ calculator ---\n[INFO] Using 'UTF-8' encoding to copy filtered resources.\n\
+        [INFO] Using 'UTF-8' encoding to copy filtered properties files.\n[INFO] skip\
+        \ non existing resourceDirectory /app/src/test/resources\n[INFO] \n[INFO]\
+        \ --- compiler:3.8.1:testCompile (default-testCompile) @ calculator ---\n\
+        [INFO] Changes detected - recompiling the module!\n[INFO] Compiling 2 source\
+        \ files to /app/target/test-classes\n[INFO] \n[INFO] --- surefire:2.22.2:test\
+        \ (default-test) @ calculator ---\n[INFO] \n[INFO] -------------------------------------------------------\n\
+        [INFO]  T E S T S\n[INFO] -------------------------------------------------------\n\
+        [INFO] Running com.example.calculator.controller.CalculatorControllerTest\n\
+        16:43:33.725 [main] DEBUG org.springframework.test.context.BootstrapUtils\
+        \ - Instantiating CacheAwareContextLoaderDelegate from class [org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate]\n\
+        16:43:33.790 [main] DEBUG org.springframework.test.context.BootstrapUtils\
+        \ - Instantiating BootstrapContext using constructor [public org.springframework.test.context.support.DefaultBootstrapContext(java.lang.Class,org.springframework.test.context.CacheAwareContextLoaderDelegate)]\n\
+        16:43:34.016 [main] DEBUG org.springframework.test.context.BootstrapUtils\
+        \ - Instantiating TestContextBootstrapper for test class [com.example.calculator.controller.CalculatorControllerTest]\
+        \ from class [org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTestContextBootstrapper]\n\
+        16:43:34.084 [main] INFO org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTestContextBootstrapper\
+        \ - Neither @ContextConfiguration nor @ContextHierarchy found for test class\
+        \ [com.example.calculator.controller.CalculatorControllerTest], using SpringBootContextLoader\n\
+        16:43:34.113 [main] DEBUG org.springframework.test.context.support.AbstractContextLoader\
+        \ - Did not detect default resource location for test class [com.example.calculator.controller.CalculatorControllerTest]:\
+        \ class path resource [com/example/calculator/controller/CalculatorControllerTest-context.xml]\
+        \ does not exist\n16:43:34.114 [main] DEBUG org.springframework.test.context.support.AbstractContextLoader\
+        \ - Did not detect default resource location for test class [com.example.calculator.controller.CalculatorControllerTest]:\
+        \ class path resource [com/example/calculator/controller/CalculatorControllerTestContext.groovy]\
+        \ does not exist\n16:43:34.114 [main] INFO org.springframework.test.context.support.AbstractContextLoader\
+        \ - Could not detect default resource locations for test class [com.example.calculator.controller.CalculatorControllerTest]:\
+        \ no resource found for suffixes {-context.xml, Context.groovy}.\n16:43:34.116\
+        \ [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils\
+        \ - Could not detect default configuration classes for test class [com.example.calculator.controller.CalculatorControllerTest]:\
+        \ CalculatorControllerTest does not declare any static, non-private, non-final,\
+        \ nested classes annotated with @Configuration.\n16:43:34.294 [main] DEBUG\
+        \ org.springframework.test.context.support.ActiveProfilesUtils - Could not\
+        \ find an 'annotation declaring class' for annotation type [org.springframework.test.context.ActiveProfiles]\
+        \ and class [com.example.calculator.controller.CalculatorControllerTest]\n\
+        16:43:34.478 [main] DEBUG org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider\
+        \ - Identified candidate component class: file [/app/target/classes/com/example/calculator/CalculatorApplication.class]\n\
+        16:43:34.479 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper\
+        \ - Found @SpringBootConfiguration com.example.calculator.CalculatorApplication\
+        \ for test class com.example.calculator.controller.CalculatorControllerTest\n\
+        16:43:34.499 [main] DEBUG org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTestContextBootstrapper\
+        \ - @TestExecutionListeners is not present for class [com.example.calculator.controller.CalculatorControllerTest]:\
+        \ using defaults.\n16:43:34.500 [main] INFO org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTestContextBootstrapper\
+        \ - Loaded default TestExecutionListener class names from location [META-INF/spring.factories]:\
+        \ [org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener,\
+        \ org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener,\
+        \ org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener,\
+        \ org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener,\
+        \ org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener,\
+        \ org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener,\
+        \ org.springframework.boot.test.autoconfigure.webservices.client.MockWebServiceServerTestExecutionListener,\
+        \ org.springframework.test.context.web.ServletTestExecutionListener, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener,\
+        \ org.springframework.test.context.event.ApplicationEventsTestExecutionListener,\
+        \ org.springframework.test.context.support.DependencyInjectionTestExecutionListener,\
+        \ org.springframework.test.context.support.DirtiesContextTestExecutionListener,\
+        \ org.springframework.test.context.transaction.TransactionalTestExecutionListener,\
+        \ org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener, org.springframework.test.context.event.EventPublishingTestExecutionListener]\n\
+        16:43:34.521 [main] DEBUG org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTestContextBootstrapper\
+        \ - Skipping candidate TestExecutionListener [org.springframework.test.context.transaction.TransactionalTestExecutionListener]\
+        \ due to a missing dependency. Specify custom listener classes or make the\
+        \ default listener classes and their required dependencies available. Offending\
+        \ class: [org/springframework/transaction/interceptor/TransactionAttributeSource]\n\
+        16:43:34.521 [main] DEBUG org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTestContextBootstrapper\
+        \ - Skipping candidate TestExecutionListener [org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener]\
+        \ due to a missing dependency. Specify custom listener classes or make the\
+        \ default listener classes and their required dependencies available. Offending\
+        \ class: [org/springframework/transaction/interceptor/TransactionAttribute]\n\
+        16:43:34.521 [main] INFO org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTestContextBootstrapper\
+        \ - Using TestExecutionListeners: [org.springframework.test.context.web.ServletTestExecutionListener@66596a88,\
+        \ org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener@5aae8eb5,\
+        \ org.springframework.test.context.event.ApplicationEventsTestExecutionListener@76954a33,\
+        \ org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener@24a298a6,\
+        \ org.springframework.boot.test.autoconfigure.SpringBootDependencyInjectionTestExecutionListener@982bb90,\
+        \ org.springframework.test.context.support.DirtiesContextTestExecutionListener@27f74733,\
+        \ org.springframework.test.context.event.EventPublishingTestExecutionListener@7bef452c,\
+        \ org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener@4bb8855f,\
+        \ org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener@57fae983,\
+        \ org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener@4a29f290,\
+        \ org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener@4bee18dc,\
+        \ org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener@44f3fe83,\
+        \ org.springframework.boot.test.autoconfigure.webservices.client.MockWebServiceServerTestExecutionListener@44c5a16f]\n\
+        16:43:34.532 [main] DEBUG org.springframework.test.context.support.AbstractDirtiesContextTestExecutionListener\
+        \ - Before test class: context [DefaultTestContext@dffa30b testClass = CalculatorControllerTest,\
+        \ testInstance = [null], testMethod = [null], testException = [null], mergedContextConfiguration\
+        \ = [WebMergedContextConfiguration@4d8126f testClass = CalculatorControllerTest,\
+        \ locations = '{}', classes = '{class com.example.calculator.CalculatorApplication}',\
+        \ contextInitializerClasses = '[]', activeProfiles = '{}', propertySourceLocations\
+        \ = '{}', propertySourceProperties = '{org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTestContextBootstrapper=true}',\
+        \ contextCustomizers = set[[ImportsContextCustomizer@6d3c232f key = [org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.groovy.template.GroovyTemplateAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration, org.springframework.boot.autoconfigure.hateoas.HypermediaAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.jsonb.JsonbAutoConfiguration, org.springframework.boot.autoconfigure.mustache.MustacheAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.web.servlet.HttpEncodingAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration,\
+        \ org.springframework.boot.test.autoconfigure.web.servlet.MockMvcAutoConfiguration,\
+        \ org.springframework.boot.test.autoconfigure.web.servlet.MockMvcWebClientAutoConfiguration,\
+        \ org.springframework.boot.test.autoconfigure.web.servlet.MockMvcWebDriverAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration,\
+        \ org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration,\
+        \ org.springframework.boot.test.autoconfigure.web.servlet.MockMvcSecurityConfiguration,\
+        \ org.springframework.boot.test.autoconfigure.web.reactive.WebTestClientAutoConfiguration]],\
+        \ org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@2b5cb9b2,\
+        \ org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@2970a5bc,\
+        \ org.springframework.boot.test.mock.mockito.MockitoContextCustomizer@15a4610c,\
+        \ org.springframework.boot.test.autoconfigure.OverrideAutoConfigurationContextCustomizerFactory$DisableAutoConfigurationContextCustomizer@5528a42c,\
+        \ org.springframework.boot.test.autoconfigure.actuate.metrics.MetricsExportContextCustomizerFactory$DisableMetricExportContextCustomizer@cc62a3b,\
+        \ org.springframework.boot.test.autoconfigure.filter.TypeExcludeFiltersContextCustomizer@9dff8e5a,\
+        \ org.springframework.boot.test.autoconfigure.properties.PropertyMappingContextCustomizer@f1d1dcea,\
+        \ org.springframework.boot.test.autoconfigure.web.servlet.WebDriverContextCustomizerFactory$Customizer@57a4d5ee,\
+        \ org.springframework.boot.test.context.SpringBootTestArgs@1, org.springframework.boot.test.context.SpringBootTestWebEnvironment@0],\
+        \ resourceBasePath = 'src/main/webapp', contextLoader = 'org.springframework.boot.test.context.SpringBootContextLoader',\
+        \ parent = [null]], attributes = map[[empty]]], class annotated with @DirtiesContext\
+        \ [false] with mode [null].\n\n  .   ____          _            __ _ _\n /\\\
+        \\ / ___'_ __ _ _(_)_ __  __ _ \\ \\ \\ \\\n( ( )\\___ | '_ | '_| | '_ \\\
+        / _` | \\ \\ \\ \\\n \\\\/  ___)| |_)| | | | | || (_| |  ) ) ) )\n  '  |____|\
+        \ .__|_| |_|_| |_\\__, | / / / /\n =========|_|==============|___/=/_/_/_/\n\
+        \ :: Spring Boot ::                (v2.6.4)\n\n2025-04-30 16:43:35.479  INFO\
+        \ 947 --- [           main] c.e.c.c.CalculatorControllerTest         : Starting\
+        \ CalculatorControllerTest using Java 21.0.4 on ad8b7b5fd959 with PID 947\
+        \ (started by root in /app)\n2025-04-30 16:43:35.484  INFO 947 --- [     \
+        \      main] c.e.c.c.CalculatorControllerTest         : No active profile\
+        \ set, falling back to 1 default profile: \"default\"\n2025-04-30 16:43:40.175\
+        \  WARN 947 --- [           main] ion$DefaultTemplateResolverConfiguration\
+        \ : Cannot find template location: classpath:/templates/ (please add some\
+        \ templates or check your Thymeleaf configuration)\n2025-04-30 16:43:40.338\
+        \  INFO 947 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext\
+        \ : Initializing Spring TestDispatcherServlet ''\n2025-04-30 16:43:40.339\
+        \  INFO 947 --- [           main] o.s.t.web.servlet.TestDispatcherServlet\
+        \  : Initializing Servlet ''\n2025-04-30 16:43:40.341  INFO 947 --- [    \
+        \       main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization\
+        \ in 2 ms\n2025-04-30 16:43:40.415  INFO 947 --- [           main] c.e.c.c.CalculatorControllerTest\
+        \         : Started CalculatorControllerTest in 5.778 seconds (JVM running\
+        \ for 9.64)\n[ERROR] Tests run: 5, Failures: 0, Errors: 1, Skipped: 0, Time\
+        \ elapsed: 7.779 s <<< FAILURE! - in com.example.calculator.controller.CalculatorControllerTest\n\
+        [ERROR] testDivideByZero  Time elapsed: 0.581 s  <<< ERROR!\norg.springframework.web.util.NestedServletException:\
+        \ Request processing failed; nested exception is java.lang.ArithmeticException:\
+        \ Division by zero\n\tat com.example.calculator.controller.CalculatorControllerTest.testDivideByZero(CalculatorControllerTest.java:51)\n\
+        Caused by: java.lang.ArithmeticException: Division by zero\n\tat com.example.calculator.controller.CalculatorControllerTest.testDivideByZero(CalculatorControllerTest.java:51)\n\
+        \n[INFO] Running com.example.calculator.service.CalculatorServiceTest\n[INFO]\
+        \ Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s - in\
+        \ com.example.calculator.service.CalculatorServiceTest\n[INFO] \n[INFO] Results:\n\
+        [INFO] \n[ERROR] Errors: \n[ERROR]   CalculatorControllerTest.testDivideByZero:51\
+        \ \xBB NestedServlet Request processin...\n[INFO] \n[ERROR] Tests run: 10,\
+        \ Failures: 0, Errors: 1, Skipped: 0\n[INFO] \n[INFO] ------------------------------------------------------------------------\n\
+        [INFO] BUILD FAILURE\n[INFO] ------------------------------------------------------------------------\n\
+        [INFO] Total time:  16.239 s\n[INFO] Finished at: 2025-04-30T16:43:41Z\n[INFO]\
+        \ ------------------------------------------------------------------------\n\
+        [ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:2.22.2:test\
+        \ (default-test) on project calculator: There are test failures.\n[ERROR]\
+        \ \n[ERROR] Please refer to /app/target/surefire-reports for the individual\
+        \ test results.\n[ERROR] Please refer to dump files (if any exist) [date].dump,\
+        \ [date]-jvmRun[N].dump and [date].dumpstream.\n[ERROR] -> [Help 1]\n[ERROR]\
+        \ \n[ERROR] To see the full stack trace of the errors, re-run Maven with the\
+        \ -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug\
+        \ logging.\n[ERROR] \n[ERROR] For more information about the errors and possible\
+        \ solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException\n\
+        =========\n\n\n`stderr` output when running the tests:\n========= \njava.lang.instrument.IllegalClassFormatException:\
+        \ Error while instrumenting jdk/jshell/execution/impl/ConsoleImpl$ConsoleProviderImpl.\n\
+        \tat org.jacoco.agent.rt.internal_3570298.CoverageTransformer.transform(CoverageTransformer.java:94)\n\
+        \tat java.instrument/java.lang.instrument.ClassFileTransformer.transform(ClassFileTransformer.java:244)\n\
+        \tat java.instrument/sun.instrument.TransformerManager.transform(TransformerManager.java:188)\n\
+        \tat java.instrument/sun.instrument.InstrumentationImpl.transform(InstrumentationImpl.java:610)\n\
+        \tat java.base/java.lang.ClassLoader.defineClass2(Native Method)\n\tat java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:1118)\n\
+        \tat java.base/java.security.SecureClassLoader.defineClass(SecureClassLoader.java:182)\n\
+        \tat java.base/jdk.internal.loader.BuiltinClassLoader.defineClass(BuiltinClassLoader.java:821)\n\
+        \tat java.base/jdk.internal.loader.BuiltinClassLoader.findClassInModuleOrNull(BuiltinClassLoader.java:741)\n\
+        \tat java.base/jdk.internal.loader.BuiltinClassLoader.findClass(BuiltinClassLoader.java:621)\n\
+        \tat java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:638)\n\tat\
+        \ java.base/java.lang.Class.forName(Class.java:625)\n\tat java.base/java.lang.Class.forName(Class.java:600)\n\
+        \tat java.base/java.util.ServiceLoader.loadProvider(ServiceLoader.java:859)\n\
+        \tat java.base/java.util.ServiceLoader$LayerLookupIterator.hasNext(ServiceLoader.java:958)\n\
+        \tat java.base/java.util.ServiceLoader$ProviderSpliterator.tryAdvance(ServiceLoader.java:1491)\n\
+        \tat java.base/java.util.stream.ReferencePipeline.forEachWithCancel(ReferencePipeline.java:129)\n\
+        \tat java.base/java.util.stream.AbstractPipeline.copyIntoWithCancel(AbstractPipeline.java:527)\n\
+        \tat java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:513)\n\
+        \tat java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)\n\
+        \tat java.base/java.util.stream.FindOps$FindOp.evaluateSequential(FindOps.java:150)\n\
+        \tat java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)\n\
+        \tat java.base/java.util.stream.ReferencePipeline.findAny(ReferencePipeline.java:652)\n\
+        \tat java.base/java.io.Console.lambda$instantiateConsole$3(Console.java:404)\n\
+        \tat java.base/java.security.AccessController.doPrivileged(AccessController.java:319)\n\
+        \tat java.base/java.io.Console.instantiateConsole(Console.java:408)\n\tat\
+        \ java.base/java.io.Console.<clinit>(Console.java:374)\n\tat java.base/jdk.internal.misc.Unsafe.ensureClassInitialized0(Native\
+        \ Method)\n\tat java.base/jdk.internal.misc.Unsafe.ensureClassInitialized(Unsafe.java:1160)\n\
+        \tat java.base/java.lang.invoke.MethodHandles$Lookup.ensureInitialized(MethodHandles.java:2912)\n\
+        \tat java.base/jdk.internal.access.SharedSecrets.ensureClassInitialized(SharedSecrets.java:537)\n\
+        \tat java.base/jdk.internal.access.SharedSecrets.getJavaIOAccess(SharedSecrets.java:278)\n\
+        \tat java.base/java.lang.System.console(System.java:302)\n\tat org.springframework.boot.ansi.AnsiOutput.detectIfAnsiCapable(AnsiOutput.java:155)\n\
+        \tat org.springframework.boot.ansi.AnsiOutput.isEnabled(AnsiOutput.java:143)\n\
+        \tat org.springframework.boot.ansi.AnsiOutput.toString(AnsiOutput.java:94)\n\
+        \tat org.springframework.boot.SpringBootBanner.printBanner(SpringBootBanner.java:54)\n\
+        \tat org.springframework.boot.SpringApplicationBannerPrinter.print(SpringApplicationBannerPrinter.java:72)\n\
+        \tat org.springframework.boot.SpringApplication.printBanner(SpringApplication.java:564)\n\
+        \tat org.springframework.boot.SpringApplication.run(SpringApplication.java:299)\n\
+        \tat org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:136)\n\
+        \tat org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java:99)\n\
+        \tat org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:124)\n\
+        \tat org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:124)\n\
+        \tat org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener.postProcessFields(MockitoTestExecutionListener.java:110)\n\
+        \tat org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener.injectFields(MockitoTestExecutionListener.java:94)\n\
+        \tat org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener.prepareTestInstance(MockitoTestExecutionListener.java:61)\n\
+        \tat org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:248)\n\
+        \tat org.springframework.test.context.junit.jupiter.SpringExtension.postProcessTestInstance(SpringExtension.java:138)\n\
+        \tat org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$8(ClassBasedTestDescriptor.java:363)\n\
+        \tat org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.executeAndMaskThrowable(ClassBasedTestDescriptor.java:368)\n\
+        \tat org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$9(ClassBasedTestDescriptor.java:363)\n\
+        \tat java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)\n\
+        \tat java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:179)\n\
+        \tat java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708)\n\
+        \tat java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)\n\
+        \tat java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)\n\
+        \tat java.base/java.util.stream.StreamSpliterators$WrappingSpliterator.forEachRemaining(StreamSpliterators.java:310)\n\
+        \tat java.base/java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:735)\n\
+        \tat java.base/java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:734)\n\
+        \tat java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:762)\n\
+        \tat org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.invokeTestInstancePostProcessors(ClassBasedTestDescriptor.java:362)\n\
+        \tat org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$instantiateAndPostProcessTestInstance$6(ClassBasedTestDescriptor.java:283)\n\
+        \tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\
+        \tat org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.instantiateAndPostProcessTestInstance(ClassBasedTestDescriptor.java:282)\n\
+        \tat org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$4(ClassBasedTestDescriptor.java:272)\n\
+        \tat java.base/java.util.Optional.orElseGet(Optional.java:364)\n\tat org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$5(ClassBasedTestDescriptor.java:271)\n\
+        \tat org.junit.jupiter.engine.execution.TestInstancesProvider.getTestInstances(TestInstancesProvider.java:31)\n\
+        \tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$prepare$0(TestMethodTestDescriptor.java:102)\n\
+        \tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\
+        \tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:101)\n\
+        \tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:66)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$prepare$2(NodeTestTask.java:123)\n\
+        \tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.prepare(NodeTestTask.java:123)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:90)\n\
+        \tat java.base/java.util.ArrayList.forEach(ArrayList.java:1596)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\
+        \tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\
+        \tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\
+        \tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\
+        \tat java.base/java.util.ArrayList.forEach(ArrayList.java:1596)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\
+        \tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\
+        \tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\
+        \tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\
+        \tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)\n\
+        \tat org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)\n\
+        \tat org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)\n\
+        \tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:220)\n\
+        \tat org.junit.platform.launcher.core.DefaultLauncher.lambda$execute$6(DefaultLauncher.java:188)\n\
+        \tat org.junit.platform.launcher.core.DefaultLauncher.withInterceptedStreams(DefaultLauncher.java:202)\n\
+        \tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:181)\n\
+        \tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:128)\n\
+        \tat org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:150)\n\
+        \tat org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:124)\n\
+        \tat org.apache.maven.surefire.booter.ForkedBooter.invokeProviderInSameClassLoader(ForkedBooter.java:384)\n\
+        \tat org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:345)\n\
+        \tat org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:126)\n\
+        \tat org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:418)\n\
+        Caused by: java.io.IOException: Error while instrumenting jdk/jshell/execution/impl/ConsoleImpl$ConsoleProviderImpl.\n\
+        \tat org.jacoco.agent.rt.internal_3570298.core.instr.Instrumenter.instrumentError(Instrumenter.java:160)\n\
+        \tat org.jacoco.agent.rt.internal_3570298.core.instr.Instrumenter.instrument(Instrumenter.java:110)\n\
+        \tat org.jacoco.agent.rt.internal_3570298.CoverageTransformer.transform(CoverageTransformer.java:92)\n\
+        \t... 110 more\nCaused by: java.lang.IllegalArgumentException: Unsupported\
+        \ class file major version 65\n\tat org.jacoco.agent.rt.internal_3570298.asm.ClassReader.<init>(ClassReader.java:196)\n\
+        \tat org.jacoco.agent.rt.internal_3570298.asm.ClassReader.<init>(ClassReader.java:177)\n\
+        \tat org.jacoco.agent.rt.internal_3570298.asm.ClassReader.<init>(ClassReader.java:163)\n\
+        \tat org.jacoco.agent.rt.internal_3570298.core.internal.instr.InstrSupport.classReaderFor(InstrSupport.java:280)\n\
+        \tat org.jacoco.agent.rt.internal_3570298.core.instr.Instrumenter.instrument(Instrumenter.java:76)\n\
+        \tat org.jacoco.agent.rt.internal_3570298.core.instr.Instrumenter.instrument(Instrumenter.java:108)\n\
+        \t... 111 more\njava.lang.instrument.IllegalClassFormatException: Error while\
+        \ instrumenting jdk/internal/org/jline/JdkConsoleProviderImpl.\n\tat org.jacoco.agent.rt.internal_3570298.CoverageTransformer.transform(CoverageTransformer.java:94)\n\
+        \tat java.instrument/java.lang.instrument.ClassFileTransformer.transform(ClassFileTransformer.java:244)\n\
+        \tat java.instrument/sun.instrument.TransformerManager.transform(TransformerManager.java:188)\n\
+        \tat java.instrument/sun.instrument.InstrumentationImpl.transform(InstrumentationImpl.java:610)\n\
+        \tat java.base/java.lang.ClassLoader.defineClass2(Native Method)\n\tat java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:1118)\n\
+        \tat java.base/java.security.SecureClassLoader.defineClass(SecureClassLoader.java:182)\n\
+        \tat java.base/jdk.internal.loader.BuiltinClassLoader.defineClass(BuiltinClassLoader.java:821)\n\
+        \tat java.base/jdk.internal.loader.BuiltinClassLoader.findClassInModuleOrNull(BuiltinClassLoader.java:741)\n\
+        \tat java.base/jdk.internal.loader.BuiltinClassLoader.findClass(BuiltinClassLoader.java:621)\n\
+        \tat java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:638)\n\tat\
+        \ java.base/java.lang.Class.forName(Class.java:625)\n\tat java.base/java.lang.Class.forName(Class.java:600)\n\
+        \tat java.base/java.util.ServiceLoader.loadProvider(ServiceLoader.java:859)\n\
+        \tat java.base/java.util.ServiceLoader$LayerLookupIterator.hasNext(ServiceLoader.java:958)\n\
+        \tat java.base/java.util.ServiceLoader$ProviderSpliterator.tryAdvance(ServiceLoader.java:1491)\n\
+        \tat java.base/java.util.stream.ReferencePipeline.forEachWithCancel(ReferencePipeline.java:129)\n\
+        \tat java.base/java.util.stream.AbstractPipeline.copyIntoWithCancel(AbstractPipeline.java:527)\n\
+        \tat java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:513)\n\
+        \tat java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)\n\
+        \tat java.base/java.util.stream.FindOps$FindOp.evaluateSequential(FindOps.java:150)\n\
+        \tat java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)\n\
+        \tat java.base/java.util.stream.ReferencePipeline.findAny(ReferencePipeline.java:652)\n\
+        \tat java.base/java.io.Console.lambda$instantiateConsole$3(Console.java:404)\n\
+        \tat java.base/java.security.AccessController.doPrivileged(AccessController.java:319)\n\
+        \tat java.base/java.io.Console.instantiateConsole(Console.java:408)\n\tat\
+        \ java.base/java.io.Console.<clinit>(Console.java:374)\n\tat java.base/jdk.internal.misc.Unsafe.ensureClassInitialized0(Native\
+        \ Method)\n\tat java.base/jdk.internal.misc.Unsafe.ensureClassInitialized(Unsafe.java:1160)\n\
+        \tat java.base/java.lang.invoke.MethodHandles$Lookup.ensureInitialized(MethodHandles.java:2912)\n\
+        \tat java.base/jdk.internal.access.SharedSecrets.ensureClassInitialized(SharedSecrets.java:537)\n\
+        \tat java.base/jdk.internal.access.SharedSecrets.getJavaIOAccess(SharedSecrets.java:278)\n\
+        \tat java.base/java.lang.System.console(System.java:302)\n\tat org.springframework.boot.ansi.AnsiOutput.detectIfAnsiCapable(AnsiOutput.java:155)\n\
+        \tat org.springframework.boot.ansi.AnsiOutput.isEnabled(AnsiOutput.java:143)\n\
+        \tat org.springframework.boot.ansi.AnsiOutput.toString(AnsiOutput.java:94)\n\
+        \tat org.springframework.boot.SpringBootBanner.printBanner(SpringBootBanner.java:54)\n\
+        \tat org.springframework.boot.SpringApplicationBannerPrinter.print(SpringApplicationBannerPrinter.java:72)\n\
+        \tat org.springframework.boot.SpringApplication.printBanner(SpringApplication.java:564)\n\
+        \tat org.springframework.boot.SpringApplication.run(SpringApplication.java:299)\n\
+        \tat org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:136)\n\
+        \tat org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java:99)\n\
+        \tat org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:124)\n\
+        \tat org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:124)\n\
+        \tat org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener.postProcessFields(MockitoTestExecutionListener.java:110)\n\
+        \tat org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener.injectFields(MockitoTestExecutionListener.java:94)\n\
+        \tat org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener.prepareTestInstance(MockitoTestExecutionListener.java:61)\n\
+        \tat org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:248)\n\
+        \tat org.springframework.test.context.junit.jupiter.SpringExtension.postProcessTestInstance(SpringExtension.java:138)\n\
+        \tat org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$8(ClassBasedTestDescriptor.java:363)\n\
+        \tat org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.executeAndMaskThrowable(ClassBasedTestDescriptor.java:368)\n\
+        \tat org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$9(ClassBasedTestDescriptor.java:363)\n\
+        \tat java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)\n\
+        \tat java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:179)\n\
+        \tat java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708)\n\
+        \tat java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)\n\
+        \tat java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)\n\
+        \tat java.base/java.util.stream.StreamSpliterators$WrappingSpliterator.forEachRemaining(StreamSpliterators.java:310)\n\
+        \tat java.base/java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:735)\n\
+        \tat java.base/java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:734)\n\
+        \tat java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:762)\n\
+        \tat org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.invokeTestInstancePostProcessors(ClassBasedTestDescriptor.java:362)\n\
+        \tat org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$instantiateAndPostProcessTestInstance$6(ClassBasedTestDescriptor.java:283)\n\
+        \tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\
+        \tat org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.instantiateAndPostProcessTestInstance(ClassBasedTestDescriptor.java:282)\n\
+        \tat org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$4(ClassBasedTestDescriptor.java:272)\n\
+        \tat java.base/java.util.Optional.orElseGet(Optional.java:364)\n\tat org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$5(ClassBasedTestDescriptor.java:271)\n\
+        \tat org.junit.jupiter.engine.execution.TestInstancesProvider.getTestInstances(TestInstancesProvider.java:31)\n\
+        \tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$prepare$0(TestMethodTestDescriptor.java:102)\n\
+        \tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\
+        \tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:101)\n\
+        \tat org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:66)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$prepare$2(NodeTestTask.java:123)\n\
+        \tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.prepare(NodeTestTask.java:123)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:90)\n\
+        \tat java.base/java.util.ArrayList.forEach(ArrayList.java:1596)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\
+        \tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\
+        \tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\
+        \tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\
+        \tat java.base/java.util.ArrayList.forEach(ArrayList.java:1596)\n\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)\n\
+        \tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)\n\
+        \tat org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)\n\
+        \tat org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)\n\
+        \tat org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)\n\
+        \tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)\n\
+        \tat org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)\n\
+        \tat org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)\n\
+        \tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:220)\n\
+        \tat org.junit.platform.launcher.core.DefaultLauncher.lambda$execute$6(DefaultLauncher.java:188)\n\
+        \tat org.junit.platform.launcher.core.DefaultLauncher.withInterceptedStreams(DefaultLauncher.java:202)\n\
+        \tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:181)\n\
+        \tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:128)\n\
+        \tat org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:150)\n\
+        \tat org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:124)\n\
+        \tat org.apache.maven.surefire.booter.ForkedBooter.invokeProviderInSameClassLoader(ForkedBooter.java:384)\n\
+        \tat org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:345)\n\
+        \tat org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:126)\n\
+        \tat org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:418)\n\
+        Caused by: java.io.IOException: Error while instrumenting jdk/internal/org/jline/JdkConsoleProviderImpl.\n\
+        \tat org.jacoco.agent.rt.internal_3570298.core.instr.Instrumenter.instrumentError(Instrumenter.java:160)\n\
+        \tat org.jacoco.agent.rt.internal_3570298.core.instr.Instrumenter.instrument(Instrumenter.java:110)\n\
+        \tat org.jacoco.agent.rt.internal_3570298.CoverageTransformer.transform(CoverageTransformer.java:92)\n\
+        \t... 110 more\nCaused by: java.lang.IllegalArgumentException: Unsupported\
+        \ class file major version 65\n\tat org.jacoco.agent.rt.internal_3570298.asm.ClassReader.<init>(ClassReader.java:196)\n\
+        \tat org.jacoco.agent.rt.internal_3570298.asm.ClassReader.<init>(ClassReader.java:177)\n\
+        \tat org.jacoco.agent.rt.internal_3570298.asm.ClassReader.<init>(ClassReader.java:163)\n\
+        \tat org.jacoco.agent.rt.internal_3570298.core.internal.instr.InstrSupport.classReaderFor(InstrSupport.java:280)\n\
+        \tat org.jacoco.agent.rt.internal_3570298.core.instr.Instrumenter.instrument(Instrumenter.java:76)\n\
+        \tat org.jacoco.agent.rt.internal_3570298.core.instr.Instrumenter.instrument(Instrumenter.java:108)\n\
+        \t... 111 more\n=========\n\n\nShort and concise analysis of why the test\
+        \ run failed, and recommended Fixes (dont add any other information):"
+    response: "### Analysis of Failure:\nThe test `testDivideByZero` in `CalculatorControllerTest`\
+      \ failed due to an unhandled `ArithmeticException` (\"Division by zero\") being\
+      \ thrown when the `/divide` endpoint is called with `b=0`. The exception propagates\
+      \ to the controller level, causing a `NestedServletException`.\n\nAdditionally,\
+      \ the `stderr` logs indicate that the JaCoCo agent is incompatible with the\
+      \ Java version being used (`Unsupported class file major version 65`), which\
+      \ corresponds to Java 21. This does not directly cause the test failure but\
+      \ may affect code coverage instrumentation.\n\n---\n\n### Recommended Fixes:\n\
+      1. **Handle Division by Zero in `CalculatorController`:**\n   Update the `divide`\
+      \ method in `CalculatorController` to handle division by zero gracefully. For\
+      \ example:\n   ```java\n   @GetMapping(\"/divide\")\n   public double divide(@RequestParam\
+      \ double a, @RequestParam double b) {\n       if (b == 0) {\n           throw\
+      \ new IllegalArgumentException(\"Division by zero is not allowed\");\n     \
+      \  }\n       return calculatorService.divide(a, b);\n   }\n   ```\n\n2. **Update\
+      \ the Test Case:**\n   Modify the `testDivideByZero` test to expect a `BadRequest`\
+      \ (HTTP 400) status instead of `InternalServerError` (HTTP 500):\n   ```java\n\
+      \   @Test\n   public void testDivideByZero() throws Exception {\n       mockMvc.perform(get(\"\
+      /divide?a=6&b=0\"))\n               .andExpect(status().isBadRequest());\n \
+      \  }\n   ```\n\n3. **Upgrade JaCoCo Version:**\n   Update the JaCoCo plugin\
+      \ to a version that supports Java 21. For example, use a version higher than\
+      \ `0.8.8` (if available) in your `pom.xml`:\n   ```xml\n   <plugin>\n      \
+      \ <groupId>org.jacoco</groupId>\n       <artifactId>jacoco-maven-plugin</artifactId>\n\
+      \       <version>0.8.8</version>\n   </plugin>\n   ```\n\n4. **Ensure Compatibility:**\n\
+      \   Verify that all dependencies and plugins in the project are compatible with\
+      \ Java 21."
+    prompt_tokens: 9555
+    completion_tokens: 452

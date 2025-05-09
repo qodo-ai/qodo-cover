@@ -1,0 +1,344 @@
+analyze_suite_test_headers_indentation:
+  8b7b17a729c4:
+    prompt:
+      system: ''
+      user: "## Overview\nYou are a code assistant that accepts a typescript test\
+        \ file as input.\nYour goal is to analyze this file, and provide several feedbacks:\
+        \ the programming language of the test file, the testing framework needed\
+        \ to run the tests in the test file, the number of tests in the test file,\
+        \ and the indentation of the test headers in the test file.\n\nHere is the\
+        \ file that contains the existing tests, called `tests/Calculator.test.ts`:\n\
+        =========\nimport Calculator from '../src/modules/Calculator';\nimport { expect\
+        \ } from 'chai';\nimport 'mocha';\nimport sinon, { SinonSpy } from 'sinon';\n\
+        \ndescribe('basic', () => {\n  it('Can be instantiated', () => {\n    const\
+        \ calc = new Calculator();\n    expect(calc).is.instanceOf(Calculator);\n\
+        \  });\n\n  it('Displays numbers when they are pressed', () => {\n    const\
+        \ calc = new Calculator();\n    calc.buttonPressed({\n      type: 'number',\n\
+        \      value: '1',\n    });\n    expect(calc.onDisplay).to.equal('1');\n\n\
+        \    calc.buttonPressed({\n      type: 'number',\n      value: '0',\n    });\n\
+        \n    expect(calc.onDisplay).to.equal('10');\n\n    calc.buttonPressed({\n\
+        \      type: 'number',\n      value: '0',\n    });\n\n    expect(calc.onDisplay).to.equal('100');\n\
+        \  });\n\n  it('Displays numbers with a decimal when \".\" is pressed', ()\
+        \ => {\n    const calc = new Calculator();\n    calc.buttonPressed({\n   \
+        \   type: 'number',\n      value: '1',\n    });\n    expect(calc.onDisplay).to.equal('1');\n\
+        \n    calc.buttonPressed({\n      type: 'number',\n      value: '0',\n   \
+        \ });\n\n    expect(calc.onDisplay).to.equal('10');\n\n    calc.buttonPressed({\n\
+        \      type: 'number',\n      value: '0',\n    });\n\n    expect(calc.onDisplay).to.equal('100');\n\
+        \n    calc.buttonPressed({\n      type: 'operator',\n      value: '.',\n \
+        \   });\n\n    expect(calc.onDisplay).to.equal('100.');\n\n    calc.buttonPressed({\n\
+        \      type: 'number',\n      value: '0',\n    });\n\n    expect(calc.onDisplay).to.equal('100.0');\n\
+        \n    calc.buttonPressed({\n      type: 'number',\n      value: '1',\n   \
+        \ });\n\n    expect(calc.onDisplay).to.equal('100.01');\n  });\n});\n=========\n\
+        \n\nNow, you need to analyze the test file and provide a YAML object equivalent\
+        \ to type $TestsAnalysis, according to the following Pydantic definitions:\n\
+        =====\n\nclass TestsAnalysis(BaseModel):\n    language: str = Field(description=\"\
+        The programming language used by the test file\")\n    testing_framework:\
+        \ str = Field(description=\"The testing framework needed to run the tests\
+        \ in the test file\")\n    number_of_tests: int = Field(description=\"The\
+        \ number of tests in the test file\")\n    test_headers_indentation: int =\
+        \ Field(description=\"The indentation of the test headers in the test file.For\
+        \ example, \"def test_...\" has an indentation of 0, \"  def test_...\" has\
+        \ an indentation of 2, \"    def test_...\" has an indentation of 4, and so\
+        \ on.\")\n\n=====\n\n\nExample output:\n\n```yaml\nlanguage: typescript\n\
+        testing_framework: ...\nnumber_of_tests: ...\ntest_headers_indentation: ...\n\
+        ```\n\nThe Response should be only a valid YAML object, without any introduction\
+        \ text or follow-up text.\n\nAnswer:\n```yaml"
+    response: '```yaml
+
+      language: typescript
+
+      testing_framework: mocha
+
+      number_of_tests: 3
+
+      test_headers_indentation: 2
+
+      ```'
+    prompt_tokens: 711
+    completion_tokens: 30
+analyze_test_insert_line:
+  daf934acdf2b:
+    prompt:
+      system: ''
+      user: "## Overview\nYou are a code assistant that accepts a typescript test\
+        \ file as input.\nYour goal is to analyze this file and provide the following:\
+        \ \n* The programming language of the test file\n* The testing framework needed\
+        \ to run the tests in the test file\n* The number of tests in the test file\n\
+        * The line number in the test file where the new test should be inserted.\
+        \ \n\nIMPORTANT: Ensure that you account for block delimiters (e.g., curly\
+        \ braces in Java, `end` in Ruby) to correctly place the new test before the\
+        \ end of the relevant block, such as a class or method definition. If a test\
+        \ should live within a class then the insertion happens BEFORE the last delimiter\
+        \ (if relevant).\n\nHere is the file that contains the existing tests, called\
+        \ `tests/Calculator.test.ts`. Note that we have manually added line numbers\
+        \ for each line of code, to help you understand the structure of the file.\
+        \ Those numbers are not a part of the original code.\n=========\n1 import\
+        \ Calculator from '../src/modules/Calculator';\n2 import { expect } from 'chai';\n\
+        3 import 'mocha';\n4 import sinon, { SinonSpy } from 'sinon';\n5 \n6 describe('basic',\
+        \ () => {\n7   it('Can be instantiated', () => {\n8     const calc = new Calculator();\n\
+        9     expect(calc).is.instanceOf(Calculator);\n10   });\n11 \n12   it('Displays\
+        \ numbers when they are pressed', () => {\n13     const calc = new Calculator();\n\
+        14     calc.buttonPressed({\n15       type: 'number',\n16       value: '1',\n\
+        17     });\n18     expect(calc.onDisplay).to.equal('1');\n19 \n20     calc.buttonPressed({\n\
+        21       type: 'number',\n22       value: '0',\n23     });\n24 \n25     expect(calc.onDisplay).to.equal('10');\n\
+        26 \n27     calc.buttonPressed({\n28       type: 'number',\n29       value:\
+        \ '0',\n30     });\n31 \n32     expect(calc.onDisplay).to.equal('100');\n\
+        33   });\n34 \n35   it('Displays numbers with a decimal when \".\" is pressed',\
+        \ () => {\n36     const calc = new Calculator();\n37     calc.buttonPressed({\n\
+        38       type: 'number',\n39       value: '1',\n40     });\n41     expect(calc.onDisplay).to.equal('1');\n\
+        42 \n43     calc.buttonPressed({\n44       type: 'number',\n45       value:\
+        \ '0',\n46     });\n47 \n48     expect(calc.onDisplay).to.equal('10');\n49\
+        \ \n50     calc.buttonPressed({\n51       type: 'number',\n52       value:\
+        \ '0',\n53     });\n54 \n55     expect(calc.onDisplay).to.equal('100');\n\
+        56 \n57     calc.buttonPressed({\n58       type: 'operator',\n59       value:\
+        \ '.',\n60     });\n61 \n62     expect(calc.onDisplay).to.equal('100.');\n\
+        63 \n64     calc.buttonPressed({\n65       type: 'number',\n66       value:\
+        \ '0',\n67     });\n68 \n69     expect(calc.onDisplay).to.equal('100.0');\n\
+        70 \n71     calc.buttonPressed({\n72       type: 'number',\n73       value:\
+        \ '1',\n74     });\n75 \n76     expect(calc.onDisplay).to.equal('100.01');\n\
+        77   });\n78 });\n79\n=========\n\n\nNow, you need to analyze the test file\
+        \ and provide a YAML object equivalent to type $TestsAnalysis, according to\
+        \ the following Pydantic definitions:\n=====\nclass TestsAnalysis(BaseModel):\n\
+        \    language: str = Field(description=\"The programming language used by\
+        \ the test file\")\n    testing_framework: str = Field(description=\"The testing\
+        \ framework needed to run the tests in the test file\")\n    number_of_tests:\
+        \ int = Field(description=\"The number of tests in the test file\")\n    relevant_line_number_to_insert_tests_after:\
+        \ int = Field(description=\"The line number in the test file, **after which**\
+        \ the new tests should be inserted, so they will be a part of the existing\
+        \ test suite. Place the new tests after the last test in the suite.\")\n \
+        \   relevant_line_number_to_insert_imports_after: int = Field(description=\"\
+        The line number in the test file, **after which**  new imports should be inserted,\
+        \ so they will be a legal valid code, and the new test file will be able to\
+        \ run. The new imports should be introduced as independent import lines, and\
+        \ not as part of the existing imports.\")\n=====\n\n\nExample output:\n\n\
+        ```yaml\nlanguage: typescript\ntesting_framework: ...\nnumber_of_tests: ...\n\
+        relevant_line_number_to_insert_tests_after: ...\nrelevant_line_number_to_insert_imports_after:\
+        \ ...\n```\n\nThe Response should be only a valid YAML object, without any\
+        \ introduction text or follow-up text.\n\nAnswer:\n```yaml"
+    response: '```yaml
+
+      language: typescript
+
+      testing_framework: mocha
+
+      number_of_tests: 3
+
+      relevant_line_number_to_insert_tests_after: 77
+
+      relevant_line_number_to_insert_imports_after: 4
+
+      ```'
+    prompt_tokens: 995
+    completion_tokens: 47
+generate_tests:
+  894f1e2b37de:
+    prompt:
+      system: ''
+      user: "## Overview\nYou are a code assistant that accepts a typescript source\
+        \ file, and a typescript test file.\nYour goal is to generate additional comprehensive\
+        \ unit tests to complement the existing test suite, in order to increase the\
+        \ code coverage against the source file.\n\nAdditional guidelines:\n- Carefully\
+        \ analyze the provided code. Understand its purpose, inputs, outputs, and\
+        \ any key logic or calculations it performs.\n- Brainstorm a list of diverse\
+        \ and meaningful test cases you think will be necessary to fully validate\
+        \ the correctness and functionality of the code, and achieve 100% code coverage.\n\
+        - After each individual test has been added, review all tests to ensure they\
+        \ cover the full range of scenarios, including how to handle exceptions or\
+        \ errors.\n- If the original test file contains a test suite, assume that\
+        \ each generated test will be a part of the same suite. Ensure that the new\
+        \ tests are consistent with the existing test suite in terms of style, naming\
+        \ conventions, and structure.\n\n## Source File\nHere is the source file that\
+        \ you will be writing tests against, called `src/modules/Calculator.ts`.\n\
+        Note that we have manually added line numbers for each line of code, to help\
+        \ you understand the code coverage report.\nThose numbers are not a part of\
+        \ the original code.\n=========\n1 // UI buttons for calculator\n2 interface\
+        \ button {\n3   type: string; // 'number' | 'operator' | 'action'\n4   value:\
+        \ string;\n5 }\n6 \n7 interface history {\n8   operation: Function;\n9   leftNum:\
+        \ number;\n10   rightNum: number;\n11 }\n12 \n13 // Math operations\n14 const\
+        \ add: Function = (a: number, b: number): number => a + b;\n15 const subtract:\
+        \ Function = (a: number, b: number): number => a - b;\n16 const divide: Function\
+        \ = (a: number, b: number): number => a / b;\n17 const multiply: Function\
+        \ = (a: number, b: number): number => a * b;\n18 const power: Function = (a:\
+        \ number, b: number): number => Math.pow(a, b);\n19 \n20 // map symbols to\
+        \ math operations\n21 const operations: { [index: string]: Function } = {\n\
+        22   \"+\": add,\n23   \"-\": subtract,\n24   \"*\": multiply,\n25   \"/\"\
+        : divide,\n26   \"^\": power,\n27 };\n28 \n29 class Calculator {\n30   currentTotal:\
+        \ number; // What the current running total is\n31   currentOperator: string;\
+        \ // What the active operator is\n32   lastOperator: string; // The last operator\
+        \ that was pressed\n33   displayShouldClear: boolean;\n34   onDisplayUpdateHandlers:\
+        \ Array<Function>;\n35   onDisplay: string;\n36   history: history[];\n37\
+        \ \n38   constructor() {\n39     this.history = [];\n40     this.onDisplayUpdateHandlers\
+        \ = [];\n41     this.clear();\n42   }\n43 \n44   fireDisplayUpdateHandlers\
+        \ = (): void => {\n45     this.onDisplayUpdateHandlers.forEach((func) => func(this.onDisplay));\n\
+        46   };\n47 \n48   onDisplayUpdate = (func: Function): void => {\n49     this.onDisplayUpdateHandlers.push(func);\n\
+        50   };\n51 \n52   offDisplayUpdate = (func: Function): boolean => {\n53 \
+        \    const index = this.onDisplayUpdateHandlers.indexOf(func);\n54     if\
+        \ (index > -1) {\n55       this.onDisplayUpdateHandlers.splice(index, 1);\n\
+        56       return true;\n57     }\n58     return false;\n59   };\n60 \n61  \
+        \ numberPressed = (btn: button) => {\n62     const isNegativeZero = this.onDisplay\
+        \ === \"-0\";\n63     if (this.displayShouldClear) {\n64       this.clear();\n\
+        65       this.displayShouldClear = false;\n66     }\n67 \n68     if (this.currentOperator\
+        \ && this.onDisplay && !isNegativeZero) {\n69       this.removeHangingDecimal();\n\
+        70 \n71       if (this.currentTotal) {\n72         const operation = operations[this.lastOperator];\n\
+        73         const result = operation(this.currentTotal, parseFloat(this.onDisplay));\n\
+        74         this.currentTotal = result;\n75       } else {\n76         this.currentTotal\
+        \ = parseFloat(this.onDisplay);\n77       }\n78 \n79       this.onDisplay\
+        \ = null;\n80 \n81       this.lastOperator = this.currentOperator;\n82   \
+        \    this.currentOperator = null;\n83     }\n84 \n85     // We handle null/-0\
+        \ the same, replace them with the number pressed\n86     if (this.onDisplay\
+        \ === null || isNegativeZero) {\n87       this.onDisplay = isNegativeZero\
+        \ ? \"-\" + btn.value : btn.value;\n88       this.fireDisplayUpdateHandlers();\n\
+        89       return;\n90     }\n91 \n92     // Don't let more than one 0 be displayed\n\
+        93     if (this.onDisplay === \"0\" && btn.value === \"0\") {\n94       return;\n\
+        95     }\n96 \n97     this.onDisplay = this.onDisplay + btn.value;\n98   \
+        \  this.fireDisplayUpdateHandlers();\n99     return;\n100   };\n101 \n102\
+        \   removeHangingDecimal = () => {\n103     if (this.onDisplay.indexOf(\"\
+        .\") === this.onDisplay.length) {\n104       this.onDisplay = this.onDisplay.slice(0,\
+        \ this.onDisplay.length - 1);\n105     }\n106   };\n107 \n108   evaluate =\
+        \ () => {\n109     // No operator? Can't evaluate\n110     if (!this.currentOperator\
+        \ && !this.lastOperator) return;\n111 \n112     this.removeHangingDecimal();\n\
+        113 \n114     let leftNum;\n115     let rightNum;\n116     let operation;\n\
+        117     if (this.displayShouldClear) {\n118       // Hitting evaluate again\
+        \ just after an evaluation, repeat op\n119       const latestOperation = this.history[this.history.length\
+        \ - 1];\n120       leftNum = parseFloat(this.onDisplay);\n121       rightNum\
+        \ = latestOperation.rightNum;\n122       operation = latestOperation.operation;\n\
+        123     } else {\n124       leftNum = this.currentTotal;\n125       rightNum\
+        \ = parseFloat(this.onDisplay);\n126       operation = operations[this.currentOperator\
+        \ || this.lastOperator];\n127     }\n128 \n129     const result = operation(leftNum,\
+        \ rightNum);\n130     this.currentTotal = null;\n131     this.onDisplay =\
+        \ result.toString();\n132     this.fireDisplayUpdateHandlers();\n133     this.displayShouldClear\
+        \ = true;\n134     this.history.push({\n135       operation: operation,\n\
+        136       leftNum,\n137       rightNum,\n138     });\n139     return result;\n\
+        140   };\n141 \n142   clear = () => {\n143     this.onDisplay = null;\n144\
+        \     this.fireDisplayUpdateHandlers();\n145     this.currentTotal = null;\n\
+        146     this.currentOperator = null;\n147     this.lastOperator = null;\n\
+        148     this.displayShouldClear = true;\n149   };\n150 \n151   actionPressed\
+        \ = (btn: button) => {\n152     switch (btn.value) {\n153       case \"evaluate\"\
+        :\n154         this.evaluate();\n155         break;\n156       case \"+\"\
+        :\n157       case \"-\":\n158       case \"*\":\n159       case \"/\":\n160\
+        \       case \"^\":\n161         this.currentOperator = btn.value;\n162  \
+        \       this.displayShouldClear = false;\n163         break;\n164       case\
+        \ \"clear\":\n165         this.clear();\n166         break;\n167       case\
+        \ \".\":\n168         if (\n169           typeof this.onDisplay === \"string\"\
+        \ &&\n170           !this.onDisplay.includes(\".\") &&\n171           this.onDisplay.length\
+        \ > 0 &&\n172           !this.displayShouldClear\n173         ) {\n174   \
+        \        const newVal = this.onDisplay + \".\";\n175           this.onDisplay\
+        \ = newVal;\n176           this.fireDisplayUpdateHandlers();\n177        \
+        \ } else if (this.displayShouldClear || this.onDisplay === null) {\n178  \
+        \         const newVal = \"0.\";\n179           this.onDisplay = newVal;\n\
+        180           this.fireDisplayUpdateHandlers();\n181           this.displayShouldClear\
+        \ = false;\n182         }\n183         break;\n184       case \"switchPolarity\"\
+        :\n185         if (this.currentOperator && this.onDisplay) {\n186        \
+        \   this.currentTotal = parseFloat(this.onDisplay);\n187         }\n188  \
+        \       if (!this.onDisplay || (this.onDisplay && this.currentOperator)) {\n\
+        189           this.onDisplay = \"0\";\n190         }\n191         if (this.onDisplay.substr(0,\
+        \ 1) === \"-\") {\n192           this.onDisplay = this.onDisplay.substr(1,\
+        \ this.onDisplay.length);\n193         } else {\n194           this.onDisplay\
+        \ = \"-\" + this.onDisplay;\n195         }\n196         this.displayShouldClear\
+        \ = false;\n197         this.fireDisplayUpdateHandlers();\n198         break;\n\
+        199       default:\n200         break;\n201     }\n202   };\n203 \n204   buttonPressed\
+        \ = (btn: button) => {\n205     switch (btn.type) {\n206       case \"number\"\
+        :\n207         this.numberPressed(btn);\n208         break;\n209       case\
+        \ \"operator\":\n210         this.actionPressed(btn);\n211         break;\n\
+        212       default:\n213         throw new Error(\"Button type not recognized!\"\
+        );\n214     }\n215     return;\n216   };\n217 \n218   pressButtons = (arr:\
+        \ Array<button>) => {\n219     arr.forEach(this.buttonPressed);\n220   };\n\
+        221 }\n222 \n223 export default Calculator;\n224\n=========\n\n## Test File\n\
+        Here is the file that contains the existing tests, called `tests/Calculator.test.ts`:\n\
+        =========\nimport Calculator from '../src/modules/Calculator';\nimport { expect\
+        \ } from 'chai';\nimport 'mocha';\nimport sinon, { SinonSpy } from 'sinon';\n\
+        \ndescribe('basic', () => {\n  it('Can be instantiated', () => {\n    const\
+        \ calc = new Calculator();\n    expect(calc).is.instanceOf(Calculator);\n\
+        \  });\n\n  it('Displays numbers when they are pressed', () => {\n    const\
+        \ calc = new Calculator();\n    calc.buttonPressed({\n      type: 'number',\n\
+        \      value: '1',\n    });\n    expect(calc.onDisplay).to.equal('1');\n\n\
+        \    calc.buttonPressed({\n      type: 'number',\n      value: '0',\n    });\n\
+        \n    expect(calc.onDisplay).to.equal('10');\n\n    calc.buttonPressed({\n\
+        \      type: 'number',\n      value: '0',\n    });\n\n    expect(calc.onDisplay).to.equal('100');\n\
+        \  });\n\n  it('Displays numbers with a decimal when \".\" is pressed', ()\
+        \ => {\n    const calc = new Calculator();\n    calc.buttonPressed({\n   \
+        \   type: 'number',\n      value: '1',\n    });\n    expect(calc.onDisplay).to.equal('1');\n\
+        \n    calc.buttonPressed({\n      type: 'number',\n      value: '0',\n   \
+        \ });\n\n    expect(calc.onDisplay).to.equal('10');\n\n    calc.buttonPressed({\n\
+        \      type: 'number',\n      value: '0',\n    });\n\n    expect(calc.onDisplay).to.equal('100');\n\
+        \n    calc.buttonPressed({\n      type: 'operator',\n      value: '.',\n \
+        \   });\n\n    expect(calc.onDisplay).to.equal('100.');\n\n    calc.buttonPressed({\n\
+        \      type: 'number',\n      value: '0',\n    });\n\n    expect(calc.onDisplay).to.equal('100.0');\n\
+        \n    calc.buttonPressed({\n      type: 'number',\n      value: '1',\n   \
+        \ });\n\n    expect(calc.onDisplay).to.equal('100.01');\n  });\n});\n=========\n\
+        \n### Test Framework\nThe test framework used for running tests is `mocha`.\n\
+        ## Additional Includes\nHere are the additional files needed to provide context\
+        \ for the source code:\n======\nNone\n======\n\n\n## Code Coverage\nBased\
+        \ on the code coverage report below, your goal is to suggest new test cases\
+        \ for the test file `tests/Calculator.test.ts` against the source file `src/modules/Calculator.ts`\
+        \ that would increase the coverage, meaning cover missing lines of code.\n\
+        =========\nLines covered: [128, 129, 2, 3, 4, 5, 6, 7, 8, 130, 138, 15, 16,\
+        \ 17, 18, 19, 21, 24, 159, 32, 33, 34, 35, 36, 160, 38, 162, 163, 165, 166,\
+        \ 170, 172, 175, 176, 177, 179, 52, 53, 54, 55, 181, 57, 60, 61, 62, 64, 69,\
+        \ 99, 100, 101, 102, 103, 104, 105, 107, 108, 124]\nLines missed: [132, 133,\
+        \ 134, 135, 136, 140, 141, 143, 144, 146, 147, 22, 150, 152, 25, 26, 27, 28,\
+        \ 153, 30, 154, 156, 39, 40, 41, 42, 43, 168, 173, 46, 48, 49, 50, 58, 65,\
+        \ 66, 70, 71, 72, 76, 77, 78, 79, 80, 83, 84, 85, 87, 88, 89, 90, 91, 92,\
+        \ 97, 110, 111, 117, 118, 119, 121, 122]\nPercentage covered: 48.31%\n=========\n\
+        \n## Response\nThe output must be a YAML object equivalent to type $NewTests,\
+        \ according to the following Pydantic definitions:\n=====\nclass SingleTest(BaseModel):\n\
+        \    test_behavior: str = Field(description=\"Short description of the behavior\
+        \ the test covers\")\n    test_name: str = Field(description=\" A short unique\
+        \ test name, that should reflect the test objective\")\n    test_code: str\
+        \ = Field(description=\"A new 'mocha' test function that extends the existing\
+        \ test suite, and tests the behavior described in 'test_behavior'. The test\
+        \ should be written like it's part of the existing test suite, if there is\
+        \ one, and it can use existing helper functions, setup, or teardown code.\
+        \ Don't include new imports here, use 'new_imports_code' section instead.\"\
+        )\n    new_imports_code: str = Field(description=\"New imports that are required\
+        \ to run the new test function, and are not already imported in the test file.\
+        \ Give an empty string if no new imports are required. If relevant, add new\
+        \ imports as 'import ...' lines.\")\n    test_tags: str = Field(description=\"\
+        A single label that best describes the test, out of: ['happy path', 'edge\
+        \ case','other']\")\n\nclass NewTests(BaseModel):\n    language: str = Field(description=\"\
+        The programming language of the source code\")\n    existing_test_function_signature:\
+        \ str = Field(description=\"A single line repeating a signature header of\
+        \ one of the existing test functions\")\n    new_tests: List[SingleTest] =\
+        \ Field(min_items=1, max_items=4, description=\"A list of new test functions\
+        \ to append to the existing test suite, aiming to increase the code coverage.\
+        \ Each test should run as-is, without requiring any additional inputs or setup\
+        \ code. Don't introduce new dependencies\")\n=====\n\nExample output:\n\n\
+        ```yaml\nlanguage: typescript\nexisting_test_function_signature: |\n  ...\n\
+        new_tests:\n- test_behavior: |\n    Test that the function returns the correct\
+        \ output for a single element list\n  test_name: |\n    ...\n  test_code:\
+        \ |\n    ...\n  new_imports_code: |\n    \"\"\n  test_tags: happy path\n \
+        \   ...\n```\n\n\nUse block scalar('|') to format each YAML output.\n\nResponse\
+        \ (should be a valid YAML, and nothing else):\n```yaml"
+    response: "```yaml\nlanguage: typescript\nexisting_test_function_signature: |\n\
+      \  it('Displays numbers when they are pressed', () => {\nnew_tests:\n- test_behavior:\
+      \ |\n    Test that the calculator correctly evaluates a basic addition operation.\n\
+      \  test_name: |\n    evaluates_basic_addition\n  test_code: |\n    it('evaluates\
+      \ basic addition', () => {\n      const calc = new Calculator();\n      calc.pressButtons([\n\
+      \        { type: 'number', value: '2' },\n        { type: 'operator', value:\
+      \ '+' },\n        { type: 'number', value: '3' },\n        { type: 'operator',\
+      \ value: 'evaluate' },\n      ]);\n      expect(calc.onDisplay).to.equal('5');\n\
+      \    });\n  new_imports_code: |\n    \"\"\n  test_tags: happy path\n\n- test_behavior:\
+      \ |\n    Test that the calculator handles division by zero gracefully.\n  test_name:\
+      \ |\n    handles_division_by_zero\n  test_code: |\n    it('handles division\
+      \ by zero', () => {\n      const calc = new Calculator();\n      calc.pressButtons([\n\
+      \        { type: 'number', value: '5' },\n        { type: 'operator', value:\
+      \ '/' },\n        { type: 'number', value: '0' },\n        { type: 'operator',\
+      \ value: 'evaluate' },\n      ]);\n      expect(calc.onDisplay).to.equal('Infinity');\n\
+      \    });\n  new_imports_code: |\n    \"\"\n  test_tags: edge case\n\n- test_behavior:\
+      \ |\n    Test that the calculator correctly switches the polarity of the displayed\
+      \ number.\n  test_name: |\n    switches_polarity\n  test_code: |\n    it('switches\
+      \ polarity of the displayed number', () => {\n      const calc = new Calculator();\n\
+      \      calc.pressButtons([\n        { type: 'number', value: '5' },\n      \
+      \  { type: 'operator', value: 'switchPolarity' },\n      ]);\n      expect(calc.onDisplay).to.equal('-5');\n\
+      \n      calc.pressButtons([\n        { type: 'operator', value: 'switchPolarity'\
+      \ },\n      ]);\n      expect(calc.onDisplay).to.equal('5');\n    });\n  new_imports_code:\
+      \ |\n    \"\"\n  test_tags: edge case\n\n- test_behavior: |\n    Test that the\
+      \ calculator correctly handles pressing the decimal button multiple times.\n\
+      \  test_name: |\n    handles_multiple_decimal_presses\n  test_code: |\n    it('handles\
+      \ multiple decimal presses', () => {\n      const calc = new Calculator();\n\
+      \      calc.pressButtons([\n        { type: 'number', value: '5' },\n      \
+      \  { type: 'operator', value: '.' },\n        { type: 'operator', value: '.'\
+      \ },\n        { type: 'number', value: '3' },\n      ]);\n      expect(calc.onDisplay).to.equal('5.3');\n\
+      \    });\n  new_imports_code: |\n    \"\"\n  test_tags: edge case\n```"
+    prompt_tokens: 3295
+    completion_tokens: 599

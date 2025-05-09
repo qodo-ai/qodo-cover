@@ -67,7 +67,7 @@ fi
 # Build or pull the Docker image
 if [ -n "$DOCKERFILE" ]; then
   echo "Building the Docker image..."
-  docker build -t cover-agent-image -f "$DOCKERFILE" "$(dirname "$DOCKERFILE")"
+  docker build --platform linux/amd64 -t cover-agent-image -f "$DOCKERFILE" "$(dirname "$DOCKERFILE")"
 else
   echo "Pulling the Docker image..."
   docker pull "$DOCKER_IMAGE"

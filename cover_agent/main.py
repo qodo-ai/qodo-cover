@@ -1,5 +1,6 @@
 import argparse
 import os
+
 from cover_agent.CoverAgent import CoverAgent
 from cover_agent.version import __version__
 
@@ -134,6 +135,11 @@ def parse_args():
         type=bool,
         default=False,
         help="Run each test separately. Default: False",
+    )
+    parser.add_argument(
+        "--record-mode",
+        action="store_true",
+        help="Enable record mode for LLM responses. Default: False.",
     )
 
     return parser.parse_args()

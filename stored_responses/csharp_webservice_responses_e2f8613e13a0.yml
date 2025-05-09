@@ -1,0 +1,218 @@
+analyze_suite_test_headers_indentation:
+  84fe888ef68d:
+    prompt:
+      system: ''
+      user: "## Overview\nYou are a code assistant that accepts a c# test file as\
+        \ input.\nYour goal is to analyze this file, and provide several feedbacks:\
+        \ the programming language of the test file, the testing framework needed\
+        \ to run the tests in the test file, the number of tests in the test file,\
+        \ and the indentation of the test headers in the test file.\n\nHere is the\
+        \ file that contains the existing tests, called `CalculatorApi.Tests/CalculatorControllerTests.cs`:\n\
+        =========\nusing CalculatorApi.Controllers;\nusing Microsoft.AspNetCore.Mvc;\n\
+        using Xunit;\n\npublic class CalculatorControllerTests\n{\n    [Fact]\n  \
+        \  public void Add_ReturnsCorrectResult()\n    {\n        // Arrange\n   \
+        \     var controller = new CalculatorController();\n\n        // Act\n   \
+        \     var result = controller.Add(5, 3) as OkObjectResult;\n\n        // Assert\n\
+        \        Assert.NotNull(result);\n        Assert.Equal(200, result.StatusCode);\n\
+        \        Assert.Equal(8.0, result.Value);\n    }\n}\n=========\n\n\nNow, you\
+        \ need to analyze the test file and provide a YAML object equivalent to type\
+        \ $TestsAnalysis, according to the following Pydantic definitions:\n=====\n\
+        \nclass TestsAnalysis(BaseModel):\n    language: str = Field(description=\"\
+        The programming language used by the test file\")\n    testing_framework:\
+        \ str = Field(description=\"The testing framework needed to run the tests\
+        \ in the test file\")\n    number_of_tests: int = Field(description=\"The\
+        \ number of tests in the test file\")\n    test_headers_indentation: int =\
+        \ Field(description=\"The indentation of the test headers in the test file.For\
+        \ example, \"def test_...\" has an indentation of 0, \"  def test_...\" has\
+        \ an indentation of 2, \"    def test_...\" has an indentation of 4, and so\
+        \ on.\")\n\n=====\n\n\nExample output:\n\n```yaml\nlanguage: c#\ntesting_framework:\
+        \ ...\nnumber_of_tests: ...\ntest_headers_indentation: ...\n```\n\nThe Response\
+        \ should be only a valid YAML object, without any introduction text or follow-up\
+        \ text.\n\nAnswer:\n```yaml"
+    response: '```yaml
+
+      language: c#
+
+      testing_framework: xUnit
+
+      number_of_tests: 1
+
+      test_headers_indentation: 4
+
+      ```'
+    prompt_tokens: 425
+    completion_tokens: 30
+analyze_test_insert_line:
+  ceb1ab37104d:
+    prompt:
+      system: ''
+      user: "## Overview\nYou are a code assistant that accepts a c# test file as\
+        \ input.\nYour goal is to analyze this file and provide the following: \n\
+        * The programming language of the test file\n* The testing framework needed\
+        \ to run the tests in the test file\n* The number of tests in the test file\n\
+        * The line number in the test file where the new test should be inserted.\
+        \ \n\nIMPORTANT: Ensure that you account for block delimiters (e.g., curly\
+        \ braces in Java, `end` in Ruby) to correctly place the new test before the\
+        \ end of the relevant block, such as a class or method definition. If a test\
+        \ should live within a class then the insertion happens BEFORE the last delimiter\
+        \ (if relevant).\n\nHere is the file that contains the existing tests, called\
+        \ `CalculatorApi.Tests/CalculatorControllerTests.cs`. Note that we have manually\
+        \ added line numbers for each line of code, to help you understand the structure\
+        \ of the file. Those numbers are not a part of the original code.\n=========\n\
+        1 using CalculatorApi.Controllers;\n2 using Microsoft.AspNetCore.Mvc;\n3 using\
+        \ Xunit;\n4 \n5 public class CalculatorControllerTests\n6 {\n7     [Fact]\n\
+        8     public void Add_ReturnsCorrectResult()\n9     {\n10         // Arrange\n\
+        11         var controller = new CalculatorController();\n12 \n13         //\
+        \ Act\n14         var result = controller.Add(5, 3) as OkObjectResult;\n15\
+        \ \n16         // Assert\n17         Assert.NotNull(result);\n18         Assert.Equal(200,\
+        \ result.StatusCode);\n19         Assert.Equal(8.0, result.Value);\n20   \
+        \  }\n21 }\n=========\n\n\nNow, you need to analyze the test file and provide\
+        \ a YAML object equivalent to type $TestsAnalysis, according to the following\
+        \ Pydantic definitions:\n=====\nclass TestsAnalysis(BaseModel):\n    language:\
+        \ str = Field(description=\"The programming language used by the test file\"\
+        )\n    testing_framework: str = Field(description=\"The testing framework\
+        \ needed to run the tests in the test file\")\n    number_of_tests: int =\
+        \ Field(description=\"The number of tests in the test file\")\n    relevant_line_number_to_insert_tests_after:\
+        \ int = Field(description=\"The line number in the test file, **after which**\
+        \ the new tests should be inserted, so they will be a part of the existing\
+        \ test suite. Place the new tests after the last test in the suite.\")\n \
+        \   relevant_line_number_to_insert_imports_after: int = Field(description=\"\
+        The line number in the test file, **after which**  new imports should be inserted,\
+        \ so they will be a legal valid code, and the new test file will be able to\
+        \ run. The new imports should be introduced as independent import lines, and\
+        \ not as part of the existing imports.\")\n=====\n\n\nExample output:\n\n\
+        ```yaml\nlanguage: c#\ntesting_framework: ...\nnumber_of_tests: ...\nrelevant_line_number_to_insert_tests_after:\
+        \ ...\nrelevant_line_number_to_insert_imports_after: ...\n```\n\nThe Response\
+        \ should be only a valid YAML object, without any introduction text or follow-up\
+        \ text.\n\nAnswer:\n```yaml"
+    response: '```yaml
+
+      language: c#
+
+      testing_framework: xUnit
+
+      number_of_tests: 1
+
+      relevant_line_number_to_insert_tests_after: 20
+
+      relevant_line_number_to_insert_imports_after: 3
+
+      ```'
+    prompt_tokens: 636
+    completion_tokens: 47
+generate_tests:
+  f08949865ae3:
+    prompt:
+      system: ''
+      user: "## Overview\nYou are a code assistant that accepts a c# source file,\
+        \ and a c# test file.\nYour goal is to generate additional comprehensive unit\
+        \ tests to complement the existing test suite, in order to increase the code\
+        \ coverage against the source file.\n\nAdditional guidelines:\n- Carefully\
+        \ analyze the provided code. Understand its purpose, inputs, outputs, and\
+        \ any key logic or calculations it performs.\n- Brainstorm a list of diverse\
+        \ and meaningful test cases you think will be necessary to fully validate\
+        \ the correctness and functionality of the code, and achieve 100% code coverage.\n\
+        - After each individual test has been added, review all tests to ensure they\
+        \ cover the full range of scenarios, including how to handle exceptions or\
+        \ errors.\n- If the original test file contains a test suite, assume that\
+        \ each generated test will be a part of the same suite. Ensure that the new\
+        \ tests are consistent with the existing test suite in terms of style, naming\
+        \ conventions, and structure.\n\n## Source File\nHere is the source file that\
+        \ you will be writing tests against, called `CalculatorApi/CalculatorController.cs`.\n\
+        Note that we have manually added line numbers for each line of code, to help\
+        \ you understand the code coverage report.\nThose numbers are not a part of\
+        \ the original code.\n=========\n1 using Microsoft.AspNetCore.Mvc;\n2 \n3\
+        \ namespace CalculatorApi.Controllers\n4 {\n5     [ApiController]\n6     [Route(\"\
+        [controller]\")]\n7     public class CalculatorController : ControllerBase\n\
+        8     {\n9         [HttpGet(\"add\")]\n10         public IActionResult Add(double\
+        \ a, double b)\n11         {\n12             return Ok(a + b);\n13       \
+        \  }\n14 \n15         [HttpGet(\"subtract\")]\n16         public IActionResult\
+        \ Subtract(double a, double b)\n17         {\n18             return Ok(a -\
+        \ b);\n19         }\n20 \n21         [HttpGet(\"multiply\")]\n22         public\
+        \ IActionResult Multiply(double a, double b)\n23         {\n24           \
+        \  return Ok(a * b);\n25         }\n26 \n27         [HttpGet(\"divide\")]\n\
+        28         public IActionResult Divide(double a, double b)\n29         {\n\
+        30             if (b == 0)\n31             {\n32                 return BadRequest(\"\
+        Division by zero is not allowed.\");\n33             }\n34             return\
+        \ Ok(a / b);\n35         }\n36     }\n37 }\n38\n=========\n\n## Test File\n\
+        Here is the file that contains the existing tests, called `CalculatorApi.Tests/CalculatorControllerTests.cs`:\n\
+        =========\nusing CalculatorApi.Controllers;\nusing Microsoft.AspNetCore.Mvc;\n\
+        using Xunit;\n\npublic class CalculatorControllerTests\n{\n    [Fact]\n  \
+        \  public void Add_ReturnsCorrectResult()\n    {\n        // Arrange\n   \
+        \     var controller = new CalculatorController();\n\n        // Act\n   \
+        \     var result = controller.Add(5, 3) as OkObjectResult;\n\n        // Assert\n\
+        \        Assert.NotNull(result);\n        Assert.Equal(200, result.StatusCode);\n\
+        \        Assert.Equal(8.0, result.Value);\n    }\n}\n=========\n\n### Test\
+        \ Framework\nThe test framework used for running tests is `xUnit`.\n## Additional\
+        \ Includes\nHere are the additional files needed to provide context for the\
+        \ source code:\n======\nNone\n======\n\n\n## Code Coverage\nBased on the code\
+        \ coverage report below, your goal is to suggest new test cases for the test\
+        \ file `CalculatorApi.Tests/CalculatorControllerTests.cs` against the source\
+        \ file `CalculatorApi/CalculatorController.cs` that would increase the coverage,\
+        \ meaning cover missing lines of code.\n=========\nLines covered: [11, 12,\
+        \ 13]\nLines missed: [32, 34, 35, 17, 18, 19, 23, 24, 25, 29, 30, 31]\nPercentage\
+        \ covered: 20.0%\n=========\n\n## Response\nThe output must be a YAML object\
+        \ equivalent to type $NewTests, according to the following Pydantic definitions:\n\
+        =====\nclass SingleTest(BaseModel):\n    test_behavior: str = Field(description=\"\
+        Short description of the behavior the test covers\")\n    test_name: str =\
+        \ Field(description=\" A short unique test name, that should reflect the test\
+        \ objective\")\n    test_code: str = Field(description=\"A new 'xUnit' test\
+        \ function that extends the existing test suite, and tests the behavior described\
+        \ in 'test_behavior'. The test should be written like it's part of the existing\
+        \ test suite, if there is one, and it can use existing helper functions, setup,\
+        \ or teardown code. Don't include new imports here, use 'new_imports_code'\
+        \ section instead.\")\n    new_imports_code: str = Field(description=\"New\
+        \ imports that are required to run the new test function, and are not already\
+        \ imported in the test file. Give an empty string if no new imports are required.\
+        \ If relevant, add new imports as 'import ...' lines.\")\n    test_tags: str\
+        \ = Field(description=\"A single label that best describes the test, out of:\
+        \ ['happy path', 'edge case','other']\")\n\nclass NewTests(BaseModel):\n \
+        \   language: str = Field(description=\"The programming language of the source\
+        \ code\")\n    existing_test_function_signature: str = Field(description=\"\
+        A single line repeating a signature header of one of the existing test functions\"\
+        )\n    new_tests: List[SingleTest] = Field(min_items=1, max_items=4, description=\"\
+        A list of new test functions to append to the existing test suite, aiming\
+        \ to increase the code coverage. Each test should run as-is, without requiring\
+        \ any additional inputs or setup code. Don't introduce new dependencies\"\
+        )\n=====\n\nExample output:\n\n```yaml\nlanguage: c#\nexisting_test_function_signature:\
+        \ |\n  ...\nnew_tests:\n- test_behavior: |\n    Test that the function returns\
+        \ the correct output for a single element list\n  test_name: |\n    ...\n\
+        \  test_code: |\n    ...\n  new_imports_code: |\n    \"\"\n  test_tags: happy\
+        \ path\n    ...\n```\n\n\nUse block scalar('|') to format each YAML output.\n\
+        \nResponse (should be a valid YAML, and nothing else):\n```yaml"
+    response: "```yaml\nlanguage: c#\nexisting_test_function_signature: |\n  public\
+      \ void Add_ReturnsCorrectResult()\nnew_tests:\n- test_behavior: |\n    Test\
+      \ that the Subtract method returns the correct result when subtracting two numbers.\n\
+      \  test_name: |\n    Subtract_ReturnsCorrectResult\n  test_code: |\n    [Fact]\n\
+      \    public void Subtract_ReturnsCorrectResult()\n    {\n        // Arrange\n\
+      \        var controller = new CalculatorController();\n\n        // Act\n  \
+      \      var result = controller.Subtract(10, 4) as OkObjectResult;\n\n      \
+      \  // Assert\n        Assert.NotNull(result);\n        Assert.Equal(200, result.StatusCode);\n\
+      \        Assert.Equal(6.0, result.Value);\n    }\n  new_imports_code: |\n  \
+      \  \"\"\n  test_tags: happy path\n\n- test_behavior: |\n    Test that the Multiply\
+      \ method returns the correct result when multiplying two numbers.\n  test_name:\
+      \ |\n    Multiply_ReturnsCorrectResult\n  test_code: |\n    [Fact]\n    public\
+      \ void Multiply_ReturnsCorrectResult()\n    {\n        // Arrange\n        var\
+      \ controller = new CalculatorController();\n\n        // Act\n        var result\
+      \ = controller.Multiply(3, 7) as OkObjectResult;\n\n        // Assert\n    \
+      \    Assert.NotNull(result);\n        Assert.Equal(200, result.StatusCode);\n\
+      \        Assert.Equal(21.0, result.Value);\n    }\n  new_imports_code: |\n \
+      \   \"\"\n  test_tags: happy path\n\n- test_behavior: |\n    Test that the Divide\
+      \ method returns the correct result when dividing two numbers.\n  test_name:\
+      \ |\n    Divide_ReturnsCorrectResult\n  test_code: |\n    [Fact]\n    public\
+      \ void Divide_ReturnsCorrectResult()\n    {\n        // Arrange\n        var\
+      \ controller = new CalculatorController();\n\n        // Act\n        var result\
+      \ = controller.Divide(20, 4) as OkObjectResult;\n\n        // Assert\n     \
+      \   Assert.NotNull(result);\n        Assert.Equal(200, result.StatusCode);\n\
+      \        Assert.Equal(5.0, result.Value);\n    }\n  new_imports_code: |\n  \
+      \  \"\"\n  test_tags: happy path\n\n- test_behavior: |\n    Test that the Divide\
+      \ method returns a BadRequest when attempting to divide by zero.\n  test_name:\
+      \ |\n    Divide_ByZero_ReturnsBadRequest\n  test_code: |\n    [Fact]\n    public\
+      \ void Divide_ByZero_ReturnsBadRequest()\n    {\n        // Arrange\n      \
+      \  var controller = new CalculatorController();\n\n        // Act\n        var\
+      \ result = controller.Divide(10, 0) as BadRequestObjectResult;\n\n        //\
+      \ Assert\n        Assert.NotNull(result);\n        Assert.Equal(400, result.StatusCode);\n\
+      \        Assert.Equal(\"Division by zero is not allowed.\", result.Value);\n\
+      \    }\n  new_imports_code: |\n    \"\"\n  test_tags: edge case\n```"
+    prompt_tokens: 1240
+    completion_tokens: 581

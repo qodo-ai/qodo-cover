@@ -1,0 +1,223 @@
+analyze_suite_test_headers_indentation:
+  6b4a4b4e140e:
+    prompt:
+      system: ''
+      user: "## Overview\nYou are a code assistant that accepts a java test file as\
+        \ input.\nYour goal is to analyze this file, and provide several feedbacks:\
+        \ the programming language of the test file, the testing framework needed\
+        \ to run the tests in the test file, the number of tests in the test file,\
+        \ and the indentation of the test headers in the test file.\n\nHere is the\
+        \ file that contains the existing tests, called `src/test/groovy/com/davidparry/cover/SimpleMathOperationsSpec.groovy`:\n\
+        =========\npackage com.davidparry.cover\n\nimport spock.lang.Specification\n\
+        \nclass SimpleMathOperationsSpec extends Specification {\n\n    def \"should\
+        \ return correct sum when adding two positive integers\"() {\n        given:\n\
+        \        SimpleMathOperations operations = new SimpleMathOperations()\n\n\
+        \        when:\n        int result = operations.add(5, 3)\n\n        then:\n\
+        \        assert result == 8\n    }\n\n    def \"should return correct result\
+        \ when subtracting two positive integers\"() {\n        given:\n        SimpleMathOperations\
+        \ operations = new SimpleMathOperations()\n\n        when:\n        int result\
+        \ = operations.subtract(10, 5)\n\n        then:\n        assert result ==\
+        \ 5\n    }\n}\n=========\n\n\nNow, you need to analyze the test file and provide\
+        \ a YAML object equivalent to type $TestsAnalysis, according to the following\
+        \ Pydantic definitions:\n=====\n\nclass TestsAnalysis(BaseModel):\n    language:\
+        \ str = Field(description=\"The programming language used by the test file\"\
+        )\n    testing_framework: str = Field(description=\"The testing framework\
+        \ needed to run the tests in the test file\")\n    number_of_tests: int =\
+        \ Field(description=\"The number of tests in the test file\")\n    test_headers_indentation:\
+        \ int = Field(description=\"The indentation of the test headers in the test\
+        \ file.For example, \"def test_...\" has an indentation of 0, \"  def test_...\"\
+        \ has an indentation of 2, \"    def test_...\" has an indentation of 4, and\
+        \ so on.\")\n\n=====\n\n\nExample output:\n\n```yaml\nlanguage: java\ntesting_framework:\
+        \ ...\nnumber_of_tests: ...\ntest_headers_indentation: ...\n```\n\nThe Response\
+        \ should be only a valid YAML object, without any introduction text or follow-up\
+        \ text.\n\nAnswer:\n```yaml"
+    response: '```yaml
+
+      language: groovy
+
+      testing_framework: spock
+
+      number_of_tests: 2
+
+      test_headers_indentation: 4
+
+      ```'
+    prompt_tokens: 469
+    completion_tokens: 31
+analyze_test_insert_line:
+  bf0e4da07630:
+    prompt:
+      system: ''
+      user: "## Overview\nYou are a code assistant that accepts a java test file as\
+        \ input.\nYour goal is to analyze this file and provide the following: \n\
+        * The programming language of the test file\n* The testing framework needed\
+        \ to run the tests in the test file\n* The number of tests in the test file\n\
+        * The line number in the test file where the new test should be inserted.\
+        \ \n\nIMPORTANT: Ensure that you account for block delimiters (e.g., curly\
+        \ braces in Java, `end` in Ruby) to correctly place the new test before the\
+        \ end of the relevant block, such as a class or method definition. If a test\
+        \ should live within a class then the insertion happens BEFORE the last delimiter\
+        \ (if relevant).\n\nHere is the file that contains the existing tests, called\
+        \ `src/test/groovy/com/davidparry/cover/SimpleMathOperationsSpec.groovy`.\
+        \ Note that we have manually added line numbers for each line of code, to\
+        \ help you understand the structure of the file. Those numbers are not a part\
+        \ of the original code.\n=========\n1 package com.davidparry.cover\n2 \n3\
+        \ import spock.lang.Specification\n4 \n5 class SimpleMathOperationsSpec extends\
+        \ Specification {\n6 \n7     def \"should return correct sum when adding two\
+        \ positive integers\"() {\n8         given:\n9         SimpleMathOperations\
+        \ operations = new SimpleMathOperations()\n10 \n11         when:\n12     \
+        \    int result = operations.add(5, 3)\n13 \n14         then:\n15        \
+        \ assert result == 8\n16     }\n17 \n18     def \"should return correct result\
+        \ when subtracting two positive integers\"() {\n19         given:\n20    \
+        \     SimpleMathOperations operations = new SimpleMathOperations()\n21 \n\
+        22         when:\n23         int result = operations.subtract(10, 5)\n24 \n\
+        25         then:\n26         assert result == 5\n27     }\n28 }\n29\n=========\n\
+        \n\nNow, you need to analyze the test file and provide a YAML object equivalent\
+        \ to type $TestsAnalysis, according to the following Pydantic definitions:\n\
+        =====\nclass TestsAnalysis(BaseModel):\n    language: str = Field(description=\"\
+        The programming language used by the test file\")\n    testing_framework:\
+        \ str = Field(description=\"The testing framework needed to run the tests\
+        \ in the test file\")\n    number_of_tests: int = Field(description=\"The\
+        \ number of tests in the test file\")\n    relevant_line_number_to_insert_tests_after:\
+        \ int = Field(description=\"The line number in the test file, **after which**\
+        \ the new tests should be inserted, so they will be a part of the existing\
+        \ test suite. Place the new tests after the last test in the suite.\")\n \
+        \   relevant_line_number_to_insert_imports_after: int = Field(description=\"\
+        The line number in the test file, **after which**  new imports should be inserted,\
+        \ so they will be a legal valid code, and the new test file will be able to\
+        \ run. The new imports should be introduced as independent import lines, and\
+        \ not as part of the existing imports.\")\n=====\n\n\nExample output:\n\n\
+        ```yaml\nlanguage: java\ntesting_framework: ...\nnumber_of_tests: ...\nrelevant_line_number_to_insert_tests_after:\
+        \ ...\nrelevant_line_number_to_insert_imports_after: ...\n```\n\nThe Response\
+        \ should be only a valid YAML object, without any introduction text or follow-up\
+        \ text.\n\nAnswer:\n```yaml"
+    response: '```yaml
+
+      language: groovy
+
+      testing_framework: spock
+
+      number_of_tests: 2
+
+      relevant_line_number_to_insert_tests_after: 27
+
+      relevant_line_number_to_insert_imports_after: 3
+
+      ```'
+    prompt_tokens: 694
+    completion_tokens: 48
+generate_tests:
+  95d3989be2b2:
+    prompt:
+      system: ''
+      user: "## Overview\nYou are a code assistant that accepts a java source file,\
+        \ and a java test file.\nYour goal is to generate additional comprehensive\
+        \ unit tests to complement the existing test suite, in order to increase the\
+        \ code coverage against the source file.\n\nAdditional guidelines:\n- Carefully\
+        \ analyze the provided code. Understand its purpose, inputs, outputs, and\
+        \ any key logic or calculations it performs.\n- Brainstorm a list of diverse\
+        \ and meaningful test cases you think will be necessary to fully validate\
+        \ the correctness and functionality of the code, and achieve 100% code coverage.\n\
+        - After each individual test has been added, review all tests to ensure they\
+        \ cover the full range of scenarios, including how to handle exceptions or\
+        \ errors.\n- If the original test file contains a test suite, assume that\
+        \ each generated test will be a part of the same suite. Ensure that the new\
+        \ tests are consistent with the existing test suite in terms of style, naming\
+        \ conventions, and structure.\n\n## Source File\nHere is the source file that\
+        \ you will be writing tests against, called `src/main/java/com/davidparry/cover/SimpleMathOperations.java`.\n\
+        Note that we have manually added line numbers for each line of code, to help\
+        \ you understand the code coverage report.\nThose numbers are not a part of\
+        \ the original code.\n=========\n1  package com.davidparry.cover;\n2 \n3 \
+        \ public class SimpleMathOperations {\n4 \n5     public int add(int a, int\
+        \ b) {\n6         return a + b;\n7     }\n8 \n9     public int subtract(int\
+        \ a, int b) {\n10         return a - b;\n11     }\n12 \n13     public int\
+        \ multiply(int a, int b) {\n14         return a * b;\n15     }\n16 \n17  \
+        \   public double divide(int a, int b) {\n18         if (b == 0) {\n19   \
+        \          throw new IllegalArgumentException(\"Division by zero is not allowed.\"\
+        );\n20         }\n21         return (double) a / b;\n22     }\n23 \n24   \
+        \  public int fibonacci(int n) {\n25         if (n <= 1) {\n26           \
+        \  return n;\n27         }\n28         return fibonacci(n - 1) + fibonacci(n\
+        \ - 2);\n29     }\n30 }\n=========\n\n## Test File\nHere is the file that\
+        \ contains the existing tests, called `src/test/groovy/com/davidparry/cover/SimpleMathOperationsSpec.groovy`:\n\
+        =========\npackage com.davidparry.cover\n\nimport spock.lang.Specification\n\
+        \nclass SimpleMathOperationsSpec extends Specification {\n\n    def \"should\
+        \ return correct sum when adding two positive integers\"() {\n        given:\n\
+        \        SimpleMathOperations operations = new SimpleMathOperations()\n\n\
+        \        when:\n        int result = operations.add(5, 3)\n\n        then:\n\
+        \        assert result == 8\n    }\n\n    def \"should return correct result\
+        \ when subtracting two positive integers\"() {\n        given:\n        SimpleMathOperations\
+        \ operations = new SimpleMathOperations()\n\n        when:\n        int result\
+        \ = operations.subtract(10, 5)\n\n        then:\n        assert result ==\
+        \ 5\n    }\n}\n=========\n\n### Test Framework\nThe test framework used for\
+        \ running tests is `spock`.\n## Additional Includes\nHere are the additional\
+        \ files needed to provide context for the source code:\n======\nNone\n======\n\
+        \n\n## Code Coverage\nBased on the code coverage report below, your goal is\
+        \ to suggest new test cases for the test file `src/test/groovy/com/davidparry/cover/SimpleMathOperationsSpec.groovy`\
+        \ against the source file `src/main/java/com/davidparry/cover/SimpleMathOperations.java`\
+        \ that would increase the coverage, meaning cover missing lines of code.\n\
+        =========\nLines covered: []\nLines missed: []\nPercentage covered: 30.0%\n\
+        =========\n\n## Response\nThe output must be a YAML object equivalent to type\
+        \ $NewTests, according to the following Pydantic definitions:\n=====\nclass\
+        \ SingleTest(BaseModel):\n    test_behavior: str = Field(description=\"Short\
+        \ description of the behavior the test covers\")\n    lines_to_cover: str\
+        \ = Field(description=\"A list of line numbers, currently uncovered, that\
+        \ this specific new test aims to cover\")\n    test_name: str = Field(description=\"\
+        \ A short test name, in snake case, that reflects the behaviour to test\"\
+        )\n    test_code: str = Field(description=\"A new 'spock' test function that\
+        \ extends the existing test suite, and tests the behavior described in 'test_behavior'.\
+        \ The test should be written like it's part of the existing test suite, if\
+        \ there is one, and it can use existing helper functions, setup, or teardown\
+        \ code. Don't include new imports here, use 'new_imports_code' section instead.\"\
+        )\n    new_imports_code: str = Field(description=\"New imports that are required\
+        \ to run the new test function, and are not already imported in the test file.\
+        \ Give an empty string if no new imports are required. If relevant, add new\
+        \ imports as 'import ...' lines.\")\n    test_tags: str = Field(description=\"\
+        A single label that best describes the test, out of: ['happy path', 'edge\
+        \ case','other']\")\n\nclass NewTests(BaseModel):\n    language: str = Field(description=\"\
+        The programming language of the source code\")\n    existing_test_function_signature:\
+        \ str = Field(description=\"A single line repeating a signature header of\
+        \ one of the existing test functions\")\n    new_tests: List[SingleTest] =\
+        \ Field(min_items=1, max_items=4, description=\"A list of new test functions\
+        \ to append to the existing test suite, aiming to increase the code coverage.\
+        \ Each test should run as-is, without requiring any additional inputs or setup\
+        \ code. Don't introduce new dependencies\")\n=====\n\nExample output:\n\n\
+        ```yaml\nlanguage: java\nexisting_test_function_signature: |\n  ...\nnew_tests:\n\
+        - test_behavior: |\n    Test that the function returns the correct output\
+        \ for a single element list\n  lines_to_cover: |\n    [1,2,5, ...]\n  test_name:\
+        \ |\n    test_single_element_list\n  test_code: |\n    ...\n  new_imports_code:\
+        \ |\n    \"\"\n  test_tags: happy path\n    ...\n```\n\n\nUse block scalar('|')\
+        \ to format each YAML output.\n\nResponse (should be a valid YAML, and nothing\
+        \ else):\n```yaml"
+    response: "```yaml\nlanguage: java\nexisting_test_function_signature: |\n  def\
+      \ \"should return correct sum when adding two positive integers\"() {\nnew_tests:\n\
+      - test_behavior: |\n    Test that the multiply method returns the correct product\
+      \ of two positive integers.\n  lines_to_cover: |\n    [13, 14, 15]\n  test_name:\
+      \ |\n    test_multiply_two_positive_integers\n  test_code: |\n    def \"should\
+      \ return correct product when multiplying two positive integers\"() {\n    \
+      \    given:\n        SimpleMathOperations operations = new SimpleMathOperations()\n\
+      \n        when:\n        int result = operations.multiply(4, 5)\n\n        then:\n\
+      \        assert result == 20\n    }\n  new_imports_code: |\n    \"\"\n  test_tags:\
+      \ happy path\n\n- test_behavior: |\n    Test that the divide method throws an\
+      \ exception when dividing by zero.\n  lines_to_cover: |\n    [17, 18, 19]\n\
+      \  test_name: |\n    test_divide_by_zero\n  test_code: |\n    def \"should throw\
+      \ exception when dividing by zero\"() {\n        given:\n        SimpleMathOperations\
+      \ operations = new SimpleMathOperations()\n\n        when:\n        operations.divide(10,\
+      \ 0)\n\n        then:\n        def e = thrown(IllegalArgumentException)\n  \
+      \      e.message == \"Division by zero is not allowed.\"\n    }\n  new_imports_code:\
+      \ |\n    \"\"\n  test_tags: edge case\n\n- test_behavior: |\n    Test that the\
+      \ divide method returns the correct result for two positive integers.\n  lines_to_cover:\
+      \ |\n    [17, 21]\n  test_name: |\n    test_divide_two_positive_integers\n \
+      \ test_code: |\n    def \"should return correct result when dividing two positive\
+      \ integers\"() {\n        given:\n        SimpleMathOperations operations =\
+      \ new SimpleMathOperations()\n\n        when:\n        double result = operations.divide(10,\
+      \ 2)\n\n        then:\n        assert result == 5.0\n    }\n  new_imports_code:\
+      \ |\n    \"\"\n  test_tags: happy path\n\n- test_behavior: |\n    Test that\
+      \ the fibonacci method returns the correct result for a base case (n = 0).\n\
+      \  lines_to_cover: |\n    [24, 25, 26]\n  test_name: |\n    test_fibonacci_base_case_zero\n\
+      \  test_code: |\n    def \"should return correct result for fibonacci base case\
+      \ n = 0\"() {\n        given:\n        SimpleMathOperations operations = new\
+      \ SimpleMathOperations()\n\n        when:\n        int result = operations.fibonacci(0)\n\
+      \n        then:\n        assert result == 0\n    }\n  new_imports_code: |\n\
+      \    \"\"\n  test_tags: edge case\n```"
+    prompt_tokens: 1296
+    completion_tokens: 554

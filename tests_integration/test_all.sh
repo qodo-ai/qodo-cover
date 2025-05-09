@@ -6,13 +6,11 @@ set -x  # Print commands and their arguments as they are executed
 
 # Default model name
 MODEL="gpt-4o-2024-11-20"
-RUN_INSTALLER=false
 
 # Function to display usage
 usage() {
-    echo "Usage: $0 [--model model_name] [--run-installer]"
+    echo "Usage: $0 [--model model_name]"
     echo "  --model model_name      Set the model name (default: gpt-4o-mini)"
-    echo "  --run-installer         Run the installer within a Docker container"
     exit 1
 }
 
@@ -23,23 +21,12 @@ while [[ "$#" -gt 0 ]]; do
             MODEL="$2"
             shift
             ;;
-        --run-installer)
-            RUN_INSTALLER=true
-            ;;
         *)
             usage
             ;;
     esac
     shift
 done
-
-# Build the installer within a Docker container if requested
-if [ "$RUN_INSTALLER" = true ]; then
-    docker build -t cover-agent-installer -f Dockerfile .
-
-    mkdir -p dist
-    docker run --rm --volume "$(pwd)/dist:/app/dist" cover-agent-installer
-fi
 
 # Set the log_db_arg variable if LOG_DB_PATH is set
 log_db_arg=""
