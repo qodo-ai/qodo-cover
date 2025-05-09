@@ -144,49 +144,11 @@ def parse_args(settings: Dynaconf) -> argparse.Namespace:
     return parser.parse_args()
 
 
-def merge_settings(args: argparse.Namespace, settings: Dynaconf) -> dict[str, Any]:
-
-    settings_branch = "default"
-    # CLI overrides TOML settings
-    # TODO: Remove TOML options because CLI already has defaults from TOML. The function potentially is not required
-    return {
-        "source_file_path": args.source_file_path,
-        "test_file_path": args.test_file_path,
-        "project_root": args.project_root,
-        "test_file_output_path": args.test_file_output_path,
-        "code_coverage_report_path": args.code_coverage_report_path,
-        "test_command": args.test_command,
-        "test_command_dir": args.test_command_dir,
-        "included_files": args.included_files,
-        "coverage_type": args.coverage_type or settings.get(f"{settings_branch}.coverage_type"),
-        "report_filepath": args.report_filepath or settings.get(f"{settings_branch}.report_filepath"),
-        "desired_coverage": args.desired_coverage or settings.get(f"{settings_branch}.desired_coverage"),
-        "max_iterations": args.max_iterations or settings.get(f"{settings_branch}.max_iterations"),
-        "max_run_time_sec": args.max_run_time or settings.get(f"{settings_branch}.max_run_time_sec"),
-        "additional_instructions": args.additional_instructions,
-        "model": args.model or settings.get(f"{settings_branch}.model"),
-        "api_base": args.api_base or settings.get(f"{settings_branch}.api_base"),
-        "strict_coverage": args.strict_coverage,
-        "run_tests_multiple_times": args.run_tests_multiple_times or settings.get(
-            f"{settings_branch}.run_tests_multiple_times"
-        ),
-        "log_db_path": args.log_db_path or settings.get(f"{settings_branch}.log_db_path"),
-        "branch": args.branch or settings.get(f"{settings_branch}.branch"),
-        "use_report_coverage_feature_flag": args.use_report_coverage_feature_flag,
-        "diff_coverage": args.diff_coverage or settings.get(f"{settings_branch}.diff_coverage"),
-        "run_each_test_separately": args.run_each_test_separately or settings.get(
-            f"{settings_branch}.run_each_test_separately"
-        ),
-        "record_mode": args.record_mode,
-    }
-
-
 def main():
     settings = get_settings()
     args = parse_args(settings)
-    merged_config = merge_settings(args, settings)
-    final_config = CoverAgentConfig(**merged_config)
-    agent = CoverAgent(final_config)
+    config = CoverAgentConfig.from_cli_args_with_defaults(args)
+    agent = CoverAgent(config)
     agent.run()
 
 

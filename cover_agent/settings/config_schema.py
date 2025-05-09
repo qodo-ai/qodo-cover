@@ -1,6 +1,10 @@
+import argparse
+
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
+from typing import Optional, Self
+
+from cover_agent.settings.config_loader import get_settings
 
 
 class CoverageType(Enum):
@@ -77,3 +81,92 @@ class CoverAgentConfig:
     run_each_test_separately: bool
     record_mode: bool
     test_command_original: Optional[str] = None
+
+    @classmethod
+    def from_cli_args(cls, args: argparse.Namespace) -> Self:
+        """
+        Create a CoverAgentConfig instance from command-line arguments.
+
+        Args:
+            args (argparse.Namespace): Parsed command-line arguments.
+
+        Returns:
+            CoverAgentConfig: A new instance of CoverAgentConfig populated with values
+            from the provided arguments.
+        """
+        return cls(
+            source_file_path=args.source_file_path,
+            test_file_path=args.test_file_path,
+            project_root=args.project_root,
+            test_file_output_path=args.test_file_output_path,
+            code_coverage_report_path=args.code_coverage_report_path,
+            test_command=args.test_command,
+            test_command_dir=args.test_command_dir,
+            included_files=args.included_files,
+            coverage_type=args.coverage_type,
+            report_filepath=args.report_filepath,
+            desired_coverage=args.desired_coverage,
+            max_iterations=args.max_iterations,
+            max_run_time_sec=args.max_run_time,
+            additional_instructions=args.additional_instructions,
+            model=args.model,
+            api_base=args.api_base,
+            strict_coverage=args.strict_coverage,
+            run_tests_multiple_times=args.run_tests_multiple_times,
+            log_db_path=args.log_db_path,
+            branch=args.branch,
+            use_report_coverage_feature_flag=args.use_report_coverage_feature_flag,
+            diff_coverage=args.diff_coverage,
+            run_each_test_separately=args.run_each_test_separately,
+            record_mode=args.record_mode,
+        )
+
+    @classmethod
+    def from_cli_args_with_defaults(cls, args: argparse.Namespace) -> Self:
+        """
+        Create a CoverAgentConfig instance from command-line arguments, merging them with default settings.
+
+        Args:
+            args (argparse.Namespace): Parsed command-line arguments.
+
+        Returns:
+            CoverAgentConfig: A new instance of CoverAgentConfig populated with values from the provided
+            arguments, where CLI arguments override the default settings.
+        """
+        default_config = get_settings().get("default")
+        args_dict = vars(args)
+
+        default_dict = {
+            "source_file_path": default_config.get("source_file_path"),
+            "test_file_path": default_config.get("test_file_path"),
+            "project_root": default_config.get("project_root"),
+            "test_file_output_path": default_config.get("test_file_output_path"),
+            "code_coverage_report_path": default_config.get("code_coverage_report_path"),
+            "test_command": default_config.get("test_command"),
+            "test_command_dir": default_config.get("test_command_dir"),
+            "included_files": default_config.get("included_files"),
+            "coverage_type": default_config.get("coverage_type"),
+            "report_filepath": default_config.get("report_filepath"),
+            "desired_coverage": default_config.get("desired_coverage"),
+            "max_iterations": default_config.get("max_iterations"),
+            "max_run_time": default_config.get("max_run_time_sec"),
+            "additional_instructions": default_config.get("additional_instructions"),
+            "model": default_config.get("model"),
+            "api_base": default_config.get("api_base"),
+            "strict_coverage": default_config.get("strict_coverage"),
+            "run_tests_multiple_times": default_config.get("run_tests_multiple_times"),
+            "log_db_path": default_config.get("log_db_path"),
+            "branch": default_config.get("branch"),
+            "use_report_coverage_feature_flag": default_config.get("use_report_coverage_feature_flag"),
+            "diff_coverage": default_config.get("diff_coverage"),
+            "run_each_test_separately": default_config.get("run_each_test_separately"),
+            "record_mode": default_config.get("record_mode"),
+        }
+
+        # CLI overrides default settings
+        merged_dict = default_dict.copy()
+        for k, v in args_dict.items():
+            if v is not None and hasattr(args, k):
+                merged_dict[k] = v
+
+        return cls(**merged_dict)
