@@ -8,9 +8,10 @@ from typing import Any, Optional
 
 from fuzzywuzzy import fuzz
 
-from cover_agent import constants
 from cover_agent.CustomLogger import CustomLogger
+from cover_agent.settings.config_loader import get_settings
 from cover_agent.utils import truncate_hash
+
 
 
 class RecordReplayManager:
@@ -28,10 +29,11 @@ class RecordReplayManager:
         files_hash (Optional[str]): Cached hash of the source and test files.
         logger (CustomLogger): Logger instance for logging messages.
     """
-    HASH_DISPLAY_LENGTH = constants.RECORD_REPLAY_HASH_DISPLAY_LENGTH
+    SETTINGS = get_settings().get("default")
+    HASH_DISPLAY_LENGTH = SETTINGS.record_replay_hash_display_length
 
     def __init__(
-            self, record_mode: bool, base_dir: str=constants.RESPONSES_FOLDER, logger: Optional[CustomLogger]=None
+            self, record_mode: bool, base_dir: str=SETTINGS.RESPONSES_FOLDER, logger: Optional[CustomLogger]=None
     ) -> None:
         self.base_dir = Path(base_dir)
         self.record_mode = record_mode
@@ -284,9 +286,9 @@ class RecordReplayManager:
             self,
             current_prompt: str,
             recorded_prompts: dict,
-            threshold: int = constants.FUZZY_LOOKUP_THRESHOLD,
-            prefix_length: Optional[int] = constants.FUZZY_LOOKUP_PREFIX_LENGTH,
-            best_ratio: int = constants.FUZZY_LOOKUP_BEST_RATIO,
+            threshold: int = SETTINGS.fuzzy_lookup_threshold,
+            prefix_length: Optional[int] = SETTINGS.fuzzy_lookup_prefix_length,
+            best_ratio: int = SETTINGS.fuzzy_lookup_best_ratio,
     ) -> str | None:
         """Find the closest matching recorded prompt using fuzzy string matching.
 

@@ -15,8 +15,7 @@ logger = CustomLogger.get_logger(__name__)
 
 
 def main():
-    settings = get_settings()
-    settings_branch = "default"
+    settings = get_settings().get("default")
 
     parser = argparse.ArgumentParser(description="Args for running tests with Docker.")
     parser.add_argument("--model", default=settings.model, help="Which LLM model to use.")
@@ -43,11 +42,11 @@ def main():
             code_coverage_report_path=test.get("code_coverage_report_path", "coverage.xml"),
             test_command=test["test_command"],
             coverage_type=test.get("coverage_type", CoverageType.COBERTURA.value),
-            max_iterations=test.get("max_iterations", settings.get(f"{settings_branch}.max_iterations")),
-            desired_coverage=test.get("desired_coverage", settings.get(f"{settings_branch}.desired_coverage")),
+            max_iterations=test.get("max_iterations", settings.get("max_iterations")),
+            desired_coverage=test.get("desired_coverage", settings.get("desired_coverage")),
             model=test.get("model", model),
             api_base=os.getenv("API_BASE", ""),
-            max_run_time_sec=test.get("max_run_time_sec", settings.get(f"{settings_branch}.max_run_time_sec")),
+            max_run_time_sec=test.get("max_run_time_sec", settings.get("max_run_time_sec")),
             openai_api_key=os.getenv("OPENAI_API_KEY", ""),
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
             dockerfile=test.get("docker_file_path", ""),

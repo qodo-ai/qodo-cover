@@ -12,13 +12,17 @@ from tests_integration.docker_utils import (
     clean_up_docker_container,
     copy_file_to_docker_container,
     get_docker_image,
+    get_docker_image_workdir,
+    get_short_docker_image_name,
     run_command_in_docker_container,
-    run_docker_container, get_short_docker_image_name, get_docker_image_workdir,
+    run_docker_container,
 )
 
 
 load_dotenv()
 logger = CustomLogger.get_logger(__name__)
+
+SETTINGS = get_settings().get("default")
 
 
 class InvalidTestArgsError(Exception):
@@ -129,8 +133,8 @@ def prepare_record_mode_volume(test_args: argparse.Namespace, image_tag: str, cl
               the container.
     """
     container_workdir = get_docker_image_workdir(client, image_tag)
-    bind_folder = f"{container_workdir}/{constants.RESPONSES_FOLDER}"
-    host_folder_path = f"{Path(__file__).resolve().parents[1]}/{constants.RESPONSES_FOLDER}"
+    bind_folder = f"{container_workdir}/{SETTINGS.responses_folder}"
+    host_folder_path = f"{Path(__file__).resolve().parents[1]}/{SETTINGS.responses_folder}"
 
     logger.info(
         f"Binding a container folder {bind_folder} to local folder {host_folder_path} for storing "
@@ -155,7 +159,7 @@ def execute_test_in_container(container, command: list, exec_env: dict) -> None:
     Returns:
         None
     """
-    copy_file_to_docker_container(container, constants.COVER_AGENT_HOST_FOLDER, constants.COVER_AGENT_CONTAINER_FOLDER)
+    copy_file_to_docker_container(container, SETTINGS.cover_agent_host_folder, SETTINGS.cover_agent_container_folder)
     run_command_in_docker_container(container, command, exec_env)
 
 
@@ -310,8 +314,7 @@ def log_test_args(test_args: argparse.Namespace, max_value_len=60) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    settings = get_settings()
-    settings_branch = "default"
+    # settings = get_settings().get("default")
 
     parser = argparse.ArgumentParser(description="Test with Docker.")
 
@@ -320,40 +323,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--code-coverage-report-path", required=True, help="Path to the code coverage report file.")
     parser.add_argument("--test-command", required=True, help="The command to run tests and generate coverage report.")
     parser.add_argument(
-        "--coverage-type", default=settings.get(f"{settings_branch}.coverage_type"), help="Type of coverage report."
+        "--coverage-type", default=SETTINGS.get("coverage_type"), help="Type of coverage report."
     )
     parser.add_argument(
         "--desired-coverage",
         type=int,
-        default=settings.get(f"{settings_branch}.desired_coverage"),
+        default=SETTINGS.get("desired_coverage"),
         help="The desired coverage percentage.",
     )
     parser.add_argument(
         "--max-iterations",
         type=int,
-        default=settings.get(f"{settings_branch}.max_iterations"),
+        default=SETTINGS.get("max_iterations"),
         help="The maximum number of iterations.",
     )
-    parser.add_argument(
-        "--max-run-time-sec",
-        type=int,
-        default=settings.get(f"{settings_branch}.max_run_time_sec"),
-        help=(
-            "Maximum time (in seconds) allowed for test execution. Overrides the value in configuration.toml "
-            "if provided."
-        ),
-    )
-    parser.add_argument("--model", default=settings.get(f"{settings_branch}.model"), help="Which LLM model to use.")
-    parser.add_argument(
-        "--api-base",
-        default=settings.get(f"{settings_branch}.api_base"),
-        help="The API url to use for Ollama or Hugging Face.",
-    )
-    parser.add_argument("--log-db-path", default=os.getenv("LOG_DB_PATH", ""), help="Path to optional log database.")
-    parser.add_argument("--dockerfile", default="", help="Path to Dockerfile.")
-    parser.add_argument("--docker-image", default="", help="Docker image name.")
-    parser.add_argument("--openai-api-key", default=os.getenv("OPENAI_API_KEY", ""), help="OpenAI API key.",)
-    parser.add_argument("--anthropic-api-key", default=os.getenv("ANTHROPIC_API_KEY", ""), help="Anthropic API key.")
     parser.add_argument(
         "--max-run-time-sec",
         type=int,
@@ -363,6 +346,17 @@ def parse_args() -> argparse.Namespace:
             "if provided. Defaults to 30 seconds."
         )
     )
+    parser.add_argument("--model", default=SETTINGS.get("model"), help="Which LLM model to use.")
+    parser.add_argument(
+        "--api-base",
+        default=SETTINGS.get("api_base"),
+        help="The API url to use for Ollama or Hugging Face.",
+    )
+    parser.add_argument("--log-db-path", default=os.getenv("LOG_DB_PATH", ""), help="Path to optional log database.")
+    parser.add_argument("--dockerfile", default="", help="Path to Dockerfile.")
+    parser.add_argument("--docker-image", default="", help="Docker image name.")
+    parser.add_argument("--openai-api-key", default=os.getenv("OPENAI_API_KEY", ""), help="OpenAI API key.",)
+    parser.add_argument("--anthropic-api-key", default=os.getenv("ANTHROPIC_API_KEY", ""), help="Anthropic API key.")
     parser.add_argument(
         "--record-mode",
         action="store_true",
