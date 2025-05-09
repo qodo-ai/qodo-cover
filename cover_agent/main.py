@@ -102,9 +102,8 @@ def parse_args(settings: Dynaconf) -> argparse.Namespace:
             default=settings.get(f"{settings_branch}.branch"),
             help="The branch to compare against when using --diff-coverage. Default: %(default)s.",
         )),
-        # TODO: Check if `store_true` is correct for this argument
         ("--run-each-test-separately", dict(
-            type=bool,
+            action="store_true",
             default=settings.get(f"{settings_branch}.run_each_test_separately. Default: %(default)s."),
             help="Run each test separately.",
         )),
@@ -133,8 +132,8 @@ def parse_args(settings: Dynaconf) -> argparse.Namespace:
     )
     group.add_argument(
         "--diff-coverage",
-        default=settings.get(f"{settings_branch}.diff_coverage. Default: %(default)s."),
         action="store_true",
+        default=settings.get(f"{settings_branch}.diff_coverage. Default: %(default)s."),
         help=(
             "If set, Cover-Agent will only generate tests based on the diff between branches. Default: False. "
             "Not compatible with --use-report-coverage-feature-flag."
