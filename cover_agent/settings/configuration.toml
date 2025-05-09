@@ -11,7 +11,7 @@ diff_coverage = false
 included_files = []
 coverage_type = "cobertura"
 report_filepath = "test_results.html"
-run-each-test-separately = false
+run_each_test_separately = false
 
 # TODO: Uncomment the following lines after merging PRs #323 and #324
 #responses_folder = "stored_responses"
