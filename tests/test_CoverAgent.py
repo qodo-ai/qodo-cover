@@ -2,14 +2,13 @@ from numpy.core.records import record
 
 from cover_agent.CoverAgent import CoverAgent
 from cover_agent.main import parse_args
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import argparse
 import os
 import pytest
 import tempfile
 
 from unittest.mock import mock_open
-import unittest
 
 
 class TestCoverAgent:
@@ -36,6 +35,7 @@ class TestCoverAgent:
                 "pytest",
                 "--max-iterations",
                 "10",
+                "--suppress-log-files",
             ],
         ):
             args = parse_args()
@@ -51,6 +51,7 @@ class TestCoverAgent:
             assert args.report_filepath == "test_results.html"
             assert args.desired_coverage == 90
             assert args.max_iterations == 10
+            assert args.suppress_log_files is True
 
     @patch("cover_agent.CoverAgent.UnitTestGenerator")
     @patch("cover_agent.CoverAgent.os.path.isfile")
@@ -72,6 +73,7 @@ class TestCoverAgent:
             desired_coverage=90,
             max_iterations=10,
             max_run_time=30,
+            suppress_log_files=False,
         )
         parse_args = lambda: args
         mock_isfile.return_value = False
@@ -86,6 +88,8 @@ class TestCoverAgent:
         )
 
         mock_unit_cover_agent.assert_not_called()
+
+        assert args.suppress_log_files is False
 
     @patch("cover_agent.CoverAgent.os.path.exists")
     @patch("cover_agent.CoverAgent.os.path.isfile")
@@ -111,6 +115,7 @@ class TestCoverAgent:
             max_iterations=10,
             prompt_only=False,
             max_run_time=30,
+            suppress_log_files=False,
         )
         parse_args = lambda: args
         mock_isfile.side_effect = [True, False]
@@ -158,6 +163,8 @@ class TestCoverAgent:
                     run_tests_multiple_times=1,
                     max_run_time=30,
                     record_mode=False,
+                    disable_file_generation=False,
+                    suppress_log_files=False,
                 )
 
                 with pytest.raises(AssertionError) as exc_info:
@@ -220,6 +227,8 @@ class TestCoverAgent:
                 branch="main",
                 max_run_time=30,
                 record_mode=False,
+                disable_file_generation=False,
+                suppress_log_files=False,
             )
             # Mock the methods used in run
             validator = mock_unit_test_validator.return_value
@@ -257,6 +266,7 @@ class TestCoverAgent:
             desired_coverage=90,
             max_iterations=10,
             max_run_time=30,
+            suppress_log_files=False,
         )
 
         with pytest.raises(FileNotFoundError) as exc_info:
@@ -308,6 +318,8 @@ class TestCoverAgent:
                 branch="main",
                 max_run_time=30,
                 record_mode=False,
+                disable_file_generation=False,
+                suppress_log_files=False,
             )
             mock_test_validator.return_value.current_coverage = 0.5
             mock_test_validator.return_value.desired_coverage = 90
@@ -375,6 +387,8 @@ class TestCoverAgent:
                 run_each_test_separately=True,
                 max_run_time=30,
                 record_mode=False,
+                disable_file_generation=False,
+                suppress_log_files=False,
             )
 
             # Initialize CoverAgent

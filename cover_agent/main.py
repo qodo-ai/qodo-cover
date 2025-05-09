@@ -116,6 +116,12 @@ def parse_args():
         default="main",
         help="The branch to compare against when using --diff-coverage. Default: %(default)s.",
     )
+    parser.add_argument(
+        "--suppress-log-files",
+        action="store_true",
+        default=False,
+        help="Suppress all generated log files (HTML, logs, DB files).",
+    )
 
     # Create mutually exclusive group
     group = parser.add_mutually_exclusive_group()

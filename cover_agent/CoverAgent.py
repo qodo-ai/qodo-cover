@@ -42,7 +42,11 @@ class CoverAgent:
             FileNotFoundError: If required source files or directories are not found.
         """
         self.args = args
-        self.logger = logger or CustomLogger.get_logger(__name__)
+        self.generate_log_files = not args.suppress_log_files
+        # Initialize logger with file generation flag
+        self.logger = logger or CustomLogger.get_logger(__name__, generate_log_files=self.generate_log_files)
+        if args.suppress_log_files:
+            self.logger.info("Suppressed all generated log files.")
 
         self._validate_paths()
         self._duplicate_test_file()
@@ -52,7 +56,9 @@ class CoverAgent:
             self.agent_completion = agent_completion
         else:
             self.ai_caller = self._initialize_ai_caller()
-            self.agent_completion = DefaultAgentCompletion(caller=self.ai_caller)
+            self.agent_completion = DefaultAgentCompletion(
+            caller=self.ai_caller, generate_log_files=self.generate_log_files
+            )
 
         # Modify test command for a single test execution if needed
         test_command = args.test_command
@@ -103,6 +109,7 @@ class CoverAgent:
             llm_model=args.model,
             use_report_coverage_feature_flag=args.use_report_coverage_feature_flag,
             agent_completion=self.agent_completion,
+            generate_log_files=self.generate_log_files,
         )
 
         # Initialize test validator with configuration
@@ -124,6 +131,7 @@ class CoverAgent:
             num_attempts=args.run_tests_multiple_times,
             agent_completion=self.agent_completion,
             max_run_time=args.max_run_time,
+            generate_log_files=self.generate_log_files,
         )
 
     def _initialize_ai_caller(self):
@@ -196,9 +204,9 @@ class CoverAgent:
         if not self.args.log_db_path:
             self.args.log_db_path = "cover_agent_unit_test_runs.db"
         # Connect to the test DB
-        self.test_db = UnitTestDB(
-            db_connection_string=f"sqlite:///{self.args.log_db_path}"
-        )
+
+        if self.generate_log_files:
+            self.test_db = UnitTestDB(db_connection_string=f"sqlite:///{self.args.log_db_path}")
 
     def _duplicate_test_file(self):
         """
@@ -263,12 +271,22 @@ class CoverAgent:
             ]
             
             # Insert results into database
-            for result in test_results:
-                result["prompt"] = self.test_gen.prompt
-                self.test_db.insert_attempt(result)
+            if self.has_test_db():
+                for result in test_results:
+                    result["prompt"] = self.test_gen.prompt
+                    self.test_db.insert_attempt(result)
                 
         except AttributeError as e:
             self.logger.error(f"Failed to validate the tests within {generated_tests_dict}. Error: {e}")
+
+    def has_test_db(self) -> bool:
+        """
+        Check if the test database is initialized.
+
+        Returns:
+            bool: True if the test database is initialized, False otherwise.
+        """
+        return hasattr(self, "test_db") and self.test_db is not None
 
     def check_iteration_progress(self):
         """
@@ -320,8 +338,11 @@ class CoverAgent:
             f"Total number of output tokens used for LLM model {self.args.model}: {self.test_gen.total_output_token_count + self.test_validator.total_output_token_count}"
         )
 
-        # Generate report and cleanup
-        self.test_db.dump_to_report(self.args.report_filepath)
+        # Only generate report if file generation is enabled
+        if self.generate_log_files:
+            # Generate report and cleanup
+            self.test_db.dump_to_report(self.args.report_filepath)
+
         if "WANDB_API_KEY" in os.environ:
             wandb.finish()
 

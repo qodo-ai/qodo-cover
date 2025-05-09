@@ -60,6 +60,7 @@ class TestMain:
             report_filepath="test_results.html",
             desired_coverage=90,
             max_iterations=10,
+            suppress_log_files=True,
         )
         parse_args = lambda: args  # Mocking parse_args function
         mock_isfile.return_value = False  # Simulate source file not found
@@ -95,6 +96,7 @@ class TestMain:
             desired_coverage=90,
             max_iterations=10,
             prompt_only=False,
+            suppress_log_files=True,
         )
         parse_args = lambda: args  # Mocking parse_args function
         mock_isfile.side_effect = [True, False]

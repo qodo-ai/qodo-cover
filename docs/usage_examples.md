@@ -14,7 +14,8 @@ cover-agent \
 --test-command "poetry run pytest tests/test_AICaller.py --cov=cover_agent --cov-report=xml --cov-report=term --log-cli-level=INFO --timeout=10" \
 --coverage-type "cobertura" \
 --desired-coverage 90 \
---max-iterations 5
+--max-iterations 5 \
+--suppress-log-files
 ```
 
 ## Example 2: Running only on a specific module
@@ -29,7 +30,8 @@ cover-agent \
 --test-command "poetry run  pytest --cov=cover_agent.AICaller --cov-report=xml:tests/coverage_prompt_builder.xml --cov-report=term tests/test_AICaller.py --timeout=10" \
 --coverage-type "cobertura" \
 --desired-coverage 90 \
---max-iterations 5
+--max-iterations 5 \
+--suppress-log-files
 ```
 
 ## Example 3: Utilizing additional instructions
@@ -50,6 +52,7 @@ cover-agent \
 --coverage-type "cobertura" \
 --desired-coverage 90 \
 --max-iterations 5 \
+--suppress-log-files \
 --additional-instructions="add tests to the class 'TestUnitTestGenerator'"
 ```
 
@@ -67,6 +70,7 @@ cover-agent \
 --test-command "poetry run pytest tests/test_main.py --cov=cover_agent --cov-report=xml --cov-report=term --log-cli-level=INFO --timeout=10" \
 --coverage-type "cobertura" \
 --desired-coverage 96 \
---max-iterations  8
+--max-iterations  8 \
+--suppress-log-files
 ```
 

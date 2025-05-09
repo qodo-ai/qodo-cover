@@ -17,6 +17,12 @@ def main():
     parser = argparse.ArgumentParser(description="Args for running tests with Docker.")
     parser.add_argument("--model", default=constants.MODEL, help="Which LLM model to use.")
     parser.add_argument("--record-mode", action="store_true", help="Enable LLM responses record mode for tests.")
+    parser.add_argument(
+        "--suppress-log-files",
+        default=False,
+        action="store_true",
+        help="Suppress all generated log files (HTML, logs, DB files).",
+    )
     args = parser.parse_args()
 
     model = args.model
@@ -24,6 +30,7 @@ def main():
 
     # Run all tests sequentially
     for test in TESTS:
+        suppress_log_files = test.get("suppress_log_files", False)
         test_args = argparse.Namespace(
             record_mode=record_mode,
             docker_image=test["docker_image"],
@@ -41,6 +48,7 @@ def main():
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
             dockerfile=test.get("docker_file_path", ""),
             log_db_path=os.getenv("LOG_DB_PATH", ""),
+            suppress_log_files=test.get("suppress_log_files", args.suppress_log_files),
         )
         run_test(test_args)
 

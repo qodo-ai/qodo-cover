@@ -1,11 +1,12 @@
-from wandb.sdk.data_types.trace_tree import Trace
 import datetime
 import json
 import logging
 import os
-import re
+
+from typing import Optional
 
 from diff_cover.diff_cover_tool import main as diff_cover_main
+from wandb.sdk.data_types.trace_tree import Trace
 
 from cover_agent.AgentCompletionABC import AgentCompletionABC
 from cover_agent.CoverageProcessor import CoverageProcessor
@@ -36,6 +37,8 @@ class UnitTestValidator:
         diff_coverage: bool = False,
         comparison_branch: str = "main",
         num_attempts: int = 1,
+        logger: Optional[CustomLogger]=None,
+        generate_log_files: bool=True,
     ):
         """
         Initialize the UnitTestValidator class with the provided parameters.
@@ -57,6 +60,8 @@ class UnitTestValidator:
             use_report_coverage_feature_flag (bool, optional): Setting this to True considers the coverage of all the files in the coverage report.
                                                                This means we consider a test as good if it increases coverage for a different
                                                                file other than the source file. Defaults to False.
+            logger (CustomLogger, optional): The logger object for logging messages.
+            generate_log_files (bool): Whether or not to generate logs.
 
         Returns:
             None
@@ -84,9 +89,10 @@ class UnitTestValidator:
         self.num_attempts = num_attempts
         self.agent_completion = agent_completion
         self.max_run_time = max_run_time
+        self.generate_log_files = generate_log_files
 
         # Get the logger instance from CustomLogger
-        self.logger = CustomLogger.get_logger(__name__)
+        self.logger = logger or CustomLogger.get_logger(__name__, generate_log_files=self.generate_log_files)
 
         # Override covertype to be 'diff' if diff_coverage is enabled
         if self.diff_coverage:
@@ -120,6 +126,7 @@ class UnitTestValidator:
             coverage_type=self.coverage_type,
             use_report_coverage_feature_flag=self.use_report_coverage_feature_flag,
             diff_coverage_report_path=self.diff_cover_report_path,
+            generate_log_files=self.generate_log_files,
         )
 
     def get_coverage(self):

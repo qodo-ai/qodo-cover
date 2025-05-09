@@ -275,6 +275,10 @@ def compose_test_command(test_args: argparse.Namespace) -> list:
     if test_args.record_mode:
         command.extend(["--record-mode"])
 
+    if test_args.suppress_log_files:
+        command.extend(["--suppress-log-files"])
+        logger.info('Suppressed all generated log files for this test run.')
+
     return command
 
 
@@ -410,12 +414,18 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Maximum time (in seconds) allowed for test execution. Overrides the value in configuration.toml "
             "if provided. Defaults to 30 seconds."
-        ),
+        )
     )
     parser.add_argument(
         "--record-mode",
         action="store_true",
         help="Enable record mode for LLM responses. Default: False.",
+    )
+    parser.add_argument(
+        "--suppress-log-files",
+        action="store_true",
+        default=False,
+        help="Suppress all generated log files (HTML, logs, DB files).",
     )
 
     return parser.parse_args()

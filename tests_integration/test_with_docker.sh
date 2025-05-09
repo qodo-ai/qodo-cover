@@ -18,6 +18,7 @@ CODE_COVERAGE_REPORT_PATH="coverage.xml"
 MAX_ITERATIONS=3  # Default value
 DESIRED_COVERAGE=70  # Default value
 LOG_DB_PATH="${LOG_DB_PATH:-}"
+SUPPRESS_LOG_FILES=""
 
 # Function to clean up Docker container
 cleanup() {
@@ -47,6 +48,7 @@ while [ "$#" -gt 0 ]; do
     --max-iterations) MAX_ITERATIONS="$2"; shift ;;
     --desired-coverage) DESIRED_COVERAGE="$2"; shift ;;
     --log-db-path) LOG_DB_PATH="$2"; shift ;;
+    --suppress-log-files) SUPPRESS_LOG_FILES="--suppress-log-files" ;;
     *) echo "Unknown parameter passed: $1"; exit 1 ;;
   esac
   shift
@@ -123,6 +125,10 @@ fi
 
 if [ -n "$LOG_DB_PATH" ]; then
   COMMAND="$COMMAND --log-db-path \"/$LOG_DB_NAME\""
+fi
+
+if [ -n "$SUPPRESS_LOG_FILES" ]; then
+  COMMAND="$COMMAND $SUPPRESS_LOG_FILES"
 fi
 
 if [ -n "$OPENAI_API_KEY" ] && [ -n "$ANTHROPIC_API_KEY" ]; then
