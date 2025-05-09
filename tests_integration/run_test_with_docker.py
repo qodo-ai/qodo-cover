@@ -258,7 +258,7 @@ def compose_test_command(test_args: argparse.Namespace) -> list:
         "--coverage-type", test_args.coverage_type,
         "--desired-coverage", str(test_args.desired_coverage),
         "--max-iterations", str(test_args.max_iterations),
-        "--max-run-time", str(test_args.max_run_time),
+        "--max-run-time-sec", str(test_args.max_run_time_sec),
         "--strict-coverage",
     ]
 
@@ -335,7 +335,7 @@ def parse_args() -> argparse.Namespace:
         help="The maximum number of iterations.",
     )
     parser.add_argument(
-        "--max-run-time",
+        "--max-run-time-sec",
         type=int,
         default=settings.get(f"{settings_branch}.max_run_time_sec"),
         help=(
@@ -355,7 +355,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--openai-api-key", default=os.getenv("OPENAI_API_KEY", ""), help="OpenAI API key.",)
     parser.add_argument("--anthropic-api-key", default=os.getenv("ANTHROPIC_API_KEY", ""), help="Anthropic API key.")
     parser.add_argument(
-        "--max-run-time",
+        "--max-run-time-sec",
         type=int,
         default=30,
         help=(

@@ -60,7 +60,7 @@ def parse_args(settings: Dynaconf) -> argparse.Namespace:
             default=settings.get(f"{settings_branch}.max_iterations"),
             help="The maximum number of iterations. Default: %(default)s.",
         )),
-        ("--max-run-time", dict(
+        ("--max-run-time-sec", dict(
             type=int,
             default=settings.get(f"{settings_branch}.max_run_time_sec"),
             help=(

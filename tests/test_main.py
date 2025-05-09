@@ -153,7 +153,7 @@ class TestMain:
 
     def test_parse_args_with_max_run_time(self):
         """
-        Test the parse_args function to ensure it correctly parses the max-run-time argument.
+        Test the parse_args function to ensure it correctly parses the max-run-time-sec argument.
         """
         with patch(
             "sys.argv",
@@ -169,10 +169,10 @@ class TestMain:
                 "pytest",
                 "--max-iterations",
                 "10",
-                "--max-run-time",
+                "--max-run-time-sec",
                 "45",
             ],
         ):
             args = parse_args()
-            # Assert that the max_run_time argument is parsed correctly
-            assert args.max_run_time == 45
+            # Assert that the max_run_time_sec argument is parsed correctly
+            assert args.max_run_time_sec == 45

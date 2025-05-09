@@ -27,7 +27,7 @@ class TestUnitValidator:
                 test_command="pytest",
                 llm_model="gpt-3",
                 agent_completion=mock_agent_completion,
-                max_run_time=30,
+                max_run_time_sec=30,
             )
 
             # Simulate agent_completion raising an exception
@@ -58,7 +58,7 @@ class TestUnitValidator:
                 llm_model="gpt-3",
                 agent_completion=MagicMock(),
                 use_report_coverage_feature_flag=True,
-                max_run_time=30,
+                max_run_time_sec=30,
             )
             with patch.object(
                 Runner, "run_command", return_value=("", "", 0, datetime.datetime.now())
@@ -85,7 +85,7 @@ class TestUnitValidator:
                 test_command="pytest",
                 llm_model="gpt-3",
                 agent_completion=mock_agent_completion,
-                max_run_time=30,
+                max_run_time_sec=30,
             )
 
             mock_response = """
@@ -146,7 +146,7 @@ class TestUnitValidator:
                 test_command="pytest",
                 llm_model="gpt-3",
                 agent_completion=MagicMock(),
-                max_run_time=30,
+                max_run_time_sec=30,
             )
 
             # Setup initial state
@@ -190,7 +190,7 @@ class TestUnitValidator:
                 test_command="pytest",
                 llm_model="gpt-3",
                 agent_completion=mock_agent_completion,
-                max_run_time=30,
+                max_run_time_sec=30,
             )
 
             # Mock responses from agent_completion
@@ -233,7 +233,7 @@ class TestUnitValidator:
                 llm_model="gpt-3",
                 agent_completion=MagicMock(),
                 use_report_coverage_feature_flag=True,
-                max_run_time=30,
+                max_run_time_sec=30,
             )
             with patch.object(
                 CoverageProcessor,
@@ -259,7 +259,7 @@ class TestUnitValidator:
                 llm_model="gpt-3",
                 agent_completion=MagicMock(),
                 diff_coverage=True,
-                max_run_time=30,
+                max_run_time_sec=30,
             )
             with patch.object(generator, "generate_diff_coverage_report"), patch.object(
                 CoverageProcessor, "process_coverage_report", return_value=([], [], 0.8)
@@ -281,7 +281,7 @@ class TestUnitValidator:
                 test_command="pytest",
                 llm_model="gpt-3",
                 agent_completion=MagicMock(),
-                max_run_time=30,
+                max_run_time_sec=30,
             )
             with patch.object(
                 CoverageProcessor, "process_coverage_report", return_value=([], [], 0.7)
@@ -305,7 +305,7 @@ class TestUnitValidator:
                 agent_completion=MagicMock(),
                 diff_coverage=True,
                 comparison_branch="main",
-                max_run_time=30,
+                max_run_time_sec=30,
             )
             with patch(
                 "cover_agent.UnitTestValidator.diff_cover_main"
@@ -335,7 +335,7 @@ class TestUnitValidator:
                 agent_completion=MagicMock(),
                 diff_coverage=True,
                 comparison_branch="main",
-                max_run_time=30,
+                max_run_time_sec=30,
             )
             with patch(
                 "cover_agent.UnitTestValidator.diff_cover_main",
