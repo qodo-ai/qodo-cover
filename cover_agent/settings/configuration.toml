@@ -13,18 +13,17 @@ coverage_type = "cobertura"
 report_filepath = "test_results.html"
 run_each_test_separately = false
 
-# TODO: Uncomment the following lines after merging PRs #323 and #324
-#responses_folder = "stored_responses"
+responses_folder = "stored_responses"
 
-#cover_agent_host_folder = "dist/cover-agent"
-#cover_agent_container_folder = "/usr/local/bin/cover-agent"
+cover_agent_host_folder = "dist/cover-agent"
+cover_agent_container_folder = "/usr/local/bin/cover-agent"
 
-#docker_hash_display_length = 12
-#record_replay_hash_display_length = 12
+docker_hash_display_length = 12
+record_replay_hash_display_length = 12
 
-#fuzzy_lookup_threshold = 95
-#fuzzy_lookup_prefix_length = 1000
-#fuzzy_lookup_best_ratio = 0
+fuzzy_lookup_threshold = 95
+fuzzy_lookup_prefix_length = 1000
+fuzzy_lookup_best_ratio = 0
 
 [include_files]
 limit_tokens = true
