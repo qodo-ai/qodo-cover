@@ -108,6 +108,7 @@ def parse_args(settings: Dynaconf) -> argparse.Namespace:
             default=settings.get(f"{settings_branch}.run_each_test_separately. Default: %(default)s."),
             help="Run each test separately.",
         )),
+        ("--record-mode", dict(action="store_true", help="Enable record mode for LLM responses. Default: False.")),
     ]
 
     for name, kwargs in arg_definitions:
@@ -138,11 +139,6 @@ def parse_args(settings: Dynaconf) -> argparse.Namespace:
             "If set, Cover-Agent will only generate tests based on the diff between branches. Default: False. "
             "Not compatible with --use-report-coverage-feature-flag."
         ),
-    )
-    parser.add_argument(
-        "--record-mode",
-        action="store_true",
-        help="Enable record mode for LLM responses. Default: False.",
     )
 
     return parser.parse_args()
@@ -181,6 +177,7 @@ def merge_settings(args: argparse.Namespace, settings: Dynaconf) -> dict[str, An
         "run_each_test_separately": args.run_each_test_separately or settings.get(
             f"{settings_branch}.run_each_test_separately"
         ),
+        "record_mode": args.record_mode,
     }
 
 
