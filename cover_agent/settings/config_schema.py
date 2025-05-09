@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Optional
 
 
 class CoverageType(Enum):
@@ -48,6 +49,8 @@ class CoverAgentConfig:
                                                  in the coverage report.
         diff_coverage (bool): If set, Cover-Agent will only generate tests based on the diff between branches.
         run_each_test_separately (bool): Run each test separately.
+        record_mode (bool): Enable LLM responses record mode for tests.
+        test_command_original (str): Original test command before any modifications.
     """
     source_file_path: str
     test_file_path: str
@@ -72,3 +75,5 @@ class CoverAgentConfig:
     use_report_coverage_feature_flag: bool
     diff_coverage: bool
     run_each_test_separately: bool
+    record_mode: bool
+    test_command_original: Optional[str] = None

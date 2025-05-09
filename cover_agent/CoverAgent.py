@@ -25,21 +25,26 @@ class CoverAgent:
     This agent coordinates between test generation and validation components, handles file management,
     and tracks the progress of coverage improvements over multiple iterations.
     """
-    def __init__(self, config: CoverAgentConfig, agent_completion: AgentCompletionABC=None, logger: Optional[CustomLogger]=None):
+    def __init__(
+        self,
+        config: CoverAgentConfig,
+        agent_completion: AgentCompletionABC=None,
+        logger: Optional[CustomLogger]=None,
+    ):
         """
-        Initialize the CoverAgent with configuration and set up test generation environment.
+        Initialize the CoverAgent instance.
 
-        Parameters:
-            args (Namespace): Command-line arguments containing:
-                - paths for source and test files
-                - project configuration
-                - coverage requirements
-                - test execution settings
-            agent_completion (AgentCompletionABC, optional): Custom completion agent for test generation.
-                                                           Defaults to DefaultAgentCompletion.
+        Args:
+            config (CoverAgentConfig): Configuration object containing all necessary settings for the agent.
+            agent_completion (AgentCompletionABC, optional): Custom agent completion object. Defaults to None,
+                in which case a default completion object is initialized.
+            logger (Optional[CustomLogger], optional): Custom logger instance. Defaults to None,
+                in which case a default logger is created.
 
-        Raises:
-            FileNotFoundError: If required source files or directories are not found.
+        Attributes:
+            logger (CustomLogger): Logger instance for logging messages.
+            config (CoverAgentConfig): Configuration object for the agent.
+            agent_completion (AgentCompletionABC): Agent completion object for handling AI interactions.
         """
         self.logger = logger or CustomLogger.get_logger(__name__)
 
