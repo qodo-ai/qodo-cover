@@ -5,13 +5,11 @@ max_iterations = 10
 api_base = "http://localhost:11434"
 max_run_time_sec = 30
 run_tests_multiple_times = 1
-log_db_path = "cover_agent_unit_test_runs.db"
 branch = "main"
-diff_coverage = false
 included_files = []
 coverage_type = "cobertura"
+log_db_path = "cover_agent_unit_test_runs.db"
 report_filepath = "test_results.html"
-run_each_test_separately = false
 
 responses_folder = "stored_responses"
 
