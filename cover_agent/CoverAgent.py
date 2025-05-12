@@ -46,10 +46,9 @@ class CoverAgent:
             config (CoverAgentConfig): Configuration object for the agent.
             agent_completion (AgentCompletionABC): Agent completion object for handling AI interactions.
         """
-        self.logger = logger or CustomLogger.get_logger(__name__)
-
         self.config = config
         self.generate_log_files = not config.suppress_log_files
+
         # Initialize logger with file generation flag
         self.logger = logger or CustomLogger.get_logger(__name__, generate_log_files=self.generate_log_files)
         if config.suppress_log_files:
@@ -64,7 +63,7 @@ class CoverAgent:
         else:
             self.ai_caller = self._initialize_ai_caller()
             self.agent_completion = DefaultAgentCompletion(
-            caller=self.ai_caller, generate_log_files=self.generate_log_files
+                caller=self.ai_caller, generate_log_files=self.generate_log_files
             )
 
         # Modify test command for a single test execution if needed
@@ -163,7 +162,7 @@ class CoverAgent:
         else:
             # Try to use replay mode if a response file exists
             try:
-                replay_manager = RecordReplayManager(record_mode=False)
+                replay_manager = RecordReplayManager(record_mode=False, generate_log_files=self.generate_log_files)
                 replay_manager.source_file = self.config.source_file_path
                 replay_manager.test_file = self.config.test_file_path
 
@@ -172,7 +171,9 @@ class CoverAgent:
                 ):
                     self.logger.info("Initializing AICallerReplay (found recorded responses)...")
                     return AICallerReplay(
-                        source_file=self.config.source_file_path, test_file=self.config.test_file_path
+                        source_file=self.config.source_file_path,
+                        test_file=self.config.test_file_path,
+                        generate_log_files=self.generate_log_files,
                     )
             except Exception as e:
                 self.logger.debug(f"Failed to initialize replay mode: {e}")

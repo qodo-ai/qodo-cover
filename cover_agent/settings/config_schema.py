@@ -81,6 +81,7 @@ class CoverAgentConfig:
     diff_coverage: bool
     run_each_test_separately: bool
     record_mode: bool
+    suppress_log_files: bool
     test_command_original: Optional[str] = None
 
     @classmethod
@@ -120,6 +121,7 @@ class CoverAgentConfig:
             diff_coverage=args.diff_coverage,
             run_each_test_separately=args.run_each_test_separately,
             record_mode=args.record_mode,
+            suppress_log_files=args.suppress_log_files,
         )
 
     @classmethod
@@ -162,6 +164,7 @@ class CoverAgentConfig:
             "diff_coverage": default_config.get("diff_coverage"),
             "run_each_test_separately": default_config.get("run_each_test_separately"),
             "record_mode": default_config.get("record_mode"),
+            "suppress_log_files": default_config.get("suppress_log_files"),
         }
 
         # CLI overrides default settings

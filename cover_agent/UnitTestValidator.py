@@ -36,11 +36,8 @@ class UnitTestValidator:
         test_command_dir: str,
         additional_instructions: str,
         included_files: list,
-        use_report_coverage_feature_flag: bool = False,
+        use_report_coverage_feature_flag: bool,
         project_root: str = "",
-        diff_coverage: bool = False,
-        comparison_branch: str = "main",
-        num_attempts: int = 1,
         logger: Optional[CustomLogger]=None,
         generate_log_files: bool=True,
     ):

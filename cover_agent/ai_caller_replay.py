@@ -16,11 +16,12 @@ class AICallerReplay:
             test_file: str,
             record_replay_manager: Optional[RecordReplayManager]=None,
             logger: Optional[CustomLogger]=None,
+            generate_log_files: bool=True,
     ):
         self.source_file = source_file
         self.test_file = test_file
         self.record_replay_manager = record_replay_manager or RecordReplayManager(record_mode=False)
-        self.logger = logger or CustomLogger.get_logger(__name__)
+        self.logger = logger or CustomLogger.get_logger(__name__, generate_log_files=generate_log_files)
 
     def call_model(self, prompt: dict, stream=True) -> tuple[str, int, int]:
         """

@@ -45,6 +45,7 @@ class AICaller:
         record_mode: bool=False,
         record_replay_manager: Optional[RecordReplayManager]=None,
         logger: Optional[CustomLogger]=None,
+        generate_log_files: bool=True,
     ):
         """
         Initializes an instance of the AICaller class.
@@ -60,8 +61,10 @@ class AICaller:
         self.source_file = source_file
         self.test_file = test_file
         self.record_mode = record_mode
-        self.record_replay_manager = record_replay_manager or RecordReplayManager(record_mode=record_mode)
-        self.logger = logger or CustomLogger.get_logger(__name__)
+        self.record_replay_manager = record_replay_manager or RecordReplayManager(
+            record_mode=record_mode, generate_log_files=generate_log_files
+        )
+        self.logger = logger or CustomLogger.get_logger(__name__, generate_log_files=generate_log_files)
 
     @conditional_retry  # You can access self.enable_retry here
     def call_model(self, prompt: dict, stream=True):

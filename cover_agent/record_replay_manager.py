@@ -33,12 +33,16 @@ class RecordReplayManager:
     HASH_DISPLAY_LENGTH = SETTINGS.record_replay_hash_display_length
 
     def __init__(
-            self, record_mode: bool, base_dir: str=SETTINGS.RESPONSES_FOLDER, logger: Optional[CustomLogger]=None
+            self,
+            record_mode: bool,
+            base_dir: str=SETTINGS.RESPONSES_FOLDER,
+            logger: Optional[CustomLogger]=None,
+            generate_log_files: bool=True,
     ) -> None:
         self.base_dir = Path(base_dir)
         self.record_mode = record_mode
         self.files_hash = None
-        self.logger = logger or CustomLogger.get_logger(__name__)
+        self.logger = logger or CustomLogger.get_logger(__name__, generate_log_files=generate_log_files)
 
         self.logger.info(
             f"✨ RecordReplayManager initialized in {'Run and Record' if record_mode else 'Run or Replay'} mode."

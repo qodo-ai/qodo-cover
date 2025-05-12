@@ -33,15 +33,15 @@ class CustomLogger:
         logger = logging.getLogger(name)
         logger.setLevel(logging.DEBUG)
 
-        # Specify the log file path
-        log_file_path = "run.log"
-
         # Check if handlers are already set up to avoid adding them multiple times
         if not logger.handlers:
             formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
             # Only add file handler if file generation is enabled
             if generate_log_files:
+                # Specify the log file path
+                log_file_path = "run.log"
+
                 # File handler for writing to a file. Use 'w' to overwrite the log file on each run
                 file_handler = logging.FileHandler(log_file_path, mode="w")
                 file_handler.setLevel(file_level)

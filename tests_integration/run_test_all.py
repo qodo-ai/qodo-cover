@@ -7,7 +7,7 @@ from cover_agent.CustomLogger import CustomLogger
 from tests_integration.run_test_with_docker import run_test
 from tests_integration.scenarios import TESTS
 from cover_agent.settings.config_loader import get_settings
-from cover_agent.settings.config_schema import CoverageType, CoverAgentConfig
+
 
 load_dotenv()
 logger = CustomLogger.get_logger(__name__)
