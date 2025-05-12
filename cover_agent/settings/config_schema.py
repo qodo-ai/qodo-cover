@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from dataclasses import dataclass
 from enum import Enum
@@ -113,7 +114,7 @@ class CoverAgentConfig:
             api_base=args.api_base,
             strict_coverage=args.strict_coverage,
             run_tests_multiple_times=args.run_tests_multiple_times,
-            log_db_path=args.log_db_path,
+            log_db_path=os.getenv("LOG_DB_PATH") or args.log_db_path,
             branch=args.branch,
             use_report_coverage_feature_flag=args.use_report_coverage_feature_flag,
             diff_coverage=args.diff_coverage,

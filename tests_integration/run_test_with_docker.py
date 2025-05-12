@@ -1,12 +1,15 @@
 import argparse
 import os
+import sys
 
 from pathlib import Path
 
 import docker
 from dotenv import load_dotenv
+from dynaconf import Dynaconf
 
 from cover_agent.CustomLogger import CustomLogger
+from cover_agent.main import parse_args
 from cover_agent.settings.config_loader import get_settings
 from tests_integration.docker_utils import (
     clean_up_docker_container,
@@ -274,7 +277,7 @@ def compose_test_command(test_args: argparse.Namespace) -> list:
 
     if test_args.log_db_path:
         log_db_name = os.path.basename(test_args.log_db_path)
-        command.extend(["--log-db-path", f"/{log_db_name}"])
+        command.extend(["--log-db-path", f"{log_db_name}"])
 
     if test_args.record_mode:
         command.extend(["--record-mode"])
@@ -313,65 +316,54 @@ def log_test_args(test_args: argparse.Namespace, max_value_len=60) -> None:
         logger.info(f"{key:30}: {value_str}")
 
 
-def parse_args() -> argparse.Namespace:
-    # settings = get_settings().get("default")
+def parse_extra_args(settings: Dynaconf) -> argparse.Namespace:
+    """
+    Parses additional command-line arguments specific to Docker and combines them with base arguments.
 
-    parser = argparse.ArgumentParser(description="Test with Docker.")
+    This function first defines and parses Docker-specific arguments, then uses the `parse_args` function
+    to parse the base arguments. The two sets of arguments are combined into a single `argparse.Namespace`.
 
-    parser.add_argument("--source-file-path", required=True, help="Path to the source file.")
-    parser.add_argument("--test-file-path", required=True, help="Path to the input test file.")
-    parser.add_argument("--code-coverage-report-path", required=True, help="Path to the code coverage report file.")
-    parser.add_argument("--test-command", required=True, help="The command to run tests and generate coverage report.")
-    parser.add_argument(
-        "--coverage-type", default=SETTINGS.get("coverage_type"), help="Type of coverage report."
-    )
-    parser.add_argument(
-        "--desired-coverage",
-        type=int,
-        default=SETTINGS.get("desired_coverage"),
-        help="The desired coverage percentage.",
-    )
-    parser.add_argument(
-        "--max-iterations",
-        type=int,
-        default=SETTINGS.get("max_iterations"),
-        help="The maximum number of iterations.",
-    )
-    parser.add_argument(
-        "--max-run-time-sec",
-        type=int,
-        default=30,
-        help=(
-            "Maximum time (in seconds) allowed for test execution. Overrides the value in configuration.toml "
-            "if provided. Defaults to 30 seconds."
-        )
-    )
-    parser.add_argument("--model", default=SETTINGS.get("model"), help="Which LLM model to use.")
-    parser.add_argument(
-        "--api-base",
-        default=SETTINGS.get("api_base"),
-        help="The API url to use for Ollama or Hugging Face.",
-    )
-    parser.add_argument("--log-db-path", default=os.getenv("LOG_DB_PATH", ""), help="Path to optional log database.")
-    parser.add_argument("--dockerfile", default="", help="Path to Dockerfile.")
-    parser.add_argument("--docker-image", default="", help="Docker image name.")
-    parser.add_argument("--openai-api-key", default=os.getenv("OPENAI_API_KEY", ""), help="OpenAI API key.",)
-    parser.add_argument("--anthropic-api-key", default=os.getenv("ANTHROPIC_API_KEY", ""), help="Anthropic API key.")
-    parser.add_argument(
-        "--record-mode",
-        action="store_true",
-        help="Enable record mode for LLM responses. Default: False.",
-    )
-    parser.add_argument(
-        "--suppress-log-files",
-        action="store_true",
-        default=False,
-        help="Suppress all generated log files (HTML, logs, DB files).",
-    )
+    Args:
+        settings (Dynaconf): Configuration settings object used for parsing base arguments.
 
-    return parser.parse_args()
+    Returns:
+        argparse.Namespace: A namespace containing both base and Docker-specific arguments.
+    """
+    logger.info("Starting to parse extra arguments...")
+    parent_args_parser = argparse.ArgumentParser(add_help=False)
+    extra_args_parser = argparse.ArgumentParser(parents=[parent_args_parser])
+
+    extra_args_definitions = [
+        ("--dockerfile", dict(type=str, default="", help="Path to Dockerfile.")),
+        ("--docker-image", dict(type=str, default="", help="Docker image name.")),
+        ("--openai-api-key", dict(type=str, default=os.getenv("OPENAI_API_KEY", ""), help="OpenAI API key.")),
+        ("--anthropic-api-key", dict(type=str, default=os.getenv("ANTHROPIC_API_KEY", ""), help="Anthropic API key.")),
+    ]
+
+    for name, kwargs in extra_args_definitions:
+        extra_args_parser.add_argument(name, **kwargs)
+
+    extra_args, base_args = extra_args_parser.parse_known_args()
+
+    # Set up sys.argv for base args parsing
+    original_argv = sys.argv
+    sys.argv = [sys.argv[0]] + base_args
+    logger.info(f"Modified sys.argv for base argument parsing: {sys.argv}.")
+
+    try:
+        base_args = parse_args(settings)
+        logger.info("Base arguments successfully parsed.")
+
+        # Combine both sets of args
+        combined_dict = {**vars(base_args), **vars(extra_args)}
+        logger.info("Successfully combined Docker-specific and base arguments.")
+        return argparse.Namespace(**combined_dict)
+    finally:
+        # Restore original argv
+        logger.debug(f"Restoring original sys.argv: {original_argv}...")
+        sys.argv = original_argv
 
 
 if __name__ == "__main__":
-    args = parse_args()
+    args = parse_extra_args(SETTINGS)
     run_test(args)
