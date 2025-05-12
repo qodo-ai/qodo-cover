@@ -143,30 +143,108 @@ class TestAICaller:
         )
 
     @patch("cover_agent.AICaller.litellm.completion")
-    def test_call_model_o1_preview(self, mock_completion, ai_caller):
+    def test_call_model_user_message_only(self, mock_completion, ai_caller):
         """
-        Test the call_model method with the 'o1-preview' model.
+        Test the call_model method with a model that only supports user messages.
         """
-        ai_caller.model = "o1-preview"
-        prompt = {"system": "System message", "user": "Hello, world!"}
+        # Set the model to one that only supports user messages
+        ai_caller.model = "o1-preview"  # This is in USER_MESSAGE_ONLY_MODELS
+        prompt = {"system": "System instruction", "user": "User query"}
+
         # Mock the response
         mock_response = Mock()
         mock_response.choices = [Mock(message=Mock(content="response"))]
         mock_response.usage = Mock(prompt_tokens=2, completion_tokens=10)
         mock_completion.return_value = mock_response
+
+        # Call the method with stream=False for simplicity
+        response, prompt_tokens, response_tokens = ai_caller.call_model(
+            prompt, stream=False
+        )
+
+        # Verify the response
+        assert response == "response"
+        assert prompt_tokens == 2
+        assert response_tokens == 10
+
+        # Check that litellm.completion was called with the correct arguments
+        # Most importantly, verify that system and user messages were combined into a single user message
+        mock_completion.assert_called_once()
+        call_args = mock_completion.call_args[1]
+        assert len(call_args["messages"]) == 1
+        assert call_args["messages"][0]["role"] == "user"
+        assert call_args["messages"][0]["content"] == "System instruction\nUser query"
+
+    @patch("cover_agent.AICaller.litellm.completion")
+    def test_call_model_no_temperature_support(self, mock_completion, ai_caller):
+        """
+        Test the call_model method with a model that doesn't support temperature.
+        """
+        # Set the model to one that doesn't support temperature
+        ai_caller.model = "o1-preview"  # This is in NO_SUPPORT_TEMPERATURE_MODELS
+        prompt = {"system": "System message", "user": "Hello, world!"}
+
+        # Mock the response
+        mock_response = Mock()
+        mock_response.choices = [Mock(message=Mock(content="response"))]
+        mock_response.usage = Mock(prompt_tokens=2, completion_tokens=10)
+        mock_completion.return_value = mock_response
+
         # Call the method
         response, prompt_tokens, response_tokens = ai_caller.call_model(
             prompt, stream=False
         )
+
+        # Verify the response
         assert response == "response"
         assert prompt_tokens == 2
         assert response_tokens == 10
+
+        # Check that litellm.completion was called without the temperature parameter
+        mock_completion.assert_called_once()
+        call_args = mock_completion.call_args[1]
+        assert "temperature" not in call_args
+
+    @patch("cover_agent.AICaller.litellm.completion")
+    def test_call_model_no_streaming_support(self, mock_completion, ai_caller):
+        """
+        Test the call_model method with a model that doesn't support streaming.
+        """
+        # Set the model to one that doesn't support streaming
+        ai_caller.model = "o1"  # This is in NO_SUPPORT_STREAMING_MODELS
+        prompt = {"system": "System message", "user": "Hello, world!"}
+
+        # Mock the response
+        mock_response = Mock()
+        mock_response.choices = [Mock(message=Mock(content="response"))]
+        mock_response.usage = Mock(prompt_tokens=2, completion_tokens=10)
+        mock_completion.return_value = mock_response
+
+        # Call the method explicitly requesting streaming, which should be ignored
+        response, prompt_tokens, response_tokens = ai_caller.call_model(
+            prompt, stream=True
+        )
+
+        # Verify the response
+        assert response == "response"
+        assert prompt_tokens == 2
+        assert response_tokens == 10
+
+        # Check that litellm.completion was called with stream=False
+        mock_completion.assert_called_once()
+        call_args = mock_completion.call_args[1]
+        assert call_args["stream"] == False
+        # Check if max_tokens was removed and max_completion_tokens was added
+        assert "max_tokens" not in call_args
+        assert call_args["max_completion_tokens"] == 2 * ai_caller.max_tokens
 
     @patch("cover_agent.AICaller.litellm.completion")
     def test_call_model_streaming_response(self, mock_completion, ai_caller):
         """
         Test the call_model method with a streaming response.
         """
+        # Make sure we're using a model that supports streaming
+        ai_caller.model = "gpt-4"  # Not in NO_SUPPORT_STREAMING_MODELS
         prompt = {"system": "", "user": "Hello, world!"}
         # Mock the response to be an iterable of chunks
         mock_chunk = Mock()
@@ -182,6 +260,37 @@ class TestAICaller:
             )
             assert response == "response"
             assert prompt_tokens == 2
+
+    @patch("cover_agent.AICaller.litellm.completion")
+    def test_call_model_empty_system_prompt(self, mock_completion, ai_caller):
+        """
+        Test the call_model method with an empty system prompt.
+        """
+        # Should work the same for any model type
+        prompt = {"system": "", "user": "Hello, world!"}
+
+        # Mock the response
+        mock_response = Mock()
+        mock_response.choices = [Mock(message=Mock(content="response"))]
+        mock_response.usage = Mock(prompt_tokens=2, completion_tokens=10)
+        mock_completion.return_value = mock_response
+
+        # Call the method
+        response, prompt_tokens, response_tokens = ai_caller.call_model(
+            prompt, stream=False
+        )
+
+        # Verify the response
+        assert response == "response"
+        assert prompt_tokens == 2
+        assert response_tokens == 10
+
+        # Check that litellm.completion was called with only a user message
+        mock_completion.assert_called_once()
+        call_args = mock_completion.call_args[1]
+        assert len(call_args["messages"]) == 1
+        assert call_args["messages"][0]["role"] == "user"
+        assert call_args["messages"][0]["content"] == "Hello, world!"
 
     @patch("cover_agent.AICaller.litellm.completion")
     @patch.dict(os.environ, {"WANDB_API_KEY": "test_key"})
