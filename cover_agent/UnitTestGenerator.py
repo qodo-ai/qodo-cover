@@ -10,10 +10,6 @@ from cover_agent.settings.config_loader import get_settings
 from cover_agent.utils import load_yaml
 
 
-# TODO: Move to configuration.toml?
-MAX_TESTS_PER_RUN = 4
-
-
 class UnitTestGenerator:
     def __init__(
         self,
@@ -182,12 +178,14 @@ class UnitTestGenerator:
             Exception: If there is an error during test generation, such as a parsing error while processing the AI model response.
         """
         failed_test_runs_value = self.check_for_failed_test_runs(failed_test_runs)
+
+        max_tests_per_run = get_settings().get("default").get("max_tests_per_run", 4)
         response, prompt_token_count, response_token_count, self.prompt = (
             self.agent_completion.generate_tests(
                 source_file_name=os.path.relpath(
                     self.source_file_path, self.project_root
                 ),
-                max_tests=MAX_TESTS_PER_RUN,
+                max_tests=max_tests_per_run,
                 source_file_numbered="\n".join(
                     f"{i + 1} {line}"
                     for i, line in enumerate(self.source_code.split("\n"))

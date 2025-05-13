@@ -154,6 +154,7 @@ class CoverAgent:
             "source_file": self.config.source_file_path,
             "test_file": self.config.test_file_path,
             "record_mode": True,
+            "generate_log_files": self.generate_log_files,
         }
         if self.config.record_mode:
             # In record mode, always use AICaller

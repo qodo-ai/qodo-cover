@@ -4,10 +4,13 @@ desired_coverage = 90
 max_iterations = 10
 api_base = "http://localhost:11434"
 max_run_time_sec = 30
+max_tests_per_run = 4
+model_retries = 3
 run_tests_multiple_times = 1
 branch = "main"
 included_files = []
 coverage_type = "cobertura"
+log_file_path = "run.log"
 log_db_path = "cover_agent_unit_test_runs.db"
 report_filepath = "test_results.html"
 

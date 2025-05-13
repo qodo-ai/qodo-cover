@@ -1,5 +1,7 @@
 import logging
 
+from cover_agent.settings.config_loader import get_settings
+
 
 class CustomLogger:
 
@@ -40,7 +42,7 @@ class CustomLogger:
             # Only add file handler if file generation is enabled
             if generate_log_files:
                 # Specify the log file path
-                log_file_path = "run.log"
+                log_file_path = get_settings().get("default").get("log_file_path", "run.log")
 
                 # File handler for writing to a file. Use 'w' to overwrite the log file on each run
                 file_handler = logging.FileHandler(log_file_path, mode="w")

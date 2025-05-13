@@ -12,10 +12,8 @@ from wandb.sdk.data_types.trace_tree import Trace
 
 from cover_agent.CustomLogger import CustomLogger
 from cover_agent.record_replay_manager import RecordReplayManager
+from cover_agent.settings.config_loader import get_settings
 from cover_agent.utils import get_original_caller
-
-# TODO: Move to configuration.toml?
-MODEL_RETRIES = 3
 
 
 def conditional_retry(func):
@@ -24,7 +22,9 @@ def conditional_retry(func):
         if not self.enable_retry:
             return func(self, *args, **kwargs)
 
-        @retry(stop=stop_after_attempt(MODEL_RETRIES), wait=wait_fixed(1))
+        model_retries = get_settings().get("default").get("model_retries", 3)
+
+        @retry(stop=stop_after_attempt(model_retries), wait=wait_fixed(1))
         def retry_wrapper():
             return func(self, *args, **kwargs)
 
@@ -39,7 +39,7 @@ class AICaller:
         model: str,
         api_base: str = "",
         enable_retry=True,
-        max_tokens=16384,
+        max_tokens=16384,  # TODO: Move to configuration.toml?
         source_file: str=None,
         test_file: str=None,
         record_mode: bool=False,

@@ -97,16 +97,13 @@ def parse_args(settings: Dynaconf) -> argparse.Namespace:
         )),
         ("--run-each-test-separately", dict(action="store_true", help="Run each test separately.")),
         ("--record-mode", dict(action="store_true", help="Enable record mode for LLM responses. Default: False.")),
+        ("--suppress-log-files", dict(
+            action="store_true", help="Suppress all generated log files (HTML, logs, DB files)."
+        )),
     ]
 
     for name, kwargs in arg_definitions:
         parser.add_argument(name, **kwargs)
-    parser.add_argument(
-        "--suppress-log-files",
-        action="store_true",
-        default=False,
-        help="Suppress all generated log files (HTML, logs, DB files).",
-    )
 
     # Create mutually exclusive group
     group = parser.add_mutually_exclusive_group()

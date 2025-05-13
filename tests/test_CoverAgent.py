@@ -14,6 +14,37 @@ class TestCoverAgent:
     """
     Test suite for the CoverAgent class.
     """
+    @staticmethod
+    def create_config_from_args(args: argparse.Namespace) -> CoverAgentConfig:
+        """Helper function to create CoverAgentConfig from argparse.Namespace"""
+        return CoverAgentConfig(
+            source_file_path=args.source_file_path,
+            test_file_path=args.test_file_path,
+            project_root=args.project_root,
+            test_file_output_path=getattr(args, "test_file_output_path", ""),
+            code_coverage_report_path=args.code_coverage_report_path,
+            test_command=args.test_command,
+            test_command_dir=args.test_command_dir,
+            included_files=args.included_files,
+            coverage_type=args.coverage_type,
+            report_filepath=args.report_filepath,
+            desired_coverage=args.desired_coverage,
+            max_iterations=args.max_iterations,
+            max_run_time_sec=args.max_run_time_sec,
+            additional_instructions=getattr(args, "additional_instructions", ""),
+            model=getattr(args, "model", ""),
+            api_base=getattr(args, "api_base", ""),
+            strict_coverage=getattr(args, "strict_coverage", False),
+            run_tests_multiple_times=getattr(args, "run_tests_multiple_times", 1),
+            log_db_path=getattr(args, "log_db_path", ""),
+            branch=getattr(args, "branch", "master"),
+            use_report_coverage_feature_flag=getattr(args, "use_report_coverage_feature_flag", False),
+            diff_coverage=getattr(args, "diff_coverage", False),
+            run_each_test_separately=getattr(args, "run_each_test_separately", False),
+            record_mode=getattr(args, "record_mode", False),
+            suppress_log_files=args.suppress_log_files,
+        )
+
     def test_parse_args(self):
         """
         Test the argument parsing functionality of the `parse_args` function.
@@ -228,9 +259,9 @@ class TestCoverAgent:
                 assert "Fatal: Coverage report" in str(exc_info.value)
                 assert config.test_file_output_path == config.test_file_path
 
-            # Clean up the temp files
-            os.remove(temp_source_file.name)
-            os.remove(temp_test_file.name)
+        # Clean up the temp files
+        os.remove(temp_source_file.name)
+        os.remove(temp_test_file.name)
 
     @patch("cover_agent.CoverAgent.os.environ", {})
     @patch("cover_agent.CoverAgent.sys.exit")
@@ -481,34 +512,3 @@ class TestCoverAgent:
             os.remove(temp_source_file.name)
             os.remove(temp_test_file.name)
             os.remove(temp_output_file.name)
-
-    @staticmethod
-    def create_config_from_args(args: argparse.Namespace) -> CoverAgentConfig:
-        """Helper function to create CoverAgentConfig from argparse.Namespace"""
-        return CoverAgentConfig(
-            source_file_path=args.source_file_path,
-            test_file_path=args.test_file_path,
-            project_root=args.project_root,
-            test_file_output_path=getattr(args, "test_file_output_path", ""),
-            code_coverage_report_path=args.code_coverage_report_path,
-            test_command=args.test_command,
-            test_command_dir=args.test_command_dir,
-            included_files=args.included_files,
-            coverage_type=args.coverage_type,
-            report_filepath=args.report_filepath,
-            desired_coverage=args.desired_coverage,
-            max_iterations=args.max_iterations,
-            max_run_time_sec=args.max_run_time_sec,
-            additional_instructions=getattr(args, "additional_instructions", ""),
-            model=getattr(args, "model", ""),
-            api_base=getattr(args, "api_base", ""),
-            strict_coverage=getattr(args, "strict_coverage", False),
-            run_tests_multiple_times=getattr(args, "run_tests_multiple_times", 1),
-            log_db_path=getattr(args, "log_db_path", ""),
-            branch=getattr(args, "branch", "master"),
-            use_report_coverage_feature_flag=getattr(args, "use_report_coverage_feature_flag", False),
-            diff_coverage=getattr(args, "diff_coverage", False),
-            run_each_test_separately=getattr(args, "run_each_test_separately", False),
-            record_mode=getattr(args, "record_mode", False),
-            suppress_log_files=args.suppress_log_files,
-        )
