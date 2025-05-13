@@ -199,7 +199,7 @@ class UnitTestValidator:
         """
         try:
             test_headers_indentation = None
-            # TODO: Why hardcoded?
+            # TODO: Move to configuration.toml?
             allowed_attempts = 3
             counter_attempts = 0
             while (
@@ -233,7 +233,7 @@ class UnitTestValidator:
 
             relevant_line_number_to_insert_tests_after = None
             relevant_line_number_to_insert_imports_after = None
-            # TODO: Why hardcoded?
+            # TODO: Move to configuration.toml?
             allowed_attempts = 3
             counter_attempts = 0
             while (

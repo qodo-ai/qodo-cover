@@ -10,7 +10,7 @@ from cover_agent.settings.config_loader import get_settings
 from cover_agent.utils import load_yaml
 
 
-# TODO: Why hardcoded here?
+# TODO: Move to configuration.toml?
 MAX_TESTS_PER_RUN = 4
 
 

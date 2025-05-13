@@ -98,9 +98,6 @@ def prepare_container_config(test_args: argparse.Namespace, image_tag: str, clie
     container_env = compose_container_env(test_args)
     container_volumes = compose_container_volumes(test_args)
 
-    # TODO: Decide if it's OK to have it permanently
-    # if test_args.record_mode:
-    #     container_volumes.update(prepare_record_mode_volume(test_args, image_tag, client))
     container_volumes.update(prepare_record_mode_volume(test_args, image_tag, client))
 
     test_name = get_short_docker_image_name(test_args.docker_image)
