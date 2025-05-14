@@ -32,7 +32,7 @@ def parse_args(settings: Dynaconf) -> argparse.Namespace:
         )),
         ("--included-files", dict(
             type=list,
-            default=settings.get("included_files"),
+            default=None,
             nargs="*",
             help=(
                 'List of files to include in the coverage. For example, "--included-files library1.c library2.c." '
