@@ -3,7 +3,7 @@ import os
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Self
+from typing import Optional
 
 from cover_agent.settings.config_loader import get_settings
 

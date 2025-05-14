@@ -35,7 +35,6 @@ def main():
 
     # Run all tests sequentially
     for test in TESTS:
-        suppress_log_files = test.get("suppress_log_files", False)
         test_args = argparse.Namespace(
             dockerfile=test.get("docker_file_path", ""),
             docker_image=test["docker_image"],

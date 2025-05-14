@@ -1,7 +1,7 @@
 [default]
 model = "gpt-4o-2024-11-20"
-desired_coverage = 90
-max_iterations = 10
+desired_coverage = 70
+max_iterations = 3
 api_base = "http://localhost:11434"
 max_run_time_sec = 30
 max_tests_per_run = 4
