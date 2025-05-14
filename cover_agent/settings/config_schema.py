@@ -85,7 +85,7 @@ class CoverAgentConfig:
     test_command_original: Optional[str] = None
 
     @classmethod
-    def from_cli_args(cls, args: argparse.Namespace) -> Self:
+    def from_cli_args(cls, args: argparse.Namespace) -> "CoverAgentConfig":
         """
         Create a CoverAgentConfig instance from command-line arguments.
 
@@ -125,7 +125,7 @@ class CoverAgentConfig:
         )
 
     @classmethod
-    def from_cli_args_with_defaults(cls, args: argparse.Namespace) -> Self:
+    def from_cli_args_with_defaults(cls, args: argparse.Namespace) -> "CoverAgentConfig":
         """
         Create a CoverAgentConfig instance from command-line arguments, merging them with default settings.
 
