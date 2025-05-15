@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 import docker
+
 from dotenv import load_dotenv
 from dynaconf import Dynaconf
 
@@ -45,6 +46,7 @@ def run_test(test_args: argparse.Namespace) -> None:
     """
     logger.info("=========== Running test with Docker and these args ================")
     log_test_args(test_args)
+    logger.info("====================================================================")
 
     client = docker.from_env()
     container = None
