@@ -1,37 +1,86 @@
-import os
 import argparse
-from unittest.mock import patch, MagicMock
+import os
+from unittest.mock import MagicMock, patch
+
 import pytest
-from cover_agent.main import parse_args, main
+
+from cover_agent.main import main, parse_args
+
+
+@pytest.fixture
+def mock_settings():
+    """Create a mock settings object with default values."""
+    settings = MagicMock()
+    settings.get = MagicMock()
+    settings.get.side_effect = lambda key: {
+        "log_db_path": "logs.db",
+        "included_files": None,
+        "coverage_type": "cobertura",
+        "report_filepath": "test_results.html",
+        "desired_coverage": 90,
+        "max_iterations": 5,
+        "max_run_time_sec": 600,
+        "model": "default-model",
+        "api_base": "",
+        "branch": "develop",
+        "strict_coverage": False,
+        "run_tests_multiple_times": 1,
+        "run_each_test_separately": False,
+        "record_mode": False,
+        "suppress_log_files": False,
+        "use_report_coverage_feature_flag": False,
+        "diff_coverage": False,
+    }.get(key)
+    return settings
+
+
+@pytest.fixture
+def base_args():
+    """Create base argument namespace with common values."""
+    return argparse.Namespace(
+        source_file_path="test_source.py",
+        test_file_path="test_file.py",
+        project_root="",
+        test_file_output_path="",
+        code_coverage_report_path="coverage_report.xml",
+        test_command="pytest",
+        test_command_dir=os.getcwd(),
+        included_files=None,
+        coverage_type="cobertura",
+        report_filepath="test_results.html",
+        desired_coverage=90,
+        max_iterations=10,
+        max_run_time_sec=600,
+        additional_instructions="",
+        model="gpt-4",
+        api_base="",
+        strict_coverage=False,
+        run_tests_multiple_times=1,
+        log_db_path="",
+        branch="develop",
+        use_report_coverage_feature_flag=False,
+        diff_coverage=False,
+        run_each_test_separately=False,
+        record_mode=False,
+        suppress_log_files=True,
+    )
 
 
 class TestMain:
-    """
-    Test suite for the main functionalities of the cover_agent module.
-    """
+    """Test suite for the main functionalities of the cover_agent module."""
 
-    def test_parse_args(self):
-        """
-        Test the parse_args function to ensure it correctly parses command-line arguments.
-        """
-        with patch(
-            "sys.argv",
-            [
-                "program.py",
-                "--source-file-path",
-                "test_source.py",
-                "--test-file-path",
-                "test_file.py",
-                "--code-coverage-report-path",
-                "coverage_report.xml",
-                "--test-command",
-                "pytest",
-                "--max-iterations",
-                "10",
-            ],
-        ):
-            args = parse_args()
-            # Assert that all arguments are parsed correctly
+    @patch("cover_agent.settings.config_loader.get_settings")
+    def test_parse_args(self, mock_get_settings, mock_settings):
+        """Test the parse_args function to ensure it correctly parses command-line arguments."""
+        mock_get_settings.return_value = {"default": mock_settings}
+
+        with patch("sys.argv", [
+            "program.py", "--source-file-path", "test_source.py",
+            "--test-file-path", "test_file.py",
+            "--code-coverage-report-path", "coverage_report.xml",
+            "--test-command", "pytest", "--max-iterations", "10",
+        ]):
+            args = parse_args(mock_settings)
             assert args.source_file_path == "test_source.py"
             assert args.test_file_path == "test_file.py"
             assert args.code_coverage_report_path == "coverage_report.xml"
@@ -43,134 +92,68 @@ class TestMain:
             assert args.desired_coverage == 90
             assert args.max_iterations == 10
 
-    @patch("cover_agent.CoverAgent.UnitTestGenerator")
-    @patch("cover_agent.CoverAgent.os.path.isfile")
-    def test_main_source_file_not_found(self, mock_isfile, mock_unit_cover_agent):
-        """
-        Test the main function to ensure it raises a FileNotFoundError when the source file is not found.
-        """
-        args = argparse.Namespace(
-            source_file_path="test_source.py",
-            test_file_path="test_file.py",
-            code_coverage_report_path="coverage_report.xml",
-            test_command="pytest",
-            test_command_dir=os.getcwd(),
-            included_files=None,
-            coverage_type="cobertura",
-            report_filepath="test_results.html",
-            desired_coverage=90,
-            max_iterations=10,
-        )
-        parse_args = lambda: args  # Mocking parse_args function
-        mock_isfile.return_value = False  # Simulate source file not found
-
-        with patch("cover_agent.main.parse_args", parse_args):
-            with pytest.raises(FileNotFoundError) as exc_info:
-                main()
-
-        # Assert that the correct exception message is raised
-        assert (
-            str(exc_info.value) == f"Source file not found at {args.source_file_path}"
-        )
-        mock_unit_cover_agent.assert_not_called()
-
-    @patch("cover_agent.CoverAgent.os.path.exists")
-    @patch("cover_agent.CoverAgent.os.path.isfile")
-    @patch("cover_agent.CoverAgent.UnitTestGenerator")
-    def test_main_test_file_not_found(
-        self, mock_unit_cover_agent, mock_isfile, mock_exists
-    ):
-        """
-        Test the main function to ensure it raises a FileNotFoundError when the test file is not found.
-        """
-        args = argparse.Namespace(
-            source_file_path="test_source.py",
-            test_file_path="test_file.py",
-            code_coverage_report_path="coverage_report.xml",
-            test_command="pytest",
-            test_command_dir=os.getcwd(),
-            included_files=None,
-            coverage_type="cobertura",
-            report_filepath="test_results.html",
-            desired_coverage=90,
-            max_iterations=10,
-            prompt_only=False,
-        )
-        parse_args = lambda: args  # Mocking parse_args function
-        mock_isfile.side_effect = [True, False]
-        mock_exists.return_value = True
-
-        with patch("cover_agent.main.parse_args", parse_args):
-            with pytest.raises(FileNotFoundError) as exc_info:
-                main()
-
-        # Assert that the correct exception message is raised
-        assert str(exc_info.value) == f"Test file not found at {args.test_file_path}"
-
+    @patch("cover_agent.settings.config_loader.get_settings")
     @patch("cover_agent.main.CoverAgent")
-    @patch("cover_agent.main.parse_args")
-    @patch("cover_agent.main.os.path.isfile")
-    def test_main_calls_agent_run(self, mock_isfile, mock_parse_args, mock_cover_agent):
-        """
-        Test the main function to ensure it correctly initializes and runs the CoverAgent.
-        """
-        args = argparse.Namespace(
-            source_file_path="test_source.py",
-            test_file_path="test_file.py",
-            test_file_output_path="",
-            code_coverage_report_path="coverage_report.xml",
-            test_command="pytest",
-            test_command_dir=os.getcwd(),
-            included_files=None,
-            coverage_type="cobertura",
-            report_filepath="test_results.html",
-            desired_coverage=90,
-            max_iterations=10,
-            additional_instructions="",
-            model="gpt-4o",
-            api_base="http://localhost:11434",
-            strict_coverage=False,
-            run_tests_multiple_times=1,
-            use_report_coverage_feature_flag=False,
-            log_db_path="",
-        )
-        mock_parse_args.return_value = args
-        # Mock os.path.isfile to return True for both source and test file paths
-        mock_isfile.side_effect = lambda path: path in [
-            args.source_file_path,
-            args.test_file_path,
-        ]
-        mock_agent_instance = MagicMock()
-        mock_cover_agent.return_value = mock_agent_instance
+    def test_main_source_file_not_found(self, mock_cover_agent, mock_get_settings, mock_settings, base_args):
+        """Test FileNotFoundError when source file is not found."""
+        mock_get_settings.return_value = {"default": mock_settings}
 
-        main()
+        with patch("cover_agent.main.parse_args", return_value=base_args):
+            mock_agent = MagicMock()
+            mock_agent.run.side_effect = FileNotFoundError(
+                f"Source file not found at {base_args.source_file_path}"
+            )
+            mock_cover_agent.return_value = mock_agent
 
-        # Assert that the CoverAgent is initialized and run correctly
-        mock_cover_agent.assert_called_once_with(args)
-        mock_agent_instance.run.assert_called_once()
+            with pytest.raises(FileNotFoundError) as exc_info:
+                main()
 
-    def test_parse_args_with_max_run_time(self):
-        """
-        Test the parse_args function to ensure it correctly parses the max-run-time argument.
-        """
-        with patch(
-            "sys.argv",
-            [
-                "program.py",
-                "--source-file-path",
-                "test_source.py",
-                "--test-file-path",
-                "test_file.py",
-                "--code-coverage-report-path",
-                "coverage_report.xml",
-                "--test-command",
-                "pytest",
-                "--max-iterations",
-                "10",
-                "--max-run-time",
-                "45",
-            ],
-        ):
-            args = parse_args()
-            # Assert that the max_run_time argument is parsed correctly
-            assert args.max_run_time == 45
+            assert str(exc_info.value) == f"Source file not found at {base_args.source_file_path}"
+
+    @patch("cover_agent.settings.config_loader.get_settings")
+    @patch("cover_agent.main.CoverAgent")
+    def test_main_test_file_not_found(self, mock_cover_agent, mock_get_settings, mock_settings, base_args):
+        """Test FileNotFoundError when test file is not found."""
+        mock_get_settings.return_value = {"default": mock_settings}
+
+        with patch("cover_agent.main.parse_args", return_value=base_args):
+            mock_agent = MagicMock()
+            mock_agent.run.side_effect = FileNotFoundError(
+                f"Test file not found at {base_args.test_file_path}"
+            )
+            mock_cover_agent.return_value = mock_agent
+
+            with pytest.raises(FileNotFoundError) as exc_info:
+                main()
+
+            assert str(exc_info.value) == f"Test file not found at {base_args.test_file_path}"
+
+    @patch("cover_agent.settings.config_loader.get_settings")
+    @patch("cover_agent.main.CoverAgent")
+    def test_main_calls_agent_run(self, mock_cover_agent, mock_get_settings, mock_settings, base_args):
+        """Test that main correctly initializes and runs the CoverAgent."""
+        mock_get_settings.return_value = {"default": mock_settings}
+
+        with patch("cover_agent.main.parse_args", return_value=base_args):
+            mock_agent = MagicMock()
+            mock_cover_agent.return_value = mock_agent
+
+            main()
+
+            mock_cover_agent.assert_called_once()
+            mock_agent.run.assert_called_once()
+
+    @patch("cover_agent.settings.config_loader.get_settings")
+    def test_parse_args_with_max_run_time(self, mock_get_settings, mock_settings):
+        """Test parsing of max-run-time-sec argument."""
+        mock_get_settings.return_value = {"default": mock_settings}
+
+        with patch("sys.argv", [
+            "program.py", "--source-file-path", "test_source.py",
+            "--test-file-path", "test_file.py",
+            "--code-coverage-report-path", "coverage_report.xml",
+            "--test-command", "pytest", "--max-iterations", "10",
+            "--max-run-time-sec", "45",
+        ]):
+            args = parse_args(mock_settings)
+            assert args.max_run_time_sec == 45

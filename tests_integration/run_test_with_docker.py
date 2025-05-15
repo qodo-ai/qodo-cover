@@ -1,24 +1,31 @@
 import argparse
 import os
+import sys
 
 from pathlib import Path
 
 import docker
 from dotenv import load_dotenv
+from dynaconf import Dynaconf
 
-from cover_agent import constants
 from cover_agent.CustomLogger import CustomLogger
+from cover_agent.main import parse_args
+from cover_agent.settings.config_loader import get_settings
 from tests_integration.docker_utils import (
     clean_up_docker_container,
     copy_file_to_docker_container,
     get_docker_image,
+    get_docker_image_workdir,
+    get_short_docker_image_name,
     run_command_in_docker_container,
-    run_docker_container, get_short_docker_image_name, get_docker_image_workdir,
+    run_docker_container,
 )
 
 
 load_dotenv()
 logger = CustomLogger.get_logger(__name__)
+
+SETTINGS = get_settings().get("default")
 
 
 class InvalidTestArgsError(Exception):
@@ -91,9 +98,6 @@ def prepare_container_config(test_args: argparse.Namespace, image_tag: str, clie
     container_env = compose_container_env(test_args)
     container_volumes = compose_container_volumes(test_args)
 
-    # TODO: Decide if it's OK to have it permanently
-    # if test_args.record_mode:
-    #     container_volumes.update(prepare_record_mode_volume(test_args, image_tag, client))
     container_volumes.update(prepare_record_mode_volume(test_args, image_tag, client))
 
     test_name = get_short_docker_image_name(test_args.docker_image)
@@ -129,8 +133,8 @@ def prepare_record_mode_volume(test_args: argparse.Namespace, image_tag: str, cl
               the container.
     """
     container_workdir = get_docker_image_workdir(client, image_tag)
-    bind_folder = f"{container_workdir}/{constants.RESPONSES_FOLDER}"
-    host_folder_path = f"{Path(__file__).resolve().parents[1]}/{constants.RESPONSES_FOLDER}"
+    bind_folder = f"{container_workdir}/{SETTINGS.responses_folder}"
+    host_folder_path = f"{Path(__file__).resolve().parents[1]}/{SETTINGS.responses_folder}"
 
     logger.info(
         f"Binding a container folder {bind_folder} to local folder {host_folder_path} for storing "
@@ -155,7 +159,7 @@ def execute_test_in_container(container, command: list, exec_env: dict) -> None:
     Returns:
         None
     """
-    copy_file_to_docker_container(container, constants.COVER_AGENT_HOST_FOLDER, constants.COVER_AGENT_CONTAINER_FOLDER)
+    copy_file_to_docker_container(container, SETTINGS.cover_agent_host_folder, SETTINGS.cover_agent_container_folder)
     run_command_in_docker_container(container, command, exec_env)
 
 
@@ -258,7 +262,7 @@ def compose_test_command(test_args: argparse.Namespace) -> list:
         "--coverage-type", test_args.coverage_type,
         "--desired-coverage", str(test_args.desired_coverage),
         "--max-iterations", str(test_args.max_iterations),
-        "--max-run-time", str(test_args.max_run_time),
+        "--max-run-time-sec", str(test_args.max_run_time_sec),
         "--strict-coverage",
     ]
 
@@ -270,10 +274,14 @@ def compose_test_command(test_args: argparse.Namespace) -> list:
 
     if test_args.log_db_path:
         log_db_name = os.path.basename(test_args.log_db_path)
-        command.extend(["--log-db-path", f"/{log_db_name}"])
+        command.extend(["--log-db-path", f"{log_db_name}"])
 
     if test_args.record_mode:
         command.extend(["--record-mode"])
+
+    if test_args.suppress_log_files:
+        command.extend(["--suppress-log-files"])
+        logger.info('Suppressed all generated log files for this test run.')
 
     return command
 
@@ -305,122 +313,54 @@ def log_test_args(test_args: argparse.Namespace, max_value_len=60) -> None:
         logger.info(f"{key:30}: {value_str}")
 
 
-def parse_args() -> argparse.Namespace:
+def parse_extra_args(settings: Dynaconf) -> argparse.Namespace:
     """
-    Parses command-line arguments for configuring and running tests with Docker.
+    Parses additional command-line arguments specific to Docker and combines them with base arguments.
 
-    This function defines and parses the required and optional arguments needed
-    to execute tests inside a Docker container. It includes arguments for file paths,
-    Docker configuration, API keys, and other test-related settings.
+    This function first defines and parses Docker-specific arguments, then uses the `parse_args` function
+    to parse the base arguments. The two sets of arguments are combined into a single `argparse.Namespace`.
+
+    Args:
+        settings (Dynaconf): Configuration settings object used for parsing base arguments.
 
     Returns:
-        argparse.Namespace: An object containing the parsed arguments as attributes.
-                            Each attribute corresponds to a command-line argument.
-
-    Command-line Arguments:
-        --source-file-path (str, required): Path to the source file.
-        --test-file-path (str, required): Path to the input test file.
-        --code-coverage-report-path (str, required): Path to the code coverage report file.
-        --test-command (str, required): The command to run tests and generate a coverage report.
-        --coverage-type (str, optional): Type of coverage report. Defaults to "cobertura".
-        --desired-coverage (int, optional): The desired coverage percentage. Defaults to a constant.
-        --max-iterations (int, optional): The maximum number of iterations. Defaults to a constant.
-        --model (str, optional): Which LLM model to use. Defaults to a constant.
-        --api-base (str, optional): The API URL to use for Ollama or Hugging Face. Defaults to a constant.
-        --log-db-path (str, optional): Path to an optional log database. Defaults to an environment variable.
-        --dockerfile (str, optional): Path to the Dockerfile. Defaults to an empty string.
-        --docker-image (str, optional): Docker image name. Defaults to an empty string.
-        --openai-api-key (str, optional): OpenAI API key. Defaults to an environment variable.
-        --anthropic-api-key (str, optional): Anthropic API key. Defaults to an environment variable.
+        argparse.Namespace: A namespace containing both base and Docker-specific arguments.
     """
-    parser = argparse.ArgumentParser(description="Test with Docker.")
-    parser.add_argument(
-        "--source-file-path", required=True, help="Path to the source file."
-    )
-    parser.add_argument(
-        "--test-file-path", required=True, help="Path to the input test file."
-    )
-    parser.add_argument(
-        "--code-coverage-report-path",
-        required=True,
-        help="Path to the code coverage report file.",
-    )
-    parser.add_argument(
-        "--test-command",
-        required=True,
-        help="The command to run tests and generate coverage report.",
-    )
-    parser.add_argument(
-        "--coverage-type",
-        default="cobertura",
-        help="Type of coverage report.",
-    )
-    parser.add_argument(
-        "--desired-coverage",
-        type=int,
-        default=constants.DESIRED_COVERAGE,
-        help="The desired coverage percentage.",
-    )
-    parser.add_argument(
-        "--max-iterations",
-        type=int,
-        default=constants.MAX_ITERATIONS,
-        help="The maximum number of iterations.",
-    )
-    parser.add_argument(
-        "--model",
-        default=constants.MODEL,
-        help="Which LLM model to use.",
-    )
-    parser.add_argument(
-        "--api-base",
-        default=constants.API_BASE,
-        help="The API url to use for Ollama or Hugging Face.",
-    )
-    parser.add_argument(
-        "--log-db-path",
-        default=os.getenv("LOG_DB_PATH", ""),
-        help="Path to optional log database.",
-    )
+    logger.info("Starting to parse extra arguments...")
+    parent_args_parser = argparse.ArgumentParser(add_help=False)
+    extra_args_parser = argparse.ArgumentParser(parents=[parent_args_parser])
 
-    parser.add_argument(
-        "--dockerfile",
-        default="",
-        help="Path to Dockerfile.",
-    )
-    parser.add_argument(
-        "--docker-image",
-        default="",
-        help="Docker image name.",
-    )
-    parser.add_argument(
-        "--openai-api-key",
-        default=os.getenv("OPENAI_API_KEY", ""),
-        help="OpenAI API key.",
-    )
-    parser.add_argument(
-        "--anthropic-api-key",
-        default=os.getenv("ANTHROPIC_API_KEY", ""),
-        help="Anthropic API key.",
-    )
-    parser.add_argument(
-        "--max-run-time",
-        type=int,
-        default=30,
-        help=(
-            "Maximum time (in seconds) allowed for test execution. Overrides the value in configuration.toml "
-            "if provided. Defaults to 30 seconds."
-        ),
-    )
-    parser.add_argument(
-        "--record-mode",
-        action="store_true",
-        help="Enable record mode for LLM responses. Default: False.",
-    )
+    extra_args_definitions = [
+        ("--dockerfile", dict(type=str, default="", help="Path to Dockerfile.")),
+        ("--docker-image", dict(type=str, default="", help="Docker image name.")),
+        ("--openai-api-key", dict(type=str, default=os.getenv("OPENAI_API_KEY", ""), help="OpenAI API key.")),
+        ("--anthropic-api-key", dict(type=str, default=os.getenv("ANTHROPIC_API_KEY", ""), help="Anthropic API key.")),
+    ]
 
-    return parser.parse_args()
+    for name, kwargs in extra_args_definitions:
+        extra_args_parser.add_argument(name, **kwargs)
+
+    extra_args, base_args = extra_args_parser.parse_known_args()
+
+    # Set up sys.argv for base args parsing
+    original_argv = sys.argv
+    sys.argv = [sys.argv[0]] + base_args
+    logger.info(f"Modified sys.argv for base argument parsing: {sys.argv}.")
+
+    try:
+        base_args = parse_args(settings)
+        logger.info("Base arguments successfully parsed.")
+
+        # Combine both sets of args
+        combined_dict = {**vars(base_args), **vars(extra_args)}
+        logger.info("Successfully combined Docker-specific and base arguments.")
+        return argparse.Namespace(**combined_dict)
+    finally:
+        # Restore original argv
+        logger.debug(f"Restoring original sys.argv: {original_argv}...")
+        sys.argv = original_argv
 
 
 if __name__ == "__main__":
-    args = parse_args()
+    args = parse_extra_args(SETTINGS)
     run_test(args)

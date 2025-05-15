@@ -55,7 +55,7 @@ class Args:
         self.branch = "main"
         self.diff_coverage = False
         self.run_each_test_separately = False
-        self.max_run_time = 30
+        self.max_run_time_sec = 30
 
 
 if __name__ == "__main__":

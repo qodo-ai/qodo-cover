@@ -1,11 +1,12 @@
-from wandb.sdk.data_types.trace_tree import Trace
 import datetime
 import json
 import logging
 import os
-import re
+
+from typing import Optional
 
 from diff_cover.diff_cover_tool import main as diff_cover_main
+from wandb.sdk.data_types.trace_tree import Trace
 
 from cover_agent.AgentCompletionABC import AgentCompletionABC
 from cover_agent.CoverageProcessor import CoverageProcessor
@@ -13,6 +14,7 @@ from cover_agent.CustomLogger import CustomLogger
 from cover_agent.FilePreprocessor import FilePreprocessor
 from cover_agent.Runner import Runner
 from cover_agent.settings.config_loader import get_settings
+from cover_agent.settings.config_schema import CoverageType
 from cover_agent.utils import load_yaml
 
 
@@ -24,18 +26,20 @@ class UnitTestValidator:
         code_coverage_report_path: str,
         test_command: str,
         llm_model: str,
-        max_run_time: int,
+        max_run_time_sec: int,
         agent_completion: AgentCompletionABC,
-        test_command_dir: str = os.getcwd(),
-        included_files: list = None,
-        coverage_type="cobertura",
-        desired_coverage: int = 90,  # Default to 90% coverage if not specified
-        additional_instructions: str = "",
-        use_report_coverage_feature_flag: bool = False,
+        desired_coverage: int,
+        comparison_branch: str,
+        coverage_type: CoverageType,
+        diff_coverage: bool,
+        num_attempts: int,
+        test_command_dir: str,
+        additional_instructions: str,
+        included_files: list,
+        use_report_coverage_feature_flag: bool,
         project_root: str = "",
-        diff_coverage: bool = False,
-        comparison_branch: str = "main",
-        num_attempts: int = 1,
+        logger: Optional[CustomLogger]=None,
+        generate_log_files: bool=True,
     ):
         """
         Initialize the UnitTestValidator class with the provided parameters.
@@ -46,7 +50,7 @@ class UnitTestValidator:
             code_coverage_report_path (str): The path to the code coverage report file.
             test_command (str): The command to run tests.
             llm_model (str): The language model to be used for test generation.
-            max_run_time (int): The maximum time in seconds to run the test command.
+            max_run_time_sec (int): The maximum time in seconds to run the test command.
             agent_completion (AgentCompletionABC): The agent completion object to use for test generation.
             api_base (str, optional): The base API url to use in case model is set to Ollama or Hugging Face. Defaults to an empty string.
             test_command_dir (str, optional): The directory where the test command should be executed. Defaults to the current working directory.
@@ -57,6 +61,8 @@ class UnitTestValidator:
             use_report_coverage_feature_flag (bool, optional): Setting this to True considers the coverage of all the files in the coverage report.
                                                                This means we consider a test as good if it increases coverage for a different
                                                                file other than the source file. Defaults to False.
+            logger (CustomLogger, optional): The logger object for logging messages.
+            generate_log_files (bool): Whether or not to generate logs.
 
         Returns:
             None
@@ -83,10 +89,11 @@ class UnitTestValidator:
         self.comparison_branch = comparison_branch
         self.num_attempts = num_attempts
         self.agent_completion = agent_completion
-        self.max_run_time = max_run_time
+        self.max_run_time_sec = max_run_time_sec
+        self.generate_log_files = generate_log_files
 
         # Get the logger instance from CustomLogger
-        self.logger = CustomLogger.get_logger(__name__)
+        self.logger = logger or CustomLogger.get_logger(__name__, generate_log_files=self.generate_log_files)
 
         # Override covertype to be 'diff' if diff_coverage is enabled
         if self.diff_coverage:
@@ -120,6 +127,7 @@ class UnitTestValidator:
             coverage_type=self.coverage_type,
             use_report_coverage_feature_flag=self.use_report_coverage_feature_flag,
             diff_coverage_report_path=self.diff_cover_report_path,
+            generate_log_files=self.generate_log_files,
         )
 
     def get_coverage(self):
@@ -191,6 +199,7 @@ class UnitTestValidator:
         """
         try:
             test_headers_indentation = None
+            # TODO: Move to configuration.toml?
             allowed_attempts = 3
             counter_attempts = 0
             while (
@@ -224,6 +233,7 @@ class UnitTestValidator:
 
             relevant_line_number_to_insert_tests_after = None
             relevant_line_number_to_insert_imports_after = None
+            # TODO: Move to configuration.toml?
             allowed_attempts = 3
             counter_attempts = 0
             while (
@@ -296,7 +306,7 @@ class UnitTestValidator:
         )
         stdout, stderr, exit_code, time_of_test_command = Runner.run_command(
             command=self.test_command,
-            max_run_time=self.max_run_time,
+            max_run_time_sec=self.max_run_time_sec,
             cwd=self.test_command_dir,
         )
         assert (
@@ -484,7 +494,7 @@ class UnitTestValidator:
                         Runner.run_command(
                             command=self.test_command,
                             cwd=self.test_command_dir,
-                            max_run_time=self.max_run_time,
+                            max_run_time_sec=self.max_run_time_sec,
                         )
                     )
                     if exit_code != 0:

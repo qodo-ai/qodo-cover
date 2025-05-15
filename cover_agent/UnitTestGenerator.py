@@ -1,13 +1,13 @@
 import json
 import os
 
+from typing import Optional
+
 from cover_agent.CustomLogger import CustomLogger
 from cover_agent.FilePreprocessor import FilePreprocessor
 from cover_agent.AgentCompletionABC import AgentCompletionABC
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.utils import load_yaml
-
-MAX_TESTS_PER_RUN = 4
 
 
 class UnitTestGenerator:
@@ -25,6 +25,8 @@ class UnitTestGenerator:
         additional_instructions: str = "",
         use_report_coverage_feature_flag: bool = False,
         project_root: str = "",
+        logger: Optional[CustomLogger]=None,
+        generate_log_files: bool=True,
     ):
         """
         Initialize the UnitTestGenerator class with the provided parameters.
@@ -45,6 +47,8 @@ class UnitTestGenerator:
             use_report_coverage_feature_flag (bool, optional): Setting this to True considers the coverage of all the files in the coverage report.
                                                                This means we consider a test as good if it increases coverage for a different
                                                                file other than the source file. Defaults to False.
+            logger (CustomLogger, optional): The logger object for logging messages.
+            generate_log_files (bool): Whether or not to generate logs.
 
         Returns:
             None
@@ -64,9 +68,10 @@ class UnitTestGenerator:
         self.last_coverage_percentages = {}
         self.llm_model = llm_model
         self.agent_completion = agent_completion
+        self.generate_log_files = generate_log_files
 
         # Get the logger instance from CustomLogger
-        self.logger = CustomLogger.get_logger(__name__)
+        self.logger = logger or CustomLogger.get_logger(__name__, generate_log_files=self.generate_log_files)
 
         # States to maintain within this class
         self.preprocessor = FilePreprocessor(self.test_file_path)
@@ -173,12 +178,14 @@ class UnitTestGenerator:
             Exception: If there is an error during test generation, such as a parsing error while processing the AI model response.
         """
         failed_test_runs_value = self.check_for_failed_test_runs(failed_test_runs)
+
+        max_tests_per_run = get_settings().get("default").get("max_tests_per_run", 4)
         response, prompt_token_count, response_token_count, self.prompt = (
             self.agent_completion.generate_tests(
                 source_file_name=os.path.relpath(
                     self.source_file_path, self.project_root
                 ),
-                max_tests=MAX_TESTS_PER_RUN,
+                max_tests=max_tests_per_run,
                 source_file_numbered="\n".join(
                     f"{i + 1} {line}"
                     for i, line in enumerate(self.source_code.split("\n"))
