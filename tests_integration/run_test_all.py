@@ -1,3 +1,7 @@
+"""
+This script runs all tests sequentially using Docker. It's intended to be run from the command line manually.
+It accepts command line arguments and produces extensive logging output and LLM streams.
+"""
 import argparse
 import os
 
