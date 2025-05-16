@@ -274,6 +274,15 @@ def parse_args_full_repo():
         help="The maximum number of iterations. Default: %(default)s.",
     )
     parser.add_argument(
+        "--max-run-time-sec",
+        type=int,
+        default=30,
+        help=(
+            "Maximum time (in seconds) allowed for test execution. Overrides the value in configuration.toml "
+            "if provided. Default: %(default)s."
+        ),
+    )
+    parser.add_argument(
         "--additional-instructions",
         default="",
         help="Any additional instructions you wish to append at the end of the prompt. Default: %(default)s.",
@@ -319,7 +328,8 @@ def parse_args_full_repo():
     parser.add_argument(
         "--desired-coverage",
         type=int,
-        default=100,
+        # default=100,
+        default=70,
         help="The desired coverage percentage. Default: %(default)s.",
     )
     parser.add_argument(

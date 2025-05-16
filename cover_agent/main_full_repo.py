@@ -1,10 +1,11 @@
 import asyncio
 import copy
-import os
+
 from cover_agent.AICaller import AICaller
-from cover_agent.utils import parse_args_full_repo, find_test_files
 from cover_agent.CoverAgent import CoverAgent
 from cover_agent.lsp_logic.ContextHelper import ContextHelper
+from cover_agent.settings.config_loader import get_settings
+from cover_agent.utils import find_test_files, parse_args_full_repo
 
 
 async def run():
@@ -28,7 +29,8 @@ async def run():
     async with context_helper.start_server():
         print("LSP server initialized.")
 
-        ai_caller = AICaller(model=args.model)
+        generate_log_files = not args.suppress_log_files
+        ai_caller = AICaller(model=args.model, generate_log_files=generate_log_files)
 
         # main loop for analyzing test files
         for test_file in test_files:
