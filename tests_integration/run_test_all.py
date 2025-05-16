@@ -1,12 +1,16 @@
+"""
+This script runs all tests sequentially using Docker. It's intended to be run from the command line manually.
+It accepts command line arguments and produces extensive logging output and LLM streams.
+"""
 import argparse
 import os
 
 from dotenv import load_dotenv
 
 from cover_agent.CustomLogger import CustomLogger
+from cover_agent.settings.config_loader import get_settings
 from tests_integration.run_test_with_docker import run_test
 from tests_integration.scenarios import TESTS
-from cover_agent.settings.config_loader import get_settings
 
 
 load_dotenv()

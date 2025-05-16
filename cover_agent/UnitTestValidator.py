@@ -198,9 +198,9 @@ class UnitTestValidator:
             None
         """
         try:
+            settings = get_settings().get("default")
             test_headers_indentation = None
-            # TODO: Move to configuration.toml?
-            allowed_attempts = 3
+            allowed_attempts = settings.get("test_headers_indentation_attempts", 3)
             counter_attempts = 0
             while (
                 test_headers_indentation is None and counter_attempts < allowed_attempts
@@ -233,8 +233,6 @@ class UnitTestValidator:
 
             relevant_line_number_to_insert_tests_after = None
             relevant_line_number_to_insert_imports_after = None
-            # TODO: Move to configuration.toml?
-            allowed_attempts = 3
             counter_attempts = 0
             while (
                 not relevant_line_number_to_insert_tests_after

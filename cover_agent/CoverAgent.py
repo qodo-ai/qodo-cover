@@ -381,6 +381,7 @@ class CoverAgent:
         failed_test_runs, language, test_framework, coverage_report = self.init()
 
         while iteration_count < self.config.max_iterations:
+            self.logger.info(f"Iteration {iteration_count + 1} of {self.config.max_iterations}.")
             self.generate_and_validate_tests(failed_test_runs, language, test_framework, coverage_report)
 
             failed_test_runs, language, test_framework, coverage_report, target_reached = self.check_iteration_progress()

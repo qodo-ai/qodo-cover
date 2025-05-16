@@ -5,6 +5,7 @@ max_iterations = 3
 api_base = "http://localhost:11434"
 max_run_time_sec = 30
 max_tests_per_run = 4
+allowed_initial_test_analysis_attempts = 3
 model_retries = 3
 run_tests_multiple_times = 1
 branch = "main"
