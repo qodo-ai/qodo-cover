@@ -288,7 +288,7 @@ def compose_test_command(test_args: argparse.Namespace) -> list:
     return command
 
 
-def log_test_args(test_args: argparse.Namespace, max_value_len=60) -> None:
+def log_test_args(test_args: argparse.Namespace, max_value_len=65) -> None:
     """
     Logs the test arguments, excluding sensitive information.
 
@@ -312,7 +312,7 @@ def log_test_args(test_args: argparse.Namespace, max_value_len=60) -> None:
         value_str = str(value)
         if len(value_str) > max_value_len:
             value_str = f"{value_str[:max_value_len]}..."
-        logger.info(f"{key:30}: {value_str}")
+        logger.info(f"{key:35}: {value_str}")
 
 
 def parse_extra_args(settings: Dynaconf) -> argparse.Namespace:

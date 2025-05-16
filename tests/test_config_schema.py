@@ -38,6 +38,9 @@ class TestCoverAgentConfig:
             run_each_test_separately=False,
             record_mode=False,
             suppress_log_files=False,
+            max_test_files_allowed_to_analyze=20,
+            look_for_oldest_unchanged_test_file=False,
+            project_language="python",
         )
 
     def test_coverage_type_enum(self):
@@ -73,6 +76,8 @@ class TestCoverAgentConfig:
         assert config.test_command == "pytest"
         assert config.coverage_type == CoverageType.COBERTURA
         assert config.test_command_original is None
+        assert config.use_report_coverage_feature_flag is False
+        assert config.project_language == "python"
 
     @patch.dict(os.environ, {"LOG_DB_PATH": "/custom/logs.db"})
     def test_from_cli_args_with_env_var(self, sample_args):

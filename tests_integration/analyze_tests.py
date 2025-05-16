@@ -39,7 +39,7 @@ The follow is the status of the test:
 """
 
 
-def analayze_test_results(
+def analyze_test_results(
     db_connection_string, response_file_path="test_results_analysis.md"
 ):
     # Create an instance of the UnitTestDB class
@@ -94,6 +94,6 @@ if __name__ == "__main__":
         f.write("")
 
     db_connection_string = "sqlite:///increase_project_coverage.db"
-    analayze_test_results(
+    analyze_test_results(
         db_connection_string=db_connection_string, response_file_path=RESPONSE_FILEPATH
     )

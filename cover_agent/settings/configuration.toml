@@ -1,7 +1,10 @@
 [default]
 model = "gpt-4o-2024-11-20"
+model_full_repo = "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0"
 desired_coverage = 70
+desired_coverage_full_repo = 100
 max_iterations = 3
+max_test_files_allowed_to_analyze = 20
 api_base = "http://localhost:11434"
 max_run_time_sec = 30
 max_tests_per_run = 4
@@ -9,6 +12,7 @@ allowed_initial_test_analysis_attempts = 3
 model_retries = 3
 run_tests_multiple_times = 1
 branch = "main"
+project_language = "python"
 coverage_type = "cobertura"
 log_file_path = "run.log"
 log_db_path = "cover_agent_unit_test_runs.db"

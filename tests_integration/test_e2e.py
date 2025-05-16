@@ -62,6 +62,7 @@ def get_test_id(test_config: dict[str, Any]) -> str:
     return f"{image_name}-{source_file}"
 
 
+@pytest.mark.e2e_docker
 @pytest.mark.parametrize("test_config", TESTS, ids=get_test_id)
 def test_scenario_with_docker(test_config, pytestconfig, llm_model: str) -> None:
     """

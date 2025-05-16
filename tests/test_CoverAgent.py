@@ -43,6 +43,9 @@ class TestCoverAgent:
             run_each_test_separately=getattr(args, "run_each_test_separately", False),
             record_mode=getattr(args, "record_mode", False),
             suppress_log_files=args.suppress_log_files,
+            max_test_files_allowed_to_analyze=getattr(args, "max_test_files_allowed_to_analyze", 20),
+            look_for_oldest_unchanged_test_file=getattr(args, "look_for_oldest_unchanged_test_file", False),
+            project_language=getattr(args, "project_language", "python"),
         )
 
     def test_parse_args(self):
