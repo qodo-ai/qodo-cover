@@ -17,6 +17,7 @@ class CoverageType(Enum):
         COBERTURA: Represents the Cobertura coverage report format.
         JACOCO: Represents the JaCoCo coverage report format.
     """
+
     LCOV = "lcov"
     COBERTURA = "cobertura"
     JACOCO = "jacoco"
@@ -57,6 +58,7 @@ class CoverAgentConfig:
         record_mode (bool): Enable LLM responses record mode for tests.
         test_command_original (str): Original test command before any modifications.
     """
+
     source_file_path: str
     test_file_path: str
     project_root: str

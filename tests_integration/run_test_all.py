@@ -2,6 +2,7 @@
 This script runs all tests sequentially using Docker. It's intended to be run from the command line manually.
 It accepts command line arguments and produces extensive logging output and LLM streams.
 """
+
 import argparse
 import os
 
@@ -23,13 +24,15 @@ def main():
     parser = argparse.ArgumentParser(description="Args for running tests with Docker.")
 
     arg_definitions = [
-        ("--model", dict(
-            type=str, default=settings.get("model"), help="Which LLM model to use. Default: %(default)s."
-        )),
+        (
+            "--model",
+            dict(type=str, default=settings.get("model"), help="Which LLM model to use. Default: %(default)s."),
+        ),
         ("--record-mode", dict(action="store_true", help="Enable record mode for LLM responses. Default: False.")),
-        ("--suppress-log-files", dict(
-            action="store_true", help="Suppress all generated log files (HTML, logs, DB files)."
-        )),
+        (
+            "--suppress-log-files",
+            dict(action="store_true", help="Suppress all generated log files (HTML, logs, DB files)."),
+        ),
     ]
 
     for name, kwargs in arg_definitions:

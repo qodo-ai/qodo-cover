@@ -2,20 +2,21 @@ import datetime
 import os
 import shutil
 import sys
-import wandb
 
 from typing import Optional
 
-from cover_agent.CustomLogger import CustomLogger
-from cover_agent.UnitTestGenerator import UnitTestGenerator
-from cover_agent.UnitTestValidator import UnitTestValidator
-from cover_agent.UnitTestDB import UnitTestDB
-from cover_agent.AICaller import AICaller
+import wandb
+
 from cover_agent.AgentCompletionABC import AgentCompletionABC
-from cover_agent.DefaultAgentCompletion import DefaultAgentCompletion
 from cover_agent.ai_caller_replay import AICallerReplay
+from cover_agent.AICaller import AICaller
+from cover_agent.CustomLogger import CustomLogger
+from cover_agent.DefaultAgentCompletion import DefaultAgentCompletion
 from cover_agent.record_replay_manager import RecordReplayManager
 from cover_agent.settings.config_schema import CoverAgentConfig
+from cover_agent.UnitTestDB import UnitTestDB
+from cover_agent.UnitTestGenerator import UnitTestGenerator
+from cover_agent.UnitTestValidator import UnitTestValidator
 
 
 class CoverAgent:

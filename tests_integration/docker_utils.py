@@ -31,6 +31,7 @@ class DockerStatus(Enum):
     """
     Enum representing various statuses during Docker operations.
     """
+
     PULLING_FS_LAYER = "Pulling fs layer"
     DOWNLOADING = "Downloading"
     DOWNLOAD_COMPLETE = "Download complete"
@@ -89,7 +90,7 @@ def get_docker_image(
 
 
 def build_docker_image(
-        client: docker.DockerClient, dockerfile: str, image_tag: str, platform: str = "linux/amd64"
+    client: docker.DockerClient, dockerfile: str, image_tag: str, platform: str = "linux/amd64"
 ) -> None:
     """
     Builds a Docker image from the specified Dockerfile.
@@ -104,9 +105,7 @@ def build_docker_image(
     Raises:
         DockerUtilityError: If the build operation fails.
     """
-    logger.info(
-        f"Starting to build the Docker image {image_tag} using Dockerfile {dockerfile} on platform {platform}."
-    )
+    logger.info(f"Starting to build the Docker image {image_tag} using Dockerfile {dockerfile} on platform {platform}.")
     dockerfile_dir = os.path.dirname(dockerfile) or "."
     dockerfile_name = os.path.basename(dockerfile)
 
@@ -151,7 +150,7 @@ def create_build_context(build_dir: str) -> io.BytesIO:
     """
     logger.info(f"Creating build context for directory: {build_dir}")
     tar_stream = io.BytesIO()
-    with tarfile.open(fileobj=tar_stream, mode='w') as tar:
+    with tarfile.open(fileobj=tar_stream, mode="w") as tar:
         for root, _, files in os.walk(build_dir):
             for file in files:
                 fullpath = os.path.join(root, file)
@@ -234,12 +233,12 @@ def get_docker_image_workdir(client: docker.DockerClient, image_tag: str) -> str
 
 
 def run_docker_container(
-        client: docker.DockerClient,
-        image: str,
-        volumes: dict[str, Any],
-        command: str="/bin/sh -c 'tail -f /dev/null'",  # Keeps container alive
-        container_env: dict[str, Any] | None = None,
-        remove: bool=False,
+    client: docker.DockerClient,
+    image: str,
+    volumes: dict[str, Any],
+    command: str = "/bin/sh -c 'tail -f /dev/null'",  # Keeps container alive
+    container_env: dict[str, Any] | None = None,
+    remove: bool = False,
 ) -> Container:
     """
     Runs a Docker container with the specified configuration.

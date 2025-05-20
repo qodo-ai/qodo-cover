@@ -1,8 +1,8 @@
 import logging
 
-import pytest
-
 from pathlib import Path
+
+import pytest
 
 from cover_agent.settings.config_loader import get_settings
 
@@ -11,9 +11,6 @@ SETTINGS = get_settings().get("default")
 
 
 def pytest_configure(config: pytest.Config) -> None:
-    """Add custom markers to pytest configuration."""
-    config.addinivalue_line("markers", "model: mark test to run with specific model")
-
     # Suppress HTTPX logs
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
@@ -40,9 +37,10 @@ def pytest_sessionstart(session: pytest.Session) -> None:
     Called after the Session object has been created and before performing collection
     and entering the run test loop.
     """
-    markers = session.config.getoption('-m')
+    markers = session.config.getoption("-m")
+
     # Check if binary exists only if the test is marked with 'e2e_docker'
-    if markers == 'e2e_docker':
+    if markers == "e2e_docker":
         check_cover_agent_binary()
 
 
@@ -56,9 +54,10 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     arg_definitions = [
         ("--model", dict(type=str, default=SETTINGS.get("model"), help="Which LLM model to use.")),
         ("--record-mode", dict(action="store_true", help="Enable record mode for LLM responses.")),
-        ("--suppress-log-files", dict(
-            action="store_true", help="Suppress all generated log files (HTML, logs, DB files)"
-        )),
+        (
+            "--suppress-log-files",
+            dict(action="store_true", help="Suppress all generated log files (HTML, logs, DB files)"),
+        ),
     ]
 
     for name, kwargs in arg_definitions:
