@@ -153,13 +153,72 @@ jobs:
         name: cover-agent-${{ matrix.os }}
         path: dist/cover-agent*
 
+  e2e-test:
+    # This job will run after building binary because it needs the binary to run the E2E tests in Docker
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+
+      # Download the Ubuntu binary
+      - name: Download Ubuntu executable
+        uses: actions/download-artifact@v4
+        with:
+          name: cover-agent-ubuntu-22.04
+          path: dist
+
+      # Make the binary executable
+      - name: Make binary executable
+        run: chmod +x dist/cover-agent
+
+      # Cache and install dependencies
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pypoetry
+            ~/.cache/pip
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
+      - name: Install Poetry
+        run: pip install poetry
+      - name: Install dependencies using Poetry
+        run: poetry install
+
+      # Run the E2E Docker tests using the Makefile target `e2e-test`
+      - name: Run E2E Docker tests
+        env:
+          OPENAI_API_KEY: "This_is_a_fake_API_key"
+        run: |
+          make e2e-test 2>&1 | tee e2e_test_full.log
+
+      # Upload E2E test reports
+      - name: Upload E2E Docker test report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-reports
+          path: |
+            testLog_e2e.xml
+            e2e_test_full.log
+
   release:
     # This job will run only if the following conditions are met:
     # - The event is a 'push' to the 'main' branch
     # - The 'version.txt' file has changed
-    # - There are relevant changes outside of 'README.md' and the 'docs/' folder
-    needs: [build, changes]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.changes.outputs.version_changed == 'true' && needs.changes.outputs.relevant_changes == 'true'
+    # - There are relevant changes outside 'README.md' and the 'docs/' folder
+    needs: [build, changes, e2e-test]
+    if: >
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/main' &&
+      needs.changes.outputs.version_changed == 'true' &&
+      needs.changes.outputs.relevant_changes == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

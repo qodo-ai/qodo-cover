@@ -31,6 +31,8 @@ def check_cover_agent_binary() -> None:
             f"cover-agent binary not found at {binary_path}. "
             f"Please build the binary using the tests_integration/build_installer.sh script before running tests."
         )
+    else:
+        logging.info(f"cover-agent binary found at {binary_path}.")
 
 
 def pytest_sessionstart(session: pytest.Session) -> None:
@@ -38,7 +40,10 @@ def pytest_sessionstart(session: pytest.Session) -> None:
     Called after the Session object has been created and before performing collection
     and entering the run test loop.
     """
-    check_cover_agent_binary()
+    markers = session.config.getoption('-m')
+    # Check if binary exists only if the test is marked with 'e2e_docker'
+    if markers == 'e2e_docker':
+        check_cover_agent_binary()
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:

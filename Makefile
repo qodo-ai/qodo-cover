@@ -7,7 +7,21 @@ TOML_FILES=$(shell find cover_agent/settings -name "*.toml" | sed 's/.*/-\-add-d
 
 # Run unit tests with Pytest
 test:
-	poetry run pytest --junitxml=testLog.xml --cov=cover_agent --cov-report=xml:cobertura.xml --cov-report=term --cov-fail-under=65 --log-cli-level=INFO
+	poetry run pytest \
+		-m "not e2e_docker" \
+		--junitxml=testLog.xml \
+		--cov=cover_agent \
+		--cov-report=xml:cobertura.xml \
+		--cov-report=term \
+		--cov-fail-under=65
+		--log-cli-level=INFO
+
+e2e-test:
+	poetry run pytest \
+		-m "e2e_docker" \
+		--capture=no \
+		--junitxml=testLog_e2e.xml \
+		--log-cli-level=INFO
 
 # Use Python Black to format python files
 format:
