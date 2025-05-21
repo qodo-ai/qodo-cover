@@ -40,9 +40,7 @@ The follow is the status of the test:
 """
 
 
-def analyze_test_results(
-    db_connection_string, response_file_path="test_results_analysis.md"
-):
+def analyze_test_results(db_connection_string, response_file_path="test_results_analysis.md"):
     # Create an instance of the UnitTestDB class
     unit_test_db = UnitTestDB(db_connection_string)
 
@@ -74,9 +72,7 @@ def analyze_test_results(
 
             # Call the LLM and get the response
             prompt_dict = {"system": "", "user": prompt}
-            response, input_token_count, output_token_count = ai_caller.call_model(
-                prompt_dict
-            )
+            response, input_token_count, output_token_count = ai_caller.call_model(prompt_dict)
 
             # Print the token count of the input and output
             print(f"Input token count: {input_token_count}")
@@ -95,6 +91,4 @@ if __name__ == "__main__":
         f.write("")
 
     db_connection_string = "sqlite:///increase_project_coverage.db"
-    analyze_test_results(
-        db_connection_string=db_connection_string, response_file_path=RESPONSE_FILEPATH
-    )
+    analyze_test_results(db_connection_string=db_connection_string, response_file_path=RESPONSE_FILEPATH)
