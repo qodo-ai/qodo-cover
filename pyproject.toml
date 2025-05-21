@@ -70,23 +70,9 @@ enable = true
 [tool.poetry-dynamic-versioning.from-file]
 source = "cover_agent/version.txt"
 
-[tool.isort]
-line_length = 120
-length_sort = false
-multi_line_output = 3
-indent = "    "
-lines_between_types = 1
-lines_after_imports = 2
-known_first_party = ["cover_agent", "tests_integration"]
-sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
-default_section = "THIRDPARTY"
-combine_star = true
-include_trailing_comma = true
-use_parentheses = true
-from_first = false
-
 [tool.black]
 line-length = 120
+skip-string-normalization = false
 target-version = ["py310", "py311", "py312"]
 exclude = '''
 /(
@@ -102,3 +88,19 @@ exclude = '''
   | node_modules
 )/
 '''
+
+[tool.isort]
+profile = "black"
+line_length = 120
+length_sort = false
+multi_line_output = 3
+indent = "    "
+lines_between_types = 1
+lines_after_imports = 2
+known_first_party = ["cover_agent", "tests_integration"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+default_section = "THIRDPARTY"
+combine_star = true
+include_trailing_comma = true
+use_parentheses = true
+from_first = false
