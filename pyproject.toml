@@ -52,6 +52,7 @@ pytest-timeout = "^2.3.1"
 fastapi = "^0.111.1"
 
 # Code formatters
+pre-commit = "^4.2.0"
 isort = "^6.0.1"
 black = "^25.1.0"
 
