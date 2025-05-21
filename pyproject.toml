@@ -42,6 +42,10 @@ jedi-language-server = "^0.41.4"
 fuzzywuzzy = "^0.18.0"
 python-levenshtein = "^0.27.1"
 
+# Code formatters
+isort = "^6.0.1"
+black = "^25.1.0"
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
 pyinstaller = "^6.12.0"
@@ -65,3 +69,36 @@ enable = true
 
 [tool.poetry-dynamic-versioning.from-file]
 source = "cover_agent/version.txt"
+
+[tool.isort]
+line_length = 120
+length_sort = false
+multi_line_output = 3
+indent = "    "
+lines_between_types = 1
+lines_after_imports = 2
+known_first_party = ["cover_agent", "tests_integration"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+default_section = "THIRDPARTY"
+combine_star = true
+include_trailing_comma = true
+use_parentheses = true
+from_first = false
+
+[tool.black]
+line-length = 120
+target-version = ["py310", "py311", "py312"]
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | build
+  | dist
+  | node_modules
+)/
+'''
