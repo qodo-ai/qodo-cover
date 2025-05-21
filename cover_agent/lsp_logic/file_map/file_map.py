@@ -4,6 +4,7 @@ from pathlib import Path
 
 from grep_ast import TreeContext
 from grep_ast.parsers import filename_to_lang
+
 # from pygments.lexers import guess_lexer_for_filename
 # from pygments.token import Token
 from tree_sitter_languages import get_language, get_parser
