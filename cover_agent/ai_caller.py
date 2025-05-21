@@ -40,12 +40,12 @@ class AICaller:
         api_base: str = "",
         enable_retry=True,
         max_tokens=16384,  # TODO: Move to configuration.toml?
-        source_file: str=None,
-        test_file: str=None,
-        record_mode: bool=False,
-        record_replay_manager: Optional[RecordReplayManager]=None,
-        logger: Optional[CustomLogger]=None,
-        generate_log_files: bool=True,
+        source_file: str = None,
+        test_file: str = None,
+        record_mode: bool = False,
+        record_replay_manager: Optional[RecordReplayManager] = None,
+        logger: Optional[CustomLogger] = None,
+        generate_log_files: bool = True,
     ):
         """
         Initializes an instance of the AICaller class.
@@ -81,9 +81,7 @@ class AICaller:
         caller_name = get_original_caller()
 
         if "system" not in prompt or "user" not in prompt:
-            raise KeyError(
-                "The prompt dictionary must contain 'system' and 'user' keys."
-            )
+            raise KeyError("The prompt dictionary must contain 'system' and 'user' keys.")
         if prompt["system"] == "":
             messages = [{"role": "user", "content": prompt["user"]}]
         else:
@@ -120,11 +118,7 @@ class AICaller:
             completion_params.pop("max_tokens", None)  # Remove 'max_tokens' if present
 
         # API base exception for OpenAI Compatible, Ollama, and Hugging Face models
-        if (
-            "ollama" in self.model
-            or "huggingface" in self.model
-            or self.model.startswith("openai/")
-        ):
+        if "ollama" in self.model or "huggingface" in self.model or self.model.startswith("openai/"):
             completion_params["api_base"] = self.api_base
 
         try:
@@ -167,8 +161,7 @@ class AICaller:
         if "WANDB_API_KEY" in os.environ:
             try:
                 root_span = Trace(
-                    name="inference_"
-                    + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"),
+                    name="inference_" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"),
                     kind="llm",  # kind can be "llm", "chain", "agent", or "tool"
                     inputs={
                         "user_prompt": prompt["user"],

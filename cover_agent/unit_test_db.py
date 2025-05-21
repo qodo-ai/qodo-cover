@@ -99,9 +99,7 @@ class UnitTestDB:
         ReportGenerator.generate_report(self.get_all_attempts(), report_filepath)
 
 
-def dump_to_report(
-    path_to_db="cover_agent_unit_test_runs.db", report_filepath="test_results.html"
-):
+def dump_to_report(path_to_db="cover_agent_unit_test_runs.db", report_filepath="test_results.html"):
     unittest_db = UnitTestDB(f"sqlite:///{path_to_db}")
     unittest_db.dump_to_report(report_filepath)
 

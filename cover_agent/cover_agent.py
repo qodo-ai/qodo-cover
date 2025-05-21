@@ -22,15 +22,16 @@ from cover_agent.unit_test_validator import UnitTestValidator
 class CoverAgent:
     """
     A class that manages the generation and validation of unit tests to achieve desired code coverage.
-    
+
     This agent coordinates between test generation and validation components, handles file management,
     and tracks the progress of coverage improvements over multiple iterations.
     """
+
     def __init__(
         self,
         config: CoverAgentConfig,
-        agent_completion: AgentCompletionABC=None,
-        logger: Optional[CustomLogger]=None,
+        agent_completion: AgentCompletionABC = None,
+        logger: Optional[CustomLogger] = None,
     ):
         """
         Initialize the CoverAgent instance.
@@ -72,26 +73,24 @@ class CoverAgent:
         new_command_line = None
         if hasattr(self.config, "run_each_test_separately") and self.config.run_each_test_separately:
             # Calculate a relative path for a test file
-            test_file_relative_path = os.path.relpath(
-                self.config.test_file_output_path, self.config.project_root
-            )
+            test_file_relative_path = os.path.relpath(self.config.test_file_output_path, self.config.project_root)
             # Handle pytest commands specifically
             if "pytest" in test_command:
                 try:
                     # Modify pytest command to target a single test file
                     ind1 = test_command.index("pytest")
                     ind2 = test_command[ind1:].index("--")
-                    new_command_line = f"{test_command[:ind1]}pytest {test_file_relative_path} {test_command[ind1 + ind2:]}"
+                    new_command_line = (
+                        f"{test_command[:ind1]}pytest {test_file_relative_path} {test_command[ind1 + ind2:]}"
+                    )
                 except ValueError:
                     self.logger.error(f"Failed to adapt test command for running a single test: {test_command}")
             else:
                 # Use AI to adapt non-pytest test commands
-                new_command_line, _, _, _ = (
-                    self.agent_completion.adapt_test_command_for_a_single_test_via_ai(
-                        test_file_relative_path=test_file_relative_path,
-                        test_command=test_command,
-                        project_root_dir=self.config.test_command_dir,
-                    )
+                new_command_line, _, _, _ = self.agent_completion.adapt_test_command_for_a_single_test_via_ai(
+                    test_file_relative_path=test_file_relative_path,
+                    test_command=test_command,
+                    project_root_dir=self.config.test_command_dir,
                 )
 
         # Update the test command if successfully modified
@@ -169,7 +168,7 @@ class CoverAgent:
                 replay_manager.test_file = self.config.test_file_path
 
                 if replay_manager.has_response_file(
-                        source_file=self.config.source_file_path, test_file=self.config.test_file_path
+                    source_file=self.config.source_file_path, test_file=self.config.test_file_path
                 ):
                     self.logger.info("Initializing AICallerReplay (found recorded responses)...")
                     return AICallerReplay(
@@ -188,7 +187,7 @@ class CoverAgent:
     def _validate_paths(self):
         """
         Validate all required file paths and initialize the test database.
-        
+
         This method ensures that source files, test files, and project directories exist.
         It also sets up the SQLite database for logging test runs.
 
@@ -197,20 +196,14 @@ class CoverAgent:
         """
         # Ensure the source file exists
         if not os.path.isfile(self.config.source_file_path):
-            raise FileNotFoundError(
-                f"Source file not found at {self.config.source_file_path}"
-            )
+            raise FileNotFoundError(f"Source file not found at {self.config.source_file_path}")
         # Ensure the test file exists
         if not os.path.isfile(self.config.test_file_path):
-            raise FileNotFoundError(
-                f"Test file not found at {self.config.test_file_path}"
-            )
+            raise FileNotFoundError(f"Test file not found at {self.config.test_file_path}")
 
         # Ensure the project root exists
         if self.config.project_root and not os.path.isdir(self.config.project_root):
-            raise FileNotFoundError(
-                f"Project root not found at {self.config.project_root}"
-            )
+            raise FileNotFoundError(f"Project root not found at {self.config.project_root}")
 
         # Connect to the test DB
 
@@ -220,7 +213,7 @@ class CoverAgent:
     def _duplicate_test_file(self):
         """
         Create a copy of the test file at the output location if specified.
-        
+
         If no output path is provided, uses the original test file path.
         This allows for non-destructive test generation without modifying the original file.
         """
@@ -234,7 +227,7 @@ class CoverAgent:
     def init(self):
         """
         Initialize the test generation environment and perform initial analysis.
-        
+
         Sets up Weights & Biases logging if configured and performs initial test suite analysis
         to establish baseline coverage metrics.
 
@@ -252,16 +245,14 @@ class CoverAgent:
 
         # Run initial test suite analysis
         self.test_validator.initial_test_suite_analysis()
-        failed_test_runs, language, test_framework, coverage_report = (
-            self.test_validator.get_coverage()
-        )
+        failed_test_runs, language, test_framework, coverage_report = self.test_validator.get_coverage()
 
         return failed_test_runs, language, test_framework, coverage_report
 
     def generate_and_validate_tests(self, failed_test_runs, language, test_framework, coverage_report):
         """
         Generate new tests and validate their effectiveness.
-        
+
         Parameters:
             failed_test_runs (list): Previously failed test executions
             language (str): Detected programming language
@@ -269,22 +260,19 @@ class CoverAgent:
             coverage_report (dict): Current coverage metrics
         """
         self.log_coverage()
-        generated_tests_dict = self.test_gen.generate_tests(
-            failed_test_runs, language, test_framework, coverage_report
-        )
+        generated_tests_dict = self.test_gen.generate_tests(failed_test_runs, language, test_framework, coverage_report)
 
         try:
             test_results = [
-                self.test_validator.validate_test(test)
-                for test in generated_tests_dict.get("new_tests", [])
+                self.test_validator.validate_test(test) for test in generated_tests_dict.get("new_tests", [])
             ]
-            
+
             # Insert results into database
             if self.has_test_db():
                 for result in test_results:
                     result["prompt"] = self.test_gen.prompt
                     self.test_db.insert_attempt(result)
-                
+
         except AttributeError as e:
             self.logger.error(f"Failed to validate the tests within {generated_tests_dict}. Error: {e}")
 
@@ -300,7 +288,7 @@ class CoverAgent:
     def check_iteration_progress(self):
         """
         Evaluate current progress towards coverage goals.
-        
+
         Returns:
             tuple: Contains updated test results, language info, framework details,
                   coverage report, and boolean indicating if target is reached.
@@ -312,10 +300,10 @@ class CoverAgent:
     def finalize_test_generation(self, iteration_count):
         """
         Complete the test generation process and produce final reports.
-        
+
         Parameters:
             iteration_count (int): Number of iterations performed
-            
+
         Side effects:
             - Logs final coverage statistics
             - Generates report file
@@ -336,7 +324,7 @@ class CoverAgent:
                 f"Reached maximum iteration limit without achieving desired {coverage_type}. "
                 f"Current Coverage: {current_coverage}%"
             )
-            
+
             if self.config.strict_coverage:
                 self.logger.error(failure_message)
                 sys.exit(2)
@@ -371,7 +359,7 @@ class CoverAgent:
     def run(self):
         """
         Execute the main test generation loop until coverage goals are met or iterations exhausted.
-        
+
         The process involves:
         1. Initializing the environment
         2. Repeatedly generating and validating tests
@@ -385,7 +373,9 @@ class CoverAgent:
             self.logger.info(f"Iteration {iteration_count + 1} of {self.config.max_iterations}.")
             self.generate_and_validate_tests(failed_test_runs, language, test_framework, coverage_report)
 
-            failed_test_runs, language, test_framework, coverage_report, target_reached = self.check_iteration_progress()
+            failed_test_runs, language, test_framework, coverage_report, target_reached = (
+                self.check_iteration_progress()
+            )
             if target_reached:
                 break
 

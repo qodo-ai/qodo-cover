@@ -25,8 +25,8 @@ class UnitTestGenerator:
         additional_instructions: str = "",
         use_report_coverage_feature_flag: bool = False,
         project_root: str = "",
-        logger: Optional[CustomLogger]=None,
-        generate_log_files: bool=True,
+        logger: Optional[CustomLogger] = None,
+        generate_log_files: bool = True,
     ):
         """
         Initialize the UnitTestGenerator class with the provided parameters.
@@ -146,9 +146,7 @@ class UnitTestGenerator:
                     error_message = failed_test.get("error_message", None)
                     failed_test_runs_value += f"Failed Test:\n```\n{code}\n```\n"
                     if error_message:
-                        failed_test_runs_value += (
-                            f"Test execution error analysis:\n{error_message}\n\n\n"
-                        )
+                        failed_test_runs_value += f"Test execution error analysis:\n{error_message}\n\n\n"
                     else:
                         failed_test_runs_value += "\n\n"
             except Exception as e:
@@ -157,9 +155,7 @@ class UnitTestGenerator:
 
         return failed_test_runs_value
 
-    def generate_tests(
-        self, failed_test_runs, language, testing_framework, code_coverage_report
-    ):
+    def generate_tests(self, failed_test_runs, language, testing_framework, code_coverage_report):
         """
         Generate tests using the AI model based on the constructed prompt.
 
@@ -180,25 +176,18 @@ class UnitTestGenerator:
         failed_test_runs_value = self.check_for_failed_test_runs(failed_test_runs)
 
         max_tests_per_run = get_settings().get("default").get("max_tests_per_run", 4)
-        response, prompt_token_count, response_token_count, self.prompt = (
-            self.agent_completion.generate_tests(
-                source_file_name=os.path.relpath(
-                    self.source_file_path, self.project_root
-                ),
-                max_tests=max_tests_per_run,
-                source_file_numbered="\n".join(
-                    f"{i + 1} {line}"
-                    for i, line in enumerate(self.source_code.split("\n"))
-                ),
-                code_coverage_report=code_coverage_report,
-                additional_instructions_text=self.additional_instructions,
-                additional_includes_section=self.included_files,
-                language=language,
-                test_file=self.test_code,
-                failed_tests_section=failed_test_runs_value,
-                test_file_name=os.path.relpath(self.test_file_path, self.project_root),
-                testing_framework=testing_framework,
-            )
+        response, prompt_token_count, response_token_count, self.prompt = self.agent_completion.generate_tests(
+            source_file_name=os.path.relpath(self.source_file_path, self.project_root),
+            max_tests=max_tests_per_run,
+            source_file_numbered="\n".join(f"{i + 1} {line}" for i, line in enumerate(self.source_code.split("\n"))),
+            code_coverage_report=code_coverage_report,
+            additional_instructions_text=self.additional_instructions,
+            additional_includes_section=self.included_files,
+            language=language,
+            test_file=self.test_code,
+            failed_tests_section=failed_test_runs_value,
+            test_file_name=os.path.relpath(self.test_file_path, self.project_root),
+            testing_framework=testing_framework,
         )
 
         self.total_input_token_count += prompt_token_count

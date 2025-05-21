@@ -131,9 +131,7 @@ class ReportGenerator:
         :return: Partial diff string formatted for HTML display, highlighting added, removed, and unchanged lines with context.
         """
         # Use unified_diff to generate a partial diff with context
-        diff = difflib.unified_diff(
-            original.splitlines(), processed.splitlines(), n=context_lines
-        )
+        diff = difflib.unified_diff(original.splitlines(), processed.splitlines(), n=context_lines)
 
         diff_html = []
         for line in diff:
@@ -160,9 +158,7 @@ class ReportGenerator:
         """
         # Generate the full diff for each result
         for result in results:
-            result["full_diff"] = cls.generate_full_diff(
-                result["original_test_file"], result["processed_test_file"]
-            )
+            result["full_diff"] = cls.generate_full_diff(result["original_test_file"], result["processed_test_file"])
 
         template = Template(cls.HTML_TEMPLATE)
         html_content = template.render(results=results)

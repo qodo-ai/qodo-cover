@@ -47,9 +47,7 @@ class CoverageProcessor:
         self.use_report_coverage_feature_flag = use_report_coverage_feature_flag
         self.diff_coverage_report_path = diff_coverage_report_path
 
-    def process_coverage_report(
-        self, time_of_test_command: int
-    ) -> Tuple[list, list, float]:
+    def process_coverage_report(self, time_of_test_command: int) -> Tuple[list, list, float]:
         """
         Verifies the coverage report's existence and update time, and then
         parses the report based on its type to extract coverage data.
@@ -73,9 +71,7 @@ class CoverageProcessor:
         Raises:
             AssertionError: If the coverage report does not exist or was not updated after the test command.
         """
-        assert os.path.exists(
-            self.file_path
-        ), f'Fatal: Coverage report "{self.file_path}" was not generated.'
+        assert os.path.exists(self.file_path), f'Fatal: Coverage report "{self.file_path}" was not generated.'
 
         # Convert file modification time to milliseconds for comparison
         file_mod_time_ms = int(round(os.path.getmtime(self.file_path) * 1000))
@@ -101,15 +97,11 @@ class CoverageProcessor:
             elif self.coverage_type == "jacoco":
                 return self.parse_coverage_report_jacoco()
             else:
-                raise ValueError(
-                    f"Unsupported coverage report type: {self.coverage_type}"
-                )
+                raise ValueError(f"Unsupported coverage report type: {self.coverage_type}")
         else:
             if self.coverage_type == "cobertura":
                 # Default behavior is to parse out a single file from the report
-                return self.parse_coverage_report_cobertura(
-                    filename=os.path.basename(self.src_file_path)
-                )
+                return self.parse_coverage_report_cobertura(filename=os.path.basename(self.src_file_path))
             elif self.coverage_type == "lcov":
                 return self.parse_coverage_report_lcov()
             elif self.coverage_type == "jacoco":
@@ -117,13 +109,9 @@ class CoverageProcessor:
             elif self.coverage_type == "diff_cover_json":
                 return self.parse_json_diff_coverage_report()
             else:
-                raise ValueError(
-                    f"Unsupported coverage report type: {self.coverage_type}"
-                )
+                raise ValueError(f"Unsupported coverage report type: {self.coverage_type}")
 
-    def parse_coverage_report_cobertura(
-        self, filename: str = None
-    ) -> Union[Tuple[list, list, float], dict]:
+    def parse_coverage_report_cobertura(self, filename: str = None) -> Union[Tuple[list, list, float], dict]:
         """
         Parses a Cobertura XML code coverage report to extract covered and missed line numbers
         for a specific file or for all files (if filename is None). Aggregates coverage data from
@@ -176,9 +164,7 @@ class CoverageProcessor:
                 covered_set = set(c_covered)
                 missed_set = set(c_missed) - covered_set
                 total_lines = len(covered_set) + len(missed_set)
-                coverage_percentage = (
-                    (len(covered_set) / total_lines) if total_lines else 0
-                )
+                coverage_percentage = (len(covered_set) / total_lines) if total_lines else 0
                 coverage_data[f_name] = (
                     list(covered_set),
                     list(missed_set),
@@ -209,9 +195,7 @@ class CoverageProcessor:
                 lines_missed.append(line_number)
 
         total_lines = len(lines_covered) + len(lines_missed)
-        coverage_percentage = (
-            (len(lines_covered) / total_lines) if total_lines > 0 else 0
-        )
+        coverage_percentage = (len(lines_covered) / total_lines) if total_lines > 0 else 0
 
         return lines_covered, lines_missed, coverage_percentage
 
@@ -242,9 +226,7 @@ class CoverageProcessor:
             raise
 
         total_lines = len(lines_covered) + len(lines_missed)
-        coverage_percentage = (
-            (len(lines_covered) / total_lines) if total_lines > 0 else 0
-        )
+        coverage_percentage = (len(lines_covered) / total_lines) if total_lines > 0 else 0
 
         return lines_covered, lines_missed, coverage_percentage
 
@@ -268,42 +250,32 @@ class CoverageProcessor:
         elif source_file_extension == "kt":
             package_name, class_name = self.extract_package_and_class_kotlin()
         else:
-            self.logger.warn(
-                f"Unsupported Bytecode Language: {source_file_extension}. Using default Java logic."
-            )
+            self.logger.warn(f"Unsupported Bytecode Language: {source_file_extension}. Using default Java logic.")
             package_name, class_name = self.extract_package_and_class_java()
 
         file_extension = self.get_file_extension(self.file_path)
 
         missed, covered = 0, 0
         if file_extension == "xml":
-            lines_missed, lines_covered = self.parse_missed_covered_lines_jacoco_xml(
-                class_name
-            )
+            lines_missed, lines_covered = self.parse_missed_covered_lines_jacoco_xml(class_name)
             missed, covered = len(lines_missed), len(lines_covered)
         elif file_extension == "csv":
-            missed, covered = self.parse_missed_covered_lines_jacoco_csv(
-                package_name, class_name
-            )
+            missed, covered = self.parse_missed_covered_lines_jacoco_csv(package_name, class_name)
         else:
-            raise ValueError(
-                f"Unsupported JaCoCo code coverage report format: {file_extension}"
-            )
+            raise ValueError(f"Unsupported JaCoCo code coverage report format: {file_extension}")
 
         total_lines = missed + covered
         coverage_percentage = (float(covered) / total_lines) if total_lines > 0 else 0
 
         return lines_covered, lines_missed, coverage_percentage
 
-    def parse_missed_covered_lines_jacoco_xml(
-        self, class_name: str
-    ) -> tuple[list, list]:
+    def parse_missed_covered_lines_jacoco_xml(self, class_name: str) -> tuple[list, list]:
         """Parses a JaCoCo XML code coverage report to extract covered and missed line numbers for a specific file."""
         tree = ET.parse(self.file_path)
         root = tree.getroot()
-        sourcefile = root.find(
-            f".//sourcefile[@name='{class_name}.java']"
-        ) or root.find(f".//sourcefile[@name='{class_name}.kt']")
+        sourcefile = root.find(f".//sourcefile[@name='{class_name}.java']") or root.find(
+            f".//sourcefile[@name='{class_name}.kt']"
+        )
 
         if sourcefile is None:
             return [], []
@@ -317,9 +289,7 @@ class CoverageProcessor:
 
         return missed, covered
 
-    def parse_missed_covered_lines_jacoco_csv(
-        self, package_name: str, class_name: str
-    ) -> tuple[int, int]:
+    def parse_missed_covered_lines_jacoco_csv(self, package_name: str, class_name: str) -> tuple[int, int]:
         with open(self.file_path, "r") as file:
             reader = csv.DictReader(file)
             missed, covered = 0, 0
@@ -414,10 +384,7 @@ class CoverageProcessor:
             file_path_components = file_path.split(os.sep)
 
             # Match if the JSON path ends with the same components as `src_file_path`
-            if (
-                file_path_components[-len(src_relative_components) :]
-                == src_relative_components
-            ):
+            if file_path_components[-len(src_relative_components) :] == src_relative_components:
                 relevant_stats = stats
                 break
 
@@ -425,9 +392,7 @@ class CoverageProcessor:
         if relevant_stats:
             covered_lines = relevant_stats["covered_lines"]
             violation_lines = relevant_stats["violation_lines"]
-            coverage_percentage = (
-                relevant_stats["percent_covered"] / 100
-            )  # Convert to decimal
+            coverage_percentage = relevant_stats["percent_covered"] / 100  # Convert to decimal
         else:
             # Default values if the file isn't found in the report
             covered_lines = []

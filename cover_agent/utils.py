@@ -38,9 +38,7 @@ def load_yaml(response_text: str, keys_fix_yaml: List[str] = []) -> dict:
     try:
         data = yaml.safe_load(response_text)
     except Exception as e:
-        logging.info(
-            f"Failed to parse AI prediction: {e}. Attempting to fix YAML formatting."
-        )
+        logging.info(f"Failed to parse AI prediction: {e}. Attempting to fix YAML formatting.")
         data = try_fix_yaml(response_text, keys_fix_yaml=keys_fix_yaml)
         if not data:
             logging.info(f"Failed to parse AI prediction after fixing YAML formatting.")
@@ -75,13 +73,8 @@ def try_fix_yaml(response_text: str, keys_fix_yaml: List[str] = []) -> dict:
     response_text_lines_copy = response_text_lines.copy()
     for i in range(0, len(response_text_lines_copy)):
         for key in keys_fix_yaml:
-            if (
-                key in response_text_lines_copy[i]
-                and not "|-" in response_text_lines_copy[i]
-            ):
-                response_text_lines_copy[i] = response_text_lines_copy[i].replace(
-                    f"{key}", f"{key} |-\n        "
-                )
+            if key in response_text_lines_copy[i] and not "|-" in response_text_lines_copy[i]:
+                response_text_lines_copy[i] = response_text_lines_copy[i].replace(f"{key}", f"{key} |-\n        ")
     try:
         data = yaml.safe_load("\n".join(response_text_lines_copy))
         logging.info(f"Successfully parsed AI prediction after adding |-\n")
@@ -96,17 +89,13 @@ def try_fix_yaml(response_text: str, keys_fix_yaml: List[str] = []) -> dict:
         snippet_text = snippet.group()
         try:
             data = yaml.safe_load(snippet_text.removeprefix("```yaml").rstrip("`"))
-            logging.info(
-                f"Successfully parsed AI prediction after extracting yaml snippet"
-            )
+            logging.info(f"Successfully parsed AI prediction after extracting yaml snippet")
             return data
         except:
             pass
 
     # third fallback - try to remove leading and trailing curly brackets
-    response_text_copy = (
-        response_text.strip().rstrip().removeprefix("{").removesuffix("}").rstrip(":\n")
-    )
+    response_text_copy = response_text.strip().rstrip().removeprefix("{").removesuffix("}").rstrip(":\n")
     try:
         data = yaml.safe_load(response_text_copy)
         logging.info(f"Successfully parsed AI prediction after removing curly brackets")
@@ -121,9 +110,7 @@ def try_fix_yaml(response_text: str, keys_fix_yaml: List[str] = []) -> dict:
         try:
             data = yaml.safe_load(response_text_lines_tmp)
             if "language" in data:
-                logging.info(
-                    f"Successfully parsed AI prediction after removing {i} lines"
-                )
+                logging.info(f"Successfully parsed AI prediction after removing {i} lines")
                 return data
         except:
             pass
@@ -135,9 +122,7 @@ def try_fix_yaml(response_text: str, keys_fix_yaml: List[str] = []) -> dict:
         # (1) find index of '\nlanguage:' string:
         index_start = response_text.find("\nlanguage:")
         if index_start == -1:
-            index_start = response_text.find(
-                "language:"
-            )  # if response starts with 'language:'
+            index_start = response_text.find("language:")  # if response starts with 'language:'
         # (2) find last appearance ot 'test_code:' string:
         index_last_code = response_text.rfind("test_code:")
         # (3) find the first place after 'test_code:' where there is a '\n\n' character:
@@ -147,9 +132,7 @@ def try_fix_yaml(response_text: str, keys_fix_yaml: List[str] = []) -> dict:
         response_text_copy = response_text[index_start:index_end].strip()
         try:
             data = yaml.safe_load(response_text_copy)
-            logging.info(
-                f"Successfully parsed AI prediction when using the language: key as a starting point"
-            )
+            logging.info(f"Successfully parsed AI prediction when using the language: key as a starting point")
             return data
         except:
             pass
@@ -157,9 +140,7 @@ def try_fix_yaml(response_text: str, keys_fix_yaml: List[str] = []) -> dict:
         pass
 
 
-def get_included_files(
-    included_files: list, project_root: str = "", disable_tokens=False
-) -> str:
+def get_included_files(included_files: list, project_root: str = "", disable_tokens=False) -> str:
     if included_files:
         included_files_content = []
         file_names_rel = []
@@ -167,11 +148,7 @@ def get_included_files(
             try:
                 with open(file_path, "r") as file:
                     included_files_content.append(file.read())
-                    file_path_rel = (
-                        os.path.relpath(file_path, project_root)
-                        if project_root
-                        else file_path
-                    )
+                    file_path_rel = os.path.relpath(file_path, project_root) if project_root else file_path
                     file_names_rel.append(file_path_rel)
             except IOError as e:
                 print(f"Error reading file {file_path}: {str(e)}")
@@ -181,9 +158,7 @@ def get_included_files(
                 out_str += f"file_path: `{file_names_rel[i]}`\ncontent:\n```\n{content}\n```\n\n\n"
 
         out_str = out_str.strip()
-        if not disable_tokens and get_settings().get(
-            "include_files.limit_tokens", False
-        ):
+        if not disable_tokens and get_settings().get("include_files.limit_tokens", False):
             encoder = TokenEncoder.get_token_encoder()
             num_input_tokens = len(encoder.encode(out_str))
             if num_input_tokens > get_settings().get("include_files.max_tokens"):
@@ -226,9 +201,7 @@ def parse_args_full_repo(settings: Dynaconf) -> argparse.Namespace:
         default=settings.get("project_language"),
         help="The programming language of the project ([python, javascript, typescript]). Default: %(default)s.",
     )
-    parser.add_argument(
-        "--project-root", required=True, help="Path to the root of the project."
-    )
+    parser.add_argument("--project-root", required=True, help="Path to the root of the project.")
 
     parser.add_argument(
         "--test-folder",
@@ -415,13 +388,8 @@ def find_test_files(args) -> list:
                     if "test" in file:
                         if filename_to_lang(file) == language:
                             test_files.append(os.path.join(root, file))
-        if (
-            len(test_files) >= MAX_TEST_FILES
-            and args.look_for_oldest_unchanged_test_file
-        ):
-            print(
-                f"Found {len(test_files)} test files. Stopping at {MAX_TEST_FILES} test files."
-            )
+        if len(test_files) >= MAX_TEST_FILES and args.look_for_oldest_unchanged_test_file:
+            print(f"Found {len(test_files)} test files. Stopping at {MAX_TEST_FILES} test files.")
             break
 
     if args.look_for_oldest_unchanged_test_file:
@@ -456,8 +424,7 @@ def get_original_caller() -> str:
 
     for frame in inspect.stack()[1:]:
         function_name = frame.function
-        if (not any(function_name.startswith(skip) for skip in ['__', 'wrap']) and
-                function_name not in frames_to_skip):
+        if not any(function_name.startswith(skip) for skip in ["__", "wrap"]) and function_name not in frames_to_skip:
 
             return f"{function_name}"
 

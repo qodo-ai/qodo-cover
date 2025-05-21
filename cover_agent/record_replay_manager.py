@@ -28,15 +28,16 @@ class RecordReplayManager:
         files_hash (Optional[str]): Cached hash of the source and test files.
         logger (CustomLogger): Logger instance for logging messages.
     """
+
     SETTINGS = get_settings().get("default")
     HASH_DISPLAY_LENGTH = SETTINGS.record_replay_hash_display_length
 
     def __init__(
         self,
         record_mode: bool,
-        base_dir: str=SETTINGS.responses_folder,
-        logger: Optional[CustomLogger]=None,
-        generate_log_files: bool=True,
+        base_dir: str = SETTINGS.responses_folder,
+        logger: Optional[CustomLogger] = None,
+        generate_log_files: bool = True,
     ) -> None:
         self.base_dir = Path(base_dir)
         self.record_mode = record_mode
@@ -75,8 +76,8 @@ class RecordReplayManager:
         source_file: str,
         test_file: str,
         prompt: dict[str, Any],
-        caller_name: str="unknown_caller",
-        fuzzy_lookup: bool=True,
+        caller_name: str = "unknown_caller",
+        fuzzy_lookup: bool = True,
     ) -> tuple[str, int, int] | None:
         """
         Load a recorded response if available.
@@ -125,9 +126,7 @@ class RecordReplayManager:
                 entry = cached_data[caller_name][prompt_hash]
                 return entry["response"], entry["prompt_tokens"], entry["completion_tokens"]
 
-            self.logger.info(
-                f"No record entry found for prompt hash {prompt_hash} under caller {caller}."
-            )
+            self.logger.info(f"No record entry found for prompt hash {prompt_hash} under caller {caller}.")
 
             if fuzzy_lookup:
                 self.logger.info(f"Trying fuzzy lookup for prompt hash {prompt_hash} under caller {caller}...")
@@ -156,7 +155,7 @@ class RecordReplayManager:
         response: str,
         prompt_tokens: int,
         completion_tokens: int,
-        caller_name: str="unknown_caller",
+        caller_name: str = "unknown_caller",
     ) -> None:
         """
         Record a response to a file.
@@ -310,17 +309,13 @@ class RecordReplayManager:
 
         # Use full prompt if prefix_length is None, otherwise use prefix
         current_text = (
-            current_prompt[:prefix_length]
-            if prefix_length and len(current_prompt) > prefix_length
-            else current_prompt
+            current_prompt[:prefix_length] if prefix_length and len(current_prompt) > prefix_length else current_prompt
         )
 
         best_match = None
         for prompt_hash, prompt_data in recorded_prompts.items():
             recorded_text = (
-                prompt_data[:prefix_length]
-                if prefix_length and len(prompt_data) > prefix_length
-                else prompt_data
+                prompt_data[:prefix_length] if prefix_length and len(prompt_data) > prefix_length else prompt_data
             )
 
             # Calculate a similarity ratio using token sort to handle reordered text

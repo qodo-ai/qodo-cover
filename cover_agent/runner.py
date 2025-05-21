@@ -17,9 +17,7 @@ class Runner:
             tuple: A tuple containing the standard output ('stdout'), standard error ('stderr'), exit code ('exit_code'),
                    and the time of the executed command ('command_start_time').
         """
-        command_start_time = int(
-            time.time() * 1000
-        )  # Get the current time in milliseconds
+        command_start_time = int(time.time() * 1000)  # Get the current time in milliseconds
 
         try:
             result = subprocess.run(
