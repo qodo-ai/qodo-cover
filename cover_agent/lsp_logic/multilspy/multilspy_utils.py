@@ -58,9 +58,7 @@ class TextUtils:
         return idx
 
     @staticmethod
-    def get_updated_position_from_line_and_column_and_edit(
-        l: int, c: int, text_to_be_inserted: str
-    ) -> Tuple[int, int]:
+    def get_updated_position_from_line_and_column_and_edit(l: int, c: int, text_to_be_inserted: str) -> Tuple[int, int]:
         """
         Utility function to get the position of the cursor after inserting text at a given line and column.
         """
@@ -119,12 +117,8 @@ class FileUtils:
         except Exception as exc:
             logger.log(f"File read '{file_path}' failed: {exc}", logging.ERROR)
             raise MultilspyException("File read failed.") from None
-        logger.log(
-            f"File read '{file_path}' failed: Unsupported encoding.", logging.ERROR
-        )
-        raise MultilspyException(
-            f"File read '{file_path}' failed: Unsupported encoding."
-        ) from None
+        logger.log(f"File read '{file_path}' failed: Unsupported encoding.", logging.ERROR)
+        raise MultilspyException(f"File read '{file_path}' failed: Unsupported encoding.") from None
 
     @staticmethod
     def download_file(logger: MultilspyLogger, url: str, target_path: str) -> None:
@@ -146,17 +140,13 @@ class FileUtils:
             raise MultilspyException("Error downoading file.") from None
 
     @staticmethod
-    def download_and_extract_archive(
-        logger: MultilspyLogger, url: str, target_path: str, archive_type: str
-    ) -> None:
+    def download_and_extract_archive(logger: MultilspyLogger, url: str, target_path: str, archive_type: str) -> None:
         """
         Downloads the archive from the given URL having format {archive_type} and extracts it to the given {target_path}
         """
         try:
             tmp_files = []
-            tmp_file_name = str(
-                PurePath(os.path.expanduser("~"), "multilspy_tmp", uuid.uuid4().hex)
-            )
+            tmp_file_name = str(PurePath(os.path.expanduser("~"), "multilspy_tmp", uuid.uuid4().hex))
             tmp_files.append(tmp_file_name)
             os.makedirs(os.path.dirname(tmp_file_name), exist_ok=True)
             FileUtils.download_file(logger, url, tmp_file_name)
@@ -167,15 +157,11 @@ class FileUtils:
                 assert os.path.isdir(target_path)
                 tmp_file_name_ungzipped = tmp_file_name + ".zip"
                 tmp_files.append(tmp_file_name_ungzipped)
-                with gzip.open(tmp_file_name, "rb") as f_in, open(
-                    tmp_file_name_ungzipped, "wb"
-                ) as f_out:
+                with gzip.open(tmp_file_name, "rb") as f_in, open(tmp_file_name_ungzipped, "wb") as f_out:
                     shutil.copyfileobj(f_in, f_out)
                 shutil.unpack_archive(tmp_file_name_ungzipped, target_path, "zip")
             elif archive_type == "gz":
-                with gzip.open(tmp_file_name, "rb") as f_in, open(
-                    target_path, "wb"
-                ) as f_out:
+                with gzip.open(tmp_file_name, "rb") as f_in, open(target_path, "wb") as f_out:
                     shutil.copyfileobj(f_in, f_out)
             else:
                 logger.log(
@@ -256,9 +242,7 @@ class PlatformUtils:
                     platform_id += "-" + libc
             return PlatformId(platform_id)
         else:
-            raise MultilspyException(
-                "Unknown platform: " + system + " " + machine + " " + bitness
-            )
+            raise MultilspyException("Unknown platform: " + system + " " + machine + " " + bitness)
 
     @staticmethod
     def get_dotnet_version() -> DotnetVersion:
@@ -266,9 +250,7 @@ class PlatformUtils:
         Returns the dotnet version for the current system
         """
         try:
-            result = subprocess.run(
-                ["dotnet", "--list-runtimes"], capture_output=True, check=True
-            )
+            result = subprocess.run(["dotnet", "--list-runtimes"], capture_output=True, check=True)
             version = ""
             for line in result.stdout.decode("utf-8").split("\n"):
                 if line.startswith("Microsoft.NETCore.App"):
@@ -288,9 +270,7 @@ class PlatformUtils:
                 raise MultilspyException("Unknown dotnet version: " + version)
         except subprocess.CalledProcessError:
             try:
-                result = subprocess.run(
-                    ["mono", "--version"], capture_output=True, check=True
-                )
+                result = subprocess.run(["mono", "--version"], capture_output=True, check=True)
                 return DotnetVersion.VMONO
             except subprocess.CalledProcessError:
                 raise MultilspyException("dotnet or mono not found on the system")

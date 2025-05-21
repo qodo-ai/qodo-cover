@@ -32,17 +32,13 @@ class MultilspyLogger:
         self.logger = logging.getLogger("multilspy")
         self.logger.setLevel(logging.INFO)
 
-    def log(
-        self, debug_message: str, level: int, sanitized_error_message: str = ""
-    ) -> None:
+    def log(self, debug_message: str, level: int, sanitized_error_message: str = "") -> None:
         """
         Log the debug and santized messages using the logger
         """
 
         debug_message = debug_message.replace("'", '"').replace("\n", " ")
-        sanitized_error_message = sanitized_error_message.replace("'", '"').replace(
-            "\n", " "
-        )
+        sanitized_error_message = sanitized_error_message.replace("'", '"').replace("\n", " ")
 
         # Collect details about the callee
         curframe = inspect.currentframe()

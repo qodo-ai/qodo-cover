@@ -13,12 +13,8 @@ from cover_agent.lsp_logic.multilspy.multilspy_logger import MultilspyLogger
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(
-        description="Process project directory and relative file path."
-    )
-    parser.add_argument(
-        "--project_dir", type=str, help="The project directory path.", default="./"
-    )
+    parser = argparse.ArgumentParser(description="Process project directory and relative file path.")
+    parser.add_argument("--project_dir", type=str, help="The project directory path.", default="./")
     parser.add_argument(
         "--rel_file",
         type=str,
@@ -41,9 +37,7 @@ async def run():
     if args.project_dir == "./":  # convert relative path to absolute path
         project_dir = os.getcwd()
     rel_file = args.rel_file
-    print(
-        f"Running context analysis for the file '{rel_file}' in the project '{project_dir}'..."
-    )
+    print(f"Running context analysis for the file '{rel_file}' in the project '{project_dir}'...")
 
     language = filename_to_lang(rel_file)
     target_file = str(os.path.join(project_dir, rel_file))
@@ -74,27 +68,19 @@ async def run():
         print("LSP server initialized.")
 
         print("\nGetting context ...")
-        context_files, context_symbols = await lsp.get_direct_context(
-            captures, language, project_dir, rel_file
-        )
+        context_files, context_symbols = await lsp.get_direct_context(captures, language, project_dir, rel_file)
         print("Getting context done.")
 
         print("\nGetting reverse context ...")
-        reverse_context_files, reverse_context_symbols = await lsp.get_reverse_context(
-            captures, project_dir, rel_file
-        )
+        reverse_context_files, reverse_context_symbols = await lsp.get_reverse_context(captures, project_dir, rel_file)
         print("Getting reverse context done.")
 
     print("\n\n================")
-    print(
-        f"For the file '{target_file}', here are the files referenced by it (context):\n"
-    )
+    print(f"For the file '{target_file}', here are the files referenced by it (context):\n")
     for file in context_files:
         print(f"'{file}'")
     print("\n\n================")
-    print(
-        f"For the file '{target_file}', here are the files referencing it (reverse context):\n"
-    )
+    print(f"For the file '{target_file}', here are the files referencing it (reverse context):\n")
     for file in reverse_context_files:
         print(f"'{file}'")
     print("================")

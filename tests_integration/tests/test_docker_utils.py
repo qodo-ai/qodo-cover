@@ -7,14 +7,14 @@ from tests_integration.docker_utils import get_short_docker_image_name
     "image_name, expected_short_name",
     [
         ("repository/path/image:tag", "image"),  # Full image name with repository and tag
-        ("repository/path/image", "image"),      # Full image name with repository, no tag
-        ("image:tag", "image"),                  # Image name with tag, no repository
-        ("image", "image"),                      # Image name only
-        ("repository/image:tag", "image"),       # Repository and image name with tag
-        ("repository/image", "image"),           # Repository and image name, no tag
-        ("", ""),                                # Empty image name
-        (":tag", ""),                            # Only tag, no image name
-        ("/:tag", ""),                           # Slash and tag, no image name
+        ("repository/path/image", "image"),  # Full image name with repository, no tag
+        ("image:tag", "image"),  # Image name with tag, no repository
+        ("image", "image"),  # Image name only
+        ("repository/image:tag", "image"),  # Repository and image name with tag
+        ("repository/image", "image"),  # Repository and image name, no tag
+        ("", ""),  # Empty image name
+        (":tag", ""),  # Only tag, no image name
+        ("/:tag", ""),  # Slash and tag, no image name
     ],
 )
 def test_get_short_docker_image_name_extracts_short_name_from_full_image_name(image_name, expected_short_name):

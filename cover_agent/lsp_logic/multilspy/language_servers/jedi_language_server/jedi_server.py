@@ -43,9 +43,7 @@ class JediServer(LanguageServer):
         """
         Returns the initialize params for the Jedi Language Server.
         """
-        with open(
-            os.path.join(os.path.dirname(__file__), "initialize_params.json"), "r"
-        ) as f:
+        with open(os.path.join(os.path.dirname(__file__), "initialize_params.json"), "r") as f:
             d = json.load(f)
 
         del d["_description"]
@@ -58,9 +56,7 @@ class JediServer(LanguageServer):
         d["rootUri"] = pathlib.Path(repository_absolute_path).as_uri()
 
         assert d["workspaceFolders"][0]["uri"] == "$uri"
-        d["workspaceFolders"][0]["uri"] = pathlib.Path(
-            repository_absolute_path
-        ).as_uri()
+        d["workspaceFolders"][0]["uri"] = pathlib.Path(repository_absolute_path).as_uri()
 
         assert d["workspaceFolders"][0]["name"] == "$name"
         d["workspaceFolders"][0]["name"] = os.path.basename(repository_absolute_path)
@@ -99,20 +95,14 @@ class JediServer(LanguageServer):
         self.server.on_request("client/registerCapability", do_nothing)
         self.server.on_notification("language/status", do_nothing)
         self.server.on_notification("window/logMessage", window_log_message)
-        self.server.on_request(
-            "workspace/executeClientCommand", execute_client_command_handler
-        )
+        self.server.on_request("workspace/executeClientCommand", execute_client_command_handler)
         self.server.on_notification("$/progress", do_nothing)
         self.server.on_notification("textDocument/publishDiagnostics", do_nothing)
         self.server.on_notification("language/actionableNotification", do_nothing)
-        self.server.on_notification(
-            "experimental/serverStatus", check_experimental_status
-        )
+        self.server.on_notification("experimental/serverStatus", check_experimental_status)
 
         async with super().start_server():
-            self.logger.log(
-                "Starting jedi-language-server server process", logging.INFO
-            )
+            self.logger.log("Starting jedi-language-server server process", logging.INFO)
             await self.server.start()
             initialize_params = self._get_initialize_params(self.repository_root_path)
 

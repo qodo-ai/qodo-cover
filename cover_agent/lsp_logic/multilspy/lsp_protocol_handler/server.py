@@ -98,14 +98,10 @@ class StopLoopException(Exception):
 
 
 def create_message(payload: PayloadLike):
-    body = json.dumps(
-        payload, check_circular=False, ensure_ascii=False, separators=(",", ":")
-    ).encode(ENCODING)
+    body = json.dumps(payload, check_circular=False, ensure_ascii=False, separators=(",", ":")).encode(ENCODING)
     return (
         f"Content-Length: {len(body)}\r\n".encode(ENCODING),
-        "Content-Type: application/vscode-jsonrpc; charset=utf-8\r\n\r\n".encode(
-            ENCODING
-        ),
+        "Content-Type: application/vscode-jsonrpc; charset=utf-8\r\n\r\n".encode(ENCODING),
         body,
     )
 
@@ -273,11 +269,7 @@ class LanguageServerHandler:
         invoking the registered response and notification handlers
         """
         try:
-            while (
-                self.process
-                and self.process.stdout
-                and not self.process.stdout.at_eof()
-            ):
+            while self.process and self.process.stdout and not self.process.stdout.at_eof():
                 line = await self.process.stdout.readline()
                 if not line:
                     continue
@@ -293,9 +285,7 @@ class LanguageServerHandler:
                     continue
                 body = await self.process.stdout.readexactly(num_bytes)
 
-                self.tasks[self.task_counter] = asyncio.get_event_loop().create_task(
-                    self._handle_body(body)
-                )
+                self.tasks[self.task_counter] = asyncio.get_event_loop().create_task(self._handle_body(body))
                 self.task_counter += 1
         except (BrokenPipeError, ConnectionResetError, StopLoopException):
             pass
@@ -306,11 +296,7 @@ class LanguageServerHandler:
         Continuously read from the language server process stderr and log the messages
         """
         try:
-            while (
-                self.process
-                and self.process.stderr
-                and not self.process.stderr.at_eof()
-            ):
+            while self.process and self.process.stderr and not self.process.stderr.at_eof():
                 line = await self.process.stderr.readline()
                 if not line:
                     continue
@@ -458,9 +444,7 @@ class LanguageServerHandler:
         except Error as ex:
             self.send_error_response(request_id, ex)
         except Exception as ex:
-            self.send_error_response(
-                request_id, Error(ErrorCodes.InternalError, str(ex))
-            )
+            self.send_error_response(request_id, Error(ErrorCodes.InternalError, str(ex)))
 
     async def _notification_handler(self, response: StringDict) -> None:
         """
