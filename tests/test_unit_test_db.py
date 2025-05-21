@@ -59,9 +59,7 @@ class TestUnitTestDB:
         # Insert the test result into the database
         attempt_id = unit_test_db.insert_attempt(test_result)
         with unit_test_db.Session() as session:
-            attempt = (
-                session.query(UnitTestGenerationAttempt).filter_by(id=attempt_id).one()
-            )
+            attempt = session.query(UnitTestGenerationAttempt).filter_by(id=attempt_id).one()
 
         # Assertions to verify the inserted attempt
         assert attempt.id == attempt_id

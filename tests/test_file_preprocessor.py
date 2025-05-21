@@ -20,9 +20,7 @@ class TestFilePreprocessor:
             preprocessor = FilePreprocessor(tmp.name)
             input_text = "Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt."
             processed_text = preprocessor.process_file(input_text)
-            assert (
-                processed_text == input_text
-            ), "C file processing should not alter the text."
+            assert processed_text == input_text, "C file processing should not alter the text."
 
     # Test for a Python file with only a function
     def test_py_file_with_function_only(self):
@@ -35,9 +33,7 @@ class TestFilePreprocessor:
             preprocessor = FilePreprocessor(tmp.name)
             input_text = "Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt."
             processed_text = preprocessor.process_file(input_text)
-            assert (
-                processed_text == input_text
-            ), "Python file without class should not alter the text."
+            assert processed_text == input_text, "Python file without class should not alter the text."
 
     # Test for a Python file with a comment that looks like a class definition
     def test_py_file_with_commented_class(self):
@@ -50,9 +46,7 @@ class TestFilePreprocessor:
             preprocessor = FilePreprocessor(tmp.name)
             input_text = "Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt."
             processed_text = preprocessor.process_file(input_text)
-            assert (
-                processed_text == input_text
-            ), "Commented class definition should not trigger processing."
+            assert processed_text == input_text, "Commented class definition should not trigger processing."
 
     # Test for a Python file with an actual class definition
     def test_py_file_with_class(self):
@@ -66,9 +60,7 @@ class TestFilePreprocessor:
             input_text = "Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt."
             processed_text = preprocessor.process_file(input_text)
             expected_output = textwrap.indent(input_text, "    ")
-            assert (
-                processed_text == expected_output
-            ), "Python file with class should indent the text."
+            assert processed_text == expected_output, "Python file with class should indent the text."
 
     def test_py_file_with_syntax_error(self):
         """

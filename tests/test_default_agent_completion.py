@@ -91,17 +91,13 @@ class TestDefaultAgentCompletion:
         mock_caller = MagicMock()
         agent = DefaultAgentCompletion(caller=mock_caller)
 
-        with patch(
-            "cover_agent.default_agent_completion.get_settings"
-        ) as mock_get_settings:
+        with patch("cover_agent.default_agent_completion.get_settings") as mock_get_settings:
             mock_get_settings.return_value = {"test_file": None}
 
             with pytest.raises(ValueError) as exc_info:
                 agent._build_prompt("test_file")
 
-            assert "Could not find valid system/user prompt settings" in str(
-                exc_info.value
-            )
+            assert "Could not find valid system/user prompt settings" in str(exc_info.value)
 
     def test_build_prompt_valid_settings(self):
         """
@@ -115,9 +111,7 @@ class TestDefaultAgentCompletion:
         mock_settings.system = "Hello {{ name }}"
         mock_settings.user = "Test {{ value }}"
 
-        with patch(
-            "cover_agent.default_agent_completion.get_settings"
-        ) as mock_get_settings:
+        with patch("cover_agent.default_agent_completion.get_settings") as mock_get_settings:
             mock_get_settings.return_value = {"test_file": mock_settings}
 
             result = agent._build_prompt("test_file", name="World", value=42)

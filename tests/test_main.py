@@ -75,12 +75,22 @@ class TestMain:
         """Test the parse_args function to ensure it correctly parses command-line arguments."""
         mock_get_settings.return_value = {"default": mock_settings}
 
-        with patch("sys.argv", [
-            "program.py", "--source-file-path", "test_source.py",
-            "--test-file-path", "test_file.py",
-            "--code-coverage-report-path", "coverage_report.xml",
-            "--test-command", "pytest", "--max-iterations", "10",
-        ]):
+        with patch(
+            "sys.argv",
+            [
+                "program.py",
+                "--source-file-path",
+                "test_source.py",
+                "--test-file-path",
+                "test_file.py",
+                "--code-coverage-report-path",
+                "coverage_report.xml",
+                "--test-command",
+                "pytest",
+                "--max-iterations",
+                "10",
+            ],
+        ):
             args = parse_args(mock_settings)
             assert args.source_file_path == "test_source.py"
             assert args.test_file_path == "test_file.py"
@@ -101,9 +111,7 @@ class TestMain:
 
         with patch("cover_agent.main.parse_args", return_value=base_args):
             mock_agent = MagicMock()
-            mock_agent.run.side_effect = FileNotFoundError(
-                f"Source file not found at {base_args.source_file_path}"
-            )
+            mock_agent.run.side_effect = FileNotFoundError(f"Source file not found at {base_args.source_file_path}")
             mock_cover_agent.return_value = mock_agent
 
             with pytest.raises(FileNotFoundError) as exc_info:
@@ -119,9 +127,7 @@ class TestMain:
 
         with patch("cover_agent.main.parse_args", return_value=base_args):
             mock_agent = MagicMock()
-            mock_agent.run.side_effect = FileNotFoundError(
-                f"Test file not found at {base_args.test_file_path}"
-            )
+            mock_agent.run.side_effect = FileNotFoundError(f"Test file not found at {base_args.test_file_path}")
             mock_cover_agent.return_value = mock_agent
 
             with pytest.raises(FileNotFoundError) as exc_info:
@@ -149,12 +155,23 @@ class TestMain:
         """Test parsing of max-run-time-sec argument."""
         mock_get_settings.return_value = {"default": mock_settings}
 
-        with patch("sys.argv", [
-            "program.py", "--source-file-path", "test_source.py",
-            "--test-file-path", "test_file.py",
-            "--code-coverage-report-path", "coverage_report.xml",
-            "--test-command", "pytest", "--max-iterations", "10",
-            "--max-run-time-sec", "45",
-        ]):
+        with patch(
+            "sys.argv",
+            [
+                "program.py",
+                "--source-file-path",
+                "test_source.py",
+                "--test-file-path",
+                "test_file.py",
+                "--code-coverage-report-path",
+                "coverage_report.xml",
+                "--test-command",
+                "pytest",
+                "--max-iterations",
+                "10",
+                "--max-run-time-sec",
+                "45",
+            ],
+        ):
             args = parse_args(mock_settings)
             assert args.max_run_time_sec == 45

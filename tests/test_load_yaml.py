@@ -300,9 +300,7 @@ test_name:"""
             return "node_modules" in path
 
         mocker.patch("os.walk", return_value=mock_os_walk)
-        mocker.patch(
-            "cover_agent.utils.is_forbidden_directory", side_effect=mock_is_forbidden
-        )
+        mocker.patch("cover_agent.utils.is_forbidden_directory", side_effect=mock_is_forbidden)
         mocker.patch("cover_agent.utils.filename_to_lang", return_value="python")
         mocker.patch("os.path.getmtime", return_value=1000)
 

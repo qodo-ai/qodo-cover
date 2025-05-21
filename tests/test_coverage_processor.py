@@ -68,9 +68,7 @@ class TestCoverageProcessor:
         # Setup
         mock_open = mocker.patch(
             "builtins.open",
-            mocker.mock_open(
-                read_data="PACKAGE,CLASS,LINE_MISSED,LINE_COVERED\ncom.example,MyClass,5,10"
-            ),
+            mocker.mock_open(read_data="PACKAGE,CLASS,LINE_MISSED,LINE_COVERED\ncom.example,MyClass,5,10"),
         )
         mocker.patch(
             "csv.DictReader",
@@ -83,14 +81,10 @@ class TestCoverageProcessor:
                 }
             ],
         )
-        processor = CoverageProcessor(
-            "path/to/coverage_report.csv", "path/to/MyClass.java", "jacoco"
-        )
+        processor = CoverageProcessor("path/to/coverage_report.csv", "path/to/MyClass.java", "jacoco")
 
         # Action
-        missed, covered = processor.parse_missed_covered_lines_jacoco_csv(
-            "com.example", "MyClass"
-        )
+        missed, covered = processor.parse_missed_covered_lines_jacoco_csv("com.example", "MyClass")
 
         # Assert
         assert missed == 5
@@ -118,9 +112,7 @@ class TestCoverageProcessor:
         )
 
         # Invoke the parse_coverage_report_jacoco method
-        lines_covered, lines_missed, coverage_percentage = (
-            coverage_processor.parse_coverage_report_jacoco()
-        )
+        lines_covered, lines_missed, coverage_percentage = coverage_processor.parse_coverage_report_jacoco()
 
         # Assert the results
         assert lines_covered == [], "Expected lines_covered to be an empty list"
@@ -132,9 +124,7 @@ class TestCoverageProcessor:
         Tests that parse_coverage_report raises a ValueError for unsupported coverage report types.
         """
         processor = CoverageProcessor("fake_path", "app.py", "unsupported_type")
-        with pytest.raises(
-            ValueError, match="Unsupported coverage report type: unsupported_type"
-        ):
+        with pytest.raises(ValueError, match="Unsupported coverage report type: unsupported_type"):
             processor.parse_coverage_report()
 
     def test_extract_package_and_class_java_file_error(self, mocker):
@@ -173,12 +163,8 @@ class TestCoverageProcessor:
         mocker.patch("builtins.open", mocker.mock_open(read_data=kotlin_file_content))
         processor = CoverageProcessor("fake_path", "path/to/MainViewModel.kt", "jacoco")
         package_name, class_name = processor.extract_package_and_class_kotlin()
-        assert (
-            package_name == "com.madrapps.playground"
-        ), "Expected package name to be 'com.madrapps.playground'"
-        assert (
-            class_name == "MainViewModel"
-        ), "Expected class name to be 'MainViewModel'"
+        assert package_name == "com.madrapps.playground", "Expected package name to be 'com.madrapps.playground'"
+        assert class_name == "MainViewModel", "Expected class name to be 'MainViewModel'"
 
     def test_extract_package_and_class_java(self, mocker):
         """
@@ -194,9 +180,7 @@ class TestCoverageProcessor:
         mocker.patch("builtins.open", mocker.mock_open(read_data=java_file_content))
         processor = CoverageProcessor("fake_path", "path/to/MyClass.java", "jacoco")
         package_name, class_name = processor.extract_package_and_class_java()
-        assert (
-            package_name == "com.example"
-        ), "Expected package name to be 'com.example'"
+        assert package_name == "com.example", "Expected package name to be 'com.example'"
         assert class_name == "MyClass", "Expected class name to be 'MyClass'"
 
     @pytest.mark.skip("no longer an assert. needs rewrite. check out caplog")
@@ -231,9 +215,7 @@ class TestCoverageProcessor:
         """
         Tests the process_coverage_report method for verifying and parsing the coverage report.
         """
-        mock_verify = mocker.patch(
-            "cover_agent.coverage_processor.CoverageProcessor.verify_report_update"
-        )
+        mock_verify = mocker.patch("cover_agent.coverage_processor.CoverageProcessor.verify_report_update")
         mock_parse = mocker.patch(
             "cover_agent.coverage_processor.CoverageProcessor.parse_coverage_report",
             return_value=([], [], 0.0),
@@ -252,20 +234,14 @@ class TestCoverageProcessor:
         """
         mock_open = mocker.patch(
             "builtins.open",
-            mocker.mock_open(
-                read_data="PACKAGE,CLASS,LINE_MISSED,LINE_COVERED\ncom.example,MyClass,5,10"
-            ),
+            mocker.mock_open(read_data="PACKAGE,CLASS,LINE_MISSED,LINE_COVERED\ncom.example,MyClass,5,10"),
         )
         mocker.patch(
             "csv.DictReader",
-            return_value=[
-                {"PACKAGE": "com.example", "CLASS": "MyClass", "LINE_MISSED": "5"}
-            ],
+            return_value=[{"PACKAGE": "com.example", "CLASS": "MyClass", "LINE_MISSED": "5"}],
         )  # Missing 'LINE_COVERED'
 
-        processor = CoverageProcessor(
-            "path/to/coverage_report.csv", "path/to/MyClass.java", "jacoco"
-        )
+        processor = CoverageProcessor("path/to/coverage_report.csv", "path/to/MyClass.java", "jacoco")
 
         with pytest.raises(KeyError):
             processor.parse_missed_covered_lines_jacoco_csv("com.example", "MyClass")
@@ -276,9 +252,7 @@ class TestCoverageProcessor:
         """
         mocker.patch("builtins.open", mocker.mock_open(read_data=""))
         processor = CoverageProcessor("empty_report.lcov", "app.py", "lcov")
-        covered_lines, missed_lines, coverage_pct = (
-            processor.parse_coverage_report_lcov()
-        )
+        covered_lines, missed_lines, coverage_pct = processor.parse_coverage_report_lcov()
         assert covered_lines == [], "Expected no covered lines"
         assert missed_lines == [], "Expected no missed lines"
         assert coverage_pct == 0, "Expected 0% coverage"
@@ -296,9 +270,7 @@ class TestCoverageProcessor:
         """
         mocker.patch("builtins.open", mocker.mock_open(read_data=lcov_data))
         processor = CoverageProcessor("report.lcov", "app.py", "lcov")
-        covered_lines, missed_lines, coverage_pct = (
-            processor.parse_coverage_report_lcov()
-        )
+        covered_lines, missed_lines, coverage_pct = processor.parse_coverage_report_lcov()
         assert covered_lines == [1, 3], "Expected lines 1 and 3 to be covered"
         assert missed_lines == [2], "Expected line 2 to be missed"
         assert coverage_pct == 2 / 3, "Expected 66.67% coverage"
@@ -323,9 +295,7 @@ class TestCoverageProcessor:
         """
         mocker.patch("builtins.open", mocker.mock_open(read_data=lcov_data))
         processor = CoverageProcessor("report.lcov", "app.py", "lcov")
-        covered_lines, missed_lines, coverage_pct = (
-            processor.parse_coverage_report_lcov()
-        )
+        covered_lines, missed_lines, coverage_pct = processor.parse_coverage_report_lcov()
         assert covered_lines == [
             1,
             3,
@@ -342,12 +312,8 @@ class TestCoverageProcessor:
             return_value=("com.example", "Example"),
         )
 
-        processor = CoverageProcessor(
-            "path/to/coverage_report.html", "path/to/MyClass.java", "jacoco"
-        )
-        with pytest.raises(
-            ValueError, match="Unsupported JaCoCo code coverage report format: html"
-        ):
+        processor = CoverageProcessor("path/to/coverage_report.html", "path/to/MyClass.java", "jacoco")
+        with pytest.raises(ValueError, match="Unsupported JaCoCo code coverage report format: html"):
             processor.parse_coverage_report_jacoco()
 
     def test_parse_missed_covered_lines_jacoco_xml_no_source_file(self, mocker):
@@ -384,14 +350,10 @@ class TestCoverageProcessor:
             return_value=ET.ElementTree(ET.fromstring(xml_str)),
         )
 
-        processor = CoverageProcessor(
-            "path/to/coverage_report.xml", "path/to/MySecondClass.java", "jacoco"
-        )
+        processor = CoverageProcessor("path/to/coverage_report.xml", "path/to/MySecondClass.java", "jacoco")
 
         # Action
-        missed, covered = processor.parse_missed_covered_lines_jacoco_xml(
-            "MySecondClass"
-        )
+        missed, covered = processor.parse_missed_covered_lines_jacoco_xml("MySecondClass")
 
         # Assert
         assert missed == []
@@ -431,9 +393,7 @@ class TestCoverageProcessor:
             return_value=ET.ElementTree(ET.fromstring(xml_str)),
         )
 
-        processor = CoverageProcessor(
-            "path/to/coverage_report.xml", "path/to/MyClass.java", "jacoco"
-        )
+        processor = CoverageProcessor("path/to/coverage_report.xml", "path/to/MyClass.java", "jacoco")
 
         # Action
         missed, covered = processor.parse_missed_covered_lines_jacoco_xml("MyClass")
@@ -476,9 +436,7 @@ class TestCoverageProcessor:
             return_value=ET.ElementTree(ET.fromstring(xml_str)),
         )
 
-        processor = CoverageProcessor(
-            "path/to/coverage_report.xml", "path/to/MyClass.kt", "jacoco"
-        )
+        processor = CoverageProcessor("path/to/coverage_report.xml", "path/to/MyClass.kt", "jacoco")
 
         # Action
         missed, covered = processor.parse_missed_covered_lines_jacoco_xml("MyClass")
@@ -491,9 +449,7 @@ class TestCoverageProcessor:
         """
         Tests that get_file_extension correctly extracts the file extension from a valid file name.
         """
-        processor = CoverageProcessor(
-            "path/to/coverage_report.xml", "path/to/MyClass.java", "jacoco"
-        )
+        processor = CoverageProcessor("path/to/coverage_report.xml", "path/to/MyClass.java", "jacoco")
 
         file_extension = processor.get_file_extension("coverage_report.xml")
 
@@ -504,9 +460,7 @@ class TestCoverageProcessor:
         """
         Tests that get_file_extension returns an empty string when the file name has no extension.
         """
-        processor = CoverageProcessor(
-            "path/to/coverage_report", "path/to/MyClass.java", "jacoco"
-        )
+        processor = CoverageProcessor("path/to/coverage_report", "path/to/MyClass.java", "jacoco")
 
         file_extension = processor.get_file_extension("coverage_report")
 
@@ -521,9 +475,7 @@ class TestCoverageProcessor:
             "cover_agent.coverage_processor.CoverageProcessor.parse_coverage_report_lcov",
             return_value=([], [], 0.0),
         )
-        processor = CoverageProcessor(
-            "fake_path", "app.py", "lcov", use_report_coverage_feature_flag=True
-        )
+        processor = CoverageProcessor("fake_path", "app.py", "lcov", use_report_coverage_feature_flag=True)
         result = processor.parse_coverage_report()
         mock_parse_lcov.assert_called_once()
         assert result == ([], [], 0.0), "Expected result to be ([], [], 0.0)"
@@ -536,9 +488,7 @@ class TestCoverageProcessor:
             "cover_agent.coverage_processor.CoverageProcessor.parse_coverage_report_cobertura",
             return_value=([], [], 0.0),
         )
-        processor = CoverageProcessor(
-            "fake_path", "app.py", "cobertura", use_report_coverage_feature_flag=True
-        )
+        processor = CoverageProcessor("fake_path", "app.py", "cobertura", use_report_coverage_feature_flag=True)
         result = processor.parse_coverage_report()
         mock_parse_cobertura.assert_called_once()
         assert result == ([], [], 0.0), "Expected result to be ([], [], 0.0)"
@@ -551,22 +501,16 @@ class TestCoverageProcessor:
             "cover_agent.coverage_processor.CoverageProcessor.parse_coverage_report_jacoco",
             return_value=([], [], 0.0),
         )
-        processor = CoverageProcessor(
-            "fake_path", "app.py", "jacoco", use_report_coverage_feature_flag=True
-        )
+        processor = CoverageProcessor("fake_path", "app.py", "jacoco", use_report_coverage_feature_flag=True)
         result = processor.parse_coverage_report()
         mock_parse_jacoco.assert_called_once()
         assert result == ([], [], 0.0), "Expected result to be ([], [], 0.0)"
 
-    def test_parse_coverage_report_cobertura_filename_not_found(
-        self, mock_xml_tree, processor
-    ):
+    def test_parse_coverage_report_cobertura_filename_not_found(self, mock_xml_tree, processor):
         """
         Tests that parse_coverage_report_cobertura returns empty lists and 0 coverage when the file is not found.
         """
-        covered_lines, missed_lines, coverage_pct = (
-            processor.parse_coverage_report_cobertura("non_existent_file.py")
-        )
+        covered_lines, missed_lines, coverage_pct = processor.parse_coverage_report_cobertura("non_existent_file.py")
         assert covered_lines == [], "Expected no covered lines"
         assert missed_lines == [], "Expected no missed lines"
         assert coverage_pct == 0.0, "Expected 0% coverage"
@@ -598,9 +542,7 @@ class TestCoverageProcessor:
             "unsupported_type",
             use_report_coverage_feature_flag=True,
         )
-        with pytest.raises(
-            ValueError, match="Unsupported coverage report type: unsupported_type"
-        ):
+        with pytest.raises(ValueError, match="Unsupported coverage report type: unsupported_type"):
             processor.parse_coverage_report()
 
     def test_parse_coverage_report_jacoco_without_feature_flag(self, mocker):
@@ -611,9 +553,7 @@ class TestCoverageProcessor:
             "cover_agent.coverage_processor.CoverageProcessor.parse_coverage_report_jacoco",
             return_value=([], [], 0.0),
         )
-        processor = CoverageProcessor(
-            "fake_path", "app.py", "jacoco", use_report_coverage_feature_flag=False
-        )
+        processor = CoverageProcessor("fake_path", "app.py", "jacoco", use_report_coverage_feature_flag=False)
         result = processor.parse_coverage_report()
         mock_parse_jacoco.assert_called_once()
         assert result == ([], [], 0.0), "Expected result to be ([], [], 0.0)"
@@ -628,9 +568,7 @@ class TestCoverageProcessor:
             "unsupported_type",
             use_report_coverage_feature_flag=False,
         )
-        with pytest.raises(
-            ValueError, match="Unsupported coverage report type: unsupported_type"
-        ):
+        with pytest.raises(ValueError, match="Unsupported coverage report type: unsupported_type"):
             processor.parse_coverage_report()
 
     def test_parse_coverage_report_lcov_without_feature_flag(self, mocker):
@@ -641,9 +579,7 @@ class TestCoverageProcessor:
             "cover_agent.coverage_processor.CoverageProcessor.parse_coverage_report_lcov",
             return_value=([], [], 0.0),
         )
-        processor = CoverageProcessor(
-            "fake_path", "app.py", "lcov", use_report_coverage_feature_flag=False
-        )
+        processor = CoverageProcessor("fake_path", "app.py", "lcov", use_report_coverage_feature_flag=False)
         result = processor.parse_coverage_report()
         mock_parse_lcov.assert_called_once()
         assert result == ([], [], 0.0), "Expected result to be ([], [], 0.0)"
@@ -701,9 +637,7 @@ class TestCoverageProcessor:
         )
 
         # Call the method
-        covered_lines, missed_lines, coverage_pct = (
-            processor.parse_json_diff_coverage_report()
-        )
+        covered_lines, missed_lines, coverage_pct = processor.parse_json_diff_coverage_report()
 
         # Verify results
         assert covered_lines == [1, 3, 5]
@@ -718,9 +652,7 @@ class TestCoverageProcessor:
             diff_coverage_report_path="diff_coverage.json",
         )
 
-        covered_lines, missed_lines, coverage_pct = (
-            processor.parse_json_diff_coverage_report()
-        )
+        covered_lines, missed_lines, coverage_pct = processor.parse_json_diff_coverage_report()
 
         # Verify default values returned
         assert covered_lines == []

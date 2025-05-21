@@ -101,9 +101,7 @@ class DummyAgent(AgentCompletionABC):
         :param additional_instructions_text: Additional instructions text.
         :return: A tuple containing insert line analysis information.
         """
-        super().analyze_test_insert_line(
-            language, test_file_numbered, test_file_name, additional_instructions_text
-        )
+        super().analyze_test_insert_line(language, test_file_numbered, test_file_name, additional_instructions_text)
         return ("insert_line_instruction", 50, 60, "insert_prompt")
 
     def analyze_test_against_context(
@@ -122,9 +120,7 @@ class DummyAgent(AgentCompletionABC):
         :param context_files_names_rel: Relative names of the context files.
         :return: A tuple containing context analysis information.
         """
-        super().analyze_test_against_context(
-            language, test_file_content, test_file_name_rel, context_files_names_rel
-        )
+        super().analyze_test_against_context(language, test_file_content, test_file_name_rel, context_files_names_rel)
         return ("context_analysis", 70, 80, "context_prompt")
 
     def analyze_suite_test_headers_indentation(
@@ -141,9 +137,7 @@ class DummyAgent(AgentCompletionABC):
         :param test_file: Content of the test file.
         :return: A tuple containing suite analysis information.
         """
-        super().analyze_suite_test_headers_indentation(
-            language, test_file_name, test_file
-        )
+        super().analyze_suite_test_headers_indentation(language, test_file_name, test_file)
         return ("suite_analysis", 90, 100, "suite_prompt")
 
     def adapt_test_command_for_a_single_test_via_ai(
@@ -160,9 +154,7 @@ class DummyAgent(AgentCompletionABC):
         :param project_root_dir: Root directory of the project.
         :return: A tuple containing adapted command information.
         """
-        super().adapt_test_command_for_a_single_test_via_ai(
-            test_file_relative_path, test_command, project_root_dir
-        )
+        super().adapt_test_command_for_a_single_test_via_ai(test_file_relative_path, test_command, project_root_dir)
         return ("adapted_command", 110, 120, "adapt_prompt")
 
 
@@ -179,18 +171,10 @@ class TestAgentCompletionABC:
         """
         assert isinstance(result, tuple), "Result is not a tuple"
         assert len(result) == 4, "Tuple does not have four elements"
-        assert isinstance(
-            result[0], str
-        ), "First element is not a string (AI-generated text)"
-        assert isinstance(
-            result[1], int
-        ), "Second element is not an integer (input token count)"
-        assert isinstance(
-            result[2], int
-        ), "Third element is not an integer (output token count)"
-        assert isinstance(
-            result[3], str
-        ), "Fourth element is not a string (final prompt)"
+        assert isinstance(result[0], str), "First element is not a string (AI-generated text)"
+        assert isinstance(result[1], int), "Second element is not an integer (input token count)"
+        assert isinstance(result[2], int), "Third element is not an integer (output token count)"
+        assert isinstance(result[3], str), "Fourth element is not a string (final prompt)"
 
     def test_instantiation_of_abstract_class(self):
         """
@@ -236,9 +220,7 @@ class TestAgentCompletionABC:
         Test the analyze_test_insert_line method of DummyAgent.
         """
         agent = DummyAgent()
-        result = agent.analyze_test_insert_line(
-            "python", "numbered_test_file", "test_file.py"
-        )
+        result = agent.analyze_test_insert_line("python", "numbered_test_file", "test_file.py")
         self.check_output_format(result)
 
     def test_analyze_test_against_context(self):
@@ -256,9 +238,7 @@ class TestAgentCompletionABC:
         Test the analyze_suite_test_headers_indentation method of DummyAgent.
         """
         agent = DummyAgent()
-        result = agent.analyze_suite_test_headers_indentation(
-            "python", "test_file.py", "test_file_content"
-        )
+        result = agent.analyze_suite_test_headers_indentation("python", "test_file.py", "test_file_content")
         self.check_output_format(result)
 
     def test_adapt_test_command_for_a_single_test_via_ai(self):

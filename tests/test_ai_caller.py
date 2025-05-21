@@ -78,9 +78,7 @@ class TestAICaller:
         """
         Test the call_model method with W&B logging enabled.
         """
-        mock_completion.return_value = [
-            {"choices": [{"delta": {"content": "response"}}]}
-        ]
+        mock_completion.return_value = [{"choices": [{"delta": {"content": "response"}}]}]
         prompt = {"system": "", "user": "Hello, world!"}
         with patch("cover_agent.ai_caller.litellm.stream_chunk_builder") as mock_builder:
             mock_builder.return_value = {
@@ -98,9 +96,7 @@ class TestAICaller:
         """
         Test the call_model method with a different API base.
         """
-        mock_completion.return_value = [
-            {"choices": [{"delta": {"content": "response"}}]}
-        ]
+        mock_completion.return_value = [{"choices": [{"delta": {"content": "response"}}]}]
         ai_caller.model = "openai/test-model"
         prompt = {"system": "", "user": "Hello, world!"}
         with patch("cover_agent.ai_caller.litellm.stream_chunk_builder") as mock_builder:
@@ -118,9 +114,7 @@ class TestAICaller:
         """
         Test the call_model method with a system key in the prompt.
         """
-        mock_completion.return_value = [
-            {"choices": [{"delta": {"content": "response"}}]}
-        ]
+        mock_completion.return_value = [{"choices": [{"delta": {"content": "response"}}]}]
         prompt = {"system": "System message", "user": "Hello, world!"}
         with patch("cover_agent.ai_caller.litellm.stream_chunk_builder") as mock_builder:
             mock_builder.return_value = {
@@ -139,10 +133,7 @@ class TestAICaller:
         prompt = {"user": "Hello, world!"}
         with pytest.raises(KeyError) as exc_info:
             ai_caller.call_model(prompt)
-        assert (
-            str(exc_info.value)
-            == "\"The prompt dictionary must contain 'system' and 'user' keys.\""
-        )
+        assert str(exc_info.value) == "\"The prompt dictionary must contain 'system' and 'user' keys.\""
 
     @patch("cover_agent.ai_caller.litellm.completion")
     def test_call_model_o1_preview(self, mock_completion, ai_caller):
@@ -157,9 +148,7 @@ class TestAICaller:
         mock_response.usage = Mock(prompt_tokens=2, completion_tokens=10)
         mock_completion.return_value = mock_response
         # Call the method
-        response, prompt_tokens, response_tokens = ai_caller.call_model(
-            prompt, stream=False
-        )
+        response, prompt_tokens, response_tokens = ai_caller.call_model(prompt, stream=False)
         assert response == "response"
         assert prompt_tokens == 2
         assert response_tokens == 10
@@ -179,18 +168,14 @@ class TestAICaller:
                 "choices": [{"message": {"content": "response"}}],
                 "usage": {"prompt_tokens": 2, "completion_tokens": 10},
             }
-            response, prompt_tokens, response_tokens = ai_caller.call_model(
-                prompt, stream=True
-            )
+            response, prompt_tokens, response_tokens = ai_caller.call_model(prompt, stream=True)
             assert response == "response"
             assert prompt_tokens == 2
 
     @patch("cover_agent.ai_caller.litellm.completion")
     @patch.dict(os.environ, {"WANDB_API_KEY": "test_key"})
     @patch("cover_agent.ai_caller.Trace.log")
-    def test_call_model_wandb_logging_exception(
-            self, mock_log, mock_completion, ai_caller
-    ):
+    def test_call_model_wandb_logging_exception(self, mock_log, mock_completion, ai_caller):
         """
         Test the call_model method with W&B logging and handle logging exceptions.
         """
@@ -202,8 +187,10 @@ class TestAICaller:
         mock_log.side_effect = Exception("Logging error")
         prompt = {"system": "", "user": "Hello, world!"}
 
-        with patch("cover_agent.ai_caller.litellm.stream_chunk_builder") as mock_builder, \
-                patch.object(ai_caller.logger, 'error') as mock_logger:
+        with (
+            patch("cover_agent.ai_caller.litellm.stream_chunk_builder") as mock_builder,
+            patch.object(ai_caller.logger, "error") as mock_logger,
+        ):
             mock_builder.return_value = {
                 "choices": [{"message": {"content": "response"}}],
                 "usage": {"prompt_tokens": 2, "completion_tokens": 10},

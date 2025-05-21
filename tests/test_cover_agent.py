@@ -15,6 +15,7 @@ class TestCoverAgent:
     """
     Test suite for the CoverAgent class.
     """
+
     @staticmethod
     def create_config_from_args(args: argparse.Namespace) -> CoverAgentConfig:
         """Helper function to create CoverAgentConfig from argparse.Namespace"""
@@ -154,9 +155,7 @@ class TestCoverAgent:
                 agent = CoverAgent(config)
 
         # Assert that the correct error message is raised
-        assert (
-            str(exc_info.value) == f"Source file not found at {args.source_file_path}"
-        )
+        assert str(exc_info.value) == f"Source file not found at {args.source_file_path}"
 
         mock_unit_cover_agent.assert_not_called()
 
@@ -220,12 +219,8 @@ class TestCoverAgent:
             mock_isfile (MagicMock): Mock for `os.path.isfile` to simulate
             the existence of files.
         """
-        with tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_source_file:
-            with tempfile.NamedTemporaryFile(
-                suffix=".py", delete=False
-            ) as temp_test_file:
+        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
+            with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_test_file:
                 args = argparse.Namespace(
                     source_file_path=temp_source_file.name,
                     test_file_path=temp_test_file.name,
@@ -273,7 +268,11 @@ class TestCoverAgent:
     @patch("cover_agent.cover_agent.UnitTestValidator")
     @patch("cover_agent.cover_agent.UnitTestDB")
     def test_run_max_iterations_strict_coverage(
-        self, mock_test_db, mock_unit_test_validator, mock_unit_test_generator, mock_sys_exit,
+        self,
+        mock_test_db,
+        mock_unit_test_validator,
+        mock_unit_test_generator,
+        mock_sys_exit,
     ):
         """
         Test the behavior of the CoverAgent when strict coverage is enabled and the maximum number of iterations is reached.
@@ -289,13 +288,11 @@ class TestCoverAgent:
             mock_unit_test_generator (MagicMock): Mock for the `UnitTestGenerator` class to simulate test generation.
             mock_sys_exit (MagicMock): Mock for the `sys.exit` function to verify the exit behavior.
         """
-        with tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_source_file, tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_test_file, tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_output_file:
+        with (
+            tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file,
+            tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_test_file,
+            tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_output_file,
+        ):
             args = argparse.Namespace(
                 source_file_path=temp_source_file.name,
                 test_file_path=temp_test_file.name,
@@ -397,13 +394,11 @@ class TestCoverAgent:
             mock_test_gen (MagicMock): Mock for the `UnitTestGenerator` class to simulate test generation.
             mock_test_validator (MagicMock): Mock for the `UnitTestValidator` class to simulate coverage validation.
         """
-        with tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_source_file, tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_test_file, tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_output_file:
+        with (
+            tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file,
+            tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_test_file,
+            tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_output_file,
+        ):
 
             args = argparse.Namespace(
                 source_file_path=temp_source_file.name,
@@ -467,13 +462,11 @@ class TestCoverAgent:
             mock_isdir (MagicMock): Mock for `os.path.isdir` to simulate directory existence.
             mock_isfile (MagicMock): Mock for `os.path.isfile` to simulate file existence.
         """
-        with tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_source_file, tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_test_file, tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_output_file:
+        with (
+            tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file,
+            tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_test_file,
+            tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_output_file,
+        ):
             # Create a relative path for the test file
             rel_path = "tests/test_output.py"
 

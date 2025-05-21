@@ -13,56 +13,34 @@ class TestFileHandling:
     """Tests for file path and hash calculations"""
 
     @staticmethod
-    @pytest.mark.parametrize("test_case", [
-        {
-            "name": "valid_files",
-            "setup": {
-                "source": "def source(): pass",
-                "test": "def test(): pass",
-                "cache_hash": None
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            {
+                "name": "valid_files",
+                "setup": {"source": "def source(): pass", "test": "def test(): pass", "cache_hash": None},
+                "expected": {
+                    "type": "success",
+                    "validate": lambda x: len(x) == 64 and isinstance(x, str) and x.isalnum(),
+                },
             },
-            "expected": {
-                "type": "success",
-                "validate": lambda x: len(x) == 64 and isinstance(x, str) and x.isalnum()
-            }
-        },
-        {
-            "name": "cached_hash",
-            "setup": {
-                "source": None,
-                "test": None,
-                "cache_hash": "cachedhash123"
+            {
+                "name": "cached_hash",
+                "setup": {"source": None, "test": None, "cache_hash": "cachedhash123"},
+                "expected": {"type": "success", "value": "cachedhash123"},
             },
-            "expected": {
-                "type": "success",
-                "value": "cachedhash123"
-            }
-        },
-        {
-            "name": "missing_source",
-            "setup": {
-                "source": None,
-                "test": "def test(): pass",
-                "cache_hash": None
+            {
+                "name": "missing_source",
+                "setup": {"source": None, "test": "def test(): pass", "cache_hash": None},
+                "expected": {"type": "error", "error": FileNotFoundError},
             },
-            "expected": {
-                "type": "error",
-                "error": FileNotFoundError
-            }
-        },
-        {
-            "name": "missing_test",
-            "setup": {
-                "source": "def source(): pass",
-                "test": None,
-                "cache_hash": None
+            {
+                "name": "missing_test",
+                "setup": {"source": "def source(): pass", "test": None, "cache_hash": None},
+                "expected": {"type": "error", "error": FileNotFoundError},
             },
-            "expected": {
-                "type": "error",
-                "error": FileNotFoundError
-            }
-        }
-    ])
+        ],
+    )
     def test_calculate_files_hash_scenarios(test_case, tmp_path):
         """
         Test different scenarios for the `_calculate_files_hash` method of the `RecordReplayManager` class.
@@ -150,7 +128,6 @@ class TestFileHandling:
 
         assert result == expected_file
         assert result.parent.exists()
-
 
     @staticmethod
     def test_get_response_file_path_with_valid_nested_source(tmp_path):
@@ -256,44 +233,47 @@ class TestFileHandling:
 
 class TestFuzzyMatching:
     @staticmethod
-    @pytest.mark.parametrize("test_case", [
-        {
-            "name": "prefix_comparison",
-            "current_prompt": "Find all prime numbers below 100",
-            "recorded_prompts": {
-                "hash1": "Find all prime numbers below 200",
-                "hash2": "Calculate fibonacci numbers",
-                "hash3": "Find prime factors of 100"
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            {
+                "name": "prefix_comparison",
+                "current_prompt": "Find all prime numbers below 100",
+                "recorded_prompts": {
+                    "hash1": "Find all prime numbers below 200",
+                    "hash2": "Calculate fibonacci numbers",
+                    "hash3": "Find prime factors of 100",
+                },
+                "threshold": 80,
+                "prefix_length": 10,
+                "expected": "hash1",
             },
-            "threshold": 80,
-            "prefix_length": 10,
-            "expected": "hash1"
-        },
-        {
-            "name": "token_sort_ratio",
-            "current_prompt": "below 100 find all prime numbers",
-            "recorded_prompts": {
-                "hash1": "Find all prime numbers below 100",
-                "hash2": "Calculate prime numbers up to 100",
-                "hash3": "Find all numbers below 100"
+            {
+                "name": "token_sort_ratio",
+                "current_prompt": "below 100 find all prime numbers",
+                "recorded_prompts": {
+                    "hash1": "Find all prime numbers below 100",
+                    "hash2": "Calculate prime numbers up to 100",
+                    "hash3": "Find all numbers below 100",
+                },
+                "threshold": 80,
+                "prefix_length": None,
+                "expected": "hash1",
             },
-            "threshold": 80,
-            "prefix_length": None,
-            "expected": "hash1"
-        },
-        {
-            "name": "no_match_above_threshold",
-            "current_prompt": "Find all prime numbers below 100",
-            "recorded_prompts": {
-                "hash1": "Calculate fibonacci sequence",
-                "hash2": "Sort an array of integers",
-                "hash3": "Implement binary search"
+            {
+                "name": "no_match_above_threshold",
+                "current_prompt": "Find all prime numbers below 100",
+                "recorded_prompts": {
+                    "hash1": "Calculate fibonacci sequence",
+                    "hash2": "Sort an array of integers",
+                    "hash3": "Implement binary search",
+                },
+                "threshold": 90,
+                "prefix_length": None,
+                "expected": None,
             },
-            "threshold": 90,
-            "prefix_length": None,
-            "expected": None
-        }
-    ])
+        ],
+    )
     def test_find_closest_prompt_match(test_case):
         """
         Test the `_find_closest_prompt_match` method of the `RecordReplayManager` class.
@@ -318,7 +298,7 @@ class TestFuzzyMatching:
             test_case["current_prompt"],
             test_case["recorded_prompts"],
             threshold=test_case["threshold"],
-            prefix_length=test_case["prefix_length"]
+            prefix_length=test_case["prefix_length"],
         )
 
         assert result == test_case["expected"]
@@ -402,7 +382,7 @@ class TestResponseHandling:
         test_file = "test.py"
 
         # Mock exists() to return True
-        with patch.object(Path, 'exists', return_value=True):
+        with patch.object(Path, "exists", return_value=True):
             assert manager.has_response_file(source_file, test_file) is True
 
     @staticmethod
@@ -431,7 +411,7 @@ class TestResponseHandling:
         source_file = "source.py"
         test_file = "test.py"
 
-        with patch.object(Path, 'exists', return_value=False):
+        with patch.object(Path, "exists", return_value=False):
             assert manager.has_response_file(source_file, test_file) is False
 
     @staticmethod
@@ -540,21 +520,24 @@ class TestResponseHandling:
         # Create a recorded prompt with slightly different wording
         recorded_prompt = {"user": "Generate a function to find all prime numbers up to 100"}
         prompt_hash = hashlib.sha256(str(recorded_prompt).encode()).hexdigest()
-        truncated_hash = prompt_hash[:RecordReplayManager.HASH_DISPLAY_LENGTH]
+        truncated_hash = prompt_hash[: RecordReplayManager.HASH_DISPLAY_LENGTH]
 
         # Create a response file with the recorded prompt
         with open(response_file, "w") as f:
-            yaml.safe_dump({
-                "metadata": {"files_hash": "hash123"},
-                "unknown_caller": {
-                    truncated_hash: {
-                        "prompt": recorded_prompt,
-                        "response": "fuzzy_matched_response",
-                        "prompt_tokens": 12,
-                        "completion_tokens": 18,
+            yaml.safe_dump(
+                {
+                    "metadata": {"files_hash": "hash123"},
+                    "unknown_caller": {
+                        truncated_hash: {
+                            "prompt": recorded_prompt,
+                            "response": "fuzzy_matched_response",
+                            "prompt_tokens": 12,
+                            "completion_tokens": 18,
+                        },
                     },
                 },
-            }, f)
+                f,
+            )
 
         # Test with a similar but not identical prompt
         current_prompt = {"user": "Create a function that finds prime numbers below 100"}
@@ -594,7 +577,7 @@ class TestResponseHandling:
         target_hash = None
         for key, prompt in prompts.items():
             prompt_hash = hashlib.sha256(str(prompt).encode()).hexdigest()
-            truncated_hash = prompt_hash[:RecordReplayManager.HASH_DISPLAY_LENGTH]
+            truncated_hash = prompt_hash[: RecordReplayManager.HASH_DISPLAY_LENGTH]
             responses[truncated_hash] = {
                 "prompt": prompt,
                 "response": f"response_{key}",
@@ -606,10 +589,13 @@ class TestResponseHandling:
 
         # Create a response file with multiple prompts
         with open(response_file, "w") as f:
-            yaml.safe_dump({
-                "metadata": {"files_hash": "hash123"},
-                "unknown_caller": responses,
-            }, f)
+            yaml.safe_dump(
+                {
+                    "metadata": {"files_hash": "hash123"},
+                    "unknown_caller": responses,
+                },
+                f,
+            )
 
         # Mock find_closest_prompt_match to return the hash of p3
         manager._find_closest_prompt_match = Mock(return_value=target_hash)
@@ -647,10 +633,13 @@ class TestResponseHandling:
         response_file.parent.mkdir(parents=True, exist_ok=True)
 
         with open(response_file, "w") as f:
-            yaml.safe_dump({
-                "metadata": {"files_hash": "hash123"},
-                "unknown_caller": {},
-            }, f)
+            yaml.safe_dump(
+                {
+                    "metadata": {"files_hash": "hash123"},
+                    "unknown_caller": {},
+                },
+                f,
+            )
 
         return manager
 
@@ -686,14 +675,20 @@ class TestResponseHandling:
         manager._calculate_files_hash = Mock(return_value="hash123")
         manager._find_closest_prompt_match = Mock(return_value=None)
 
-        mock_file = mock_open(read_data=yaml.safe_dump({
-            "metadata": {"files_hash": "hash123"},
-            "unknown_caller": {},
-        }))
+        mock_file = mock_open(
+            read_data=yaml.safe_dump(
+                {
+                    "metadata": {"files_hash": "hash123"},
+                    "unknown_caller": {},
+                }
+            )
+        )
 
-        with patch('builtins.open', mock_file), \
-                patch.object(Path, 'exists', return_value=True), \
-                patch.object(Path, 'mkdir', return_value=None):
+        with (
+            patch("builtins.open", mock_file),
+            patch.object(Path, "exists", return_value=True),
+            patch.object(Path, "mkdir", return_value=None),
+        ):
             result = manager.load_recorded_response(
                 "source.py",
                 "test.py",
@@ -735,14 +730,20 @@ class TestResponseHandling:
         manager._calculate_files_hash = Mock(return_value="hash123")
         manager._find_closest_prompt_match = Mock(side_effect=Exception("Test error"))
 
-        mock_file = mock_open(read_data=yaml.safe_dump({
-            "metadata": {"files_hash": "hash123"},
-            "unknown_caller": {},
-        }))
+        mock_file = mock_open(
+            read_data=yaml.safe_dump(
+                {
+                    "metadata": {"files_hash": "hash123"},
+                    "unknown_caller": {},
+                }
+            )
+        )
 
-        with patch('builtins.open', mock_file), \
-                patch.object(Path, 'exists', return_value=True), \
-                patch.object(Path, 'mkdir', return_value=None):
+        with (
+            patch("builtins.open", mock_file),
+            patch.object(Path, "exists", return_value=True),
+            patch.object(Path, "mkdir", return_value=None),
+        ):
             result = manager.load_recorded_response(
                 "source.py",
                 "test.py",
@@ -753,66 +754,69 @@ class TestResponseHandling:
         assert result is None
 
     @staticmethod
-    @pytest.mark.parametrize("test_case", [
-        {
-            "name": "new_response",
-            "record_mode": True,
-            "existing_data": None,
-            "prompt": {"key": "value"},
-            "response": "response",
-            "prompt_tokens": 10,
-            "completion_tokens": 20,
-            "expected_hash": "hash123",
-            "expected_metadata": {"files_hash": "hash123"},
-            "validate_existing": False,
-        },
-        {
-            "name": "append_to_existing",
-            "record_mode": True,
-            "existing_data": {
-                "metadata": {"files_hash": "hash456"},
-                "unknown_caller": {
-                    "existing_hash": {
-                        "prompt": {"key": "old_value"},
-                        "response": "old_response",
-                        "prompt_tokens": 5,
-                        "completion_tokens": 10,
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            {
+                "name": "new_response",
+                "record_mode": True,
+                "existing_data": None,
+                "prompt": {"key": "value"},
+                "response": "response",
+                "prompt_tokens": 10,
+                "completion_tokens": 20,
+                "expected_hash": "hash123",
+                "expected_metadata": {"files_hash": "hash123"},
+                "validate_existing": False,
+            },
+            {
+                "name": "append_to_existing",
+                "record_mode": True,
+                "existing_data": {
+                    "metadata": {"files_hash": "hash456"},
+                    "unknown_caller": {
+                        "existing_hash": {
+                            "prompt": {"key": "old_value"},
+                            "response": "old_response",
+                            "prompt_tokens": 5,
+                            "completion_tokens": 10,
+                        },
                     },
                 },
+                "prompt": {"key": "new_value"},
+                "response": "new_response",
+                "prompt_tokens": 15,
+                "completion_tokens": 25,
+                "expected_hash": "hash456",
+                "expected_metadata": {"files_hash": "hash456"},
+                "validate_existing": True,
             },
-            "prompt": {"key": "new_value"},
-            "response": "new_response",
-            "prompt_tokens": 15,
-            "completion_tokens": 25,
-            "expected_hash": "hash456",
-            "expected_metadata": {"files_hash": "hash456"},
-            "validate_existing": True,
-        },
-        {
-            "name": "invalid_yaml",
-            "record_mode": True,
-            "existing_data": "invalid: [unclosed",
-            "prompt": {"key": "value"},
-            "response": "response",
-            "prompt_tokens": 10,
-            "completion_tokens": 20,
-            "expected_hash": "hash789",
-            "expected_metadata": {"files_hash": "hash789"},
-            "validate_existing": False,
-        },
-        {
-            "name": "skip_in_replay_mode",
-            "record_mode": False,
-            "existing_data": None,
-            "prompt": {"key": "value"},
-            "response": "response",
-            "prompt_tokens": 10,
-            "completion_tokens": 20,
-            "expected_hash": "hash123",  # Changed: Need a valid hash for a file path
-            "expected_metadata": None,
-            "validate_existing": False,
-        },
-    ])
+            {
+                "name": "invalid_yaml",
+                "record_mode": True,
+                "existing_data": "invalid: [unclosed",
+                "prompt": {"key": "value"},
+                "response": "response",
+                "prompt_tokens": 10,
+                "completion_tokens": 20,
+                "expected_hash": "hash789",
+                "expected_metadata": {"files_hash": "hash789"},
+                "validate_existing": False,
+            },
+            {
+                "name": "skip_in_replay_mode",
+                "record_mode": False,
+                "existing_data": None,
+                "prompt": {"key": "value"},
+                "response": "response",
+                "prompt_tokens": 10,
+                "completion_tokens": 20,
+                "expected_hash": "hash123",  # Changed: Need a valid hash for a file path
+                "expected_metadata": None,
+                "validate_existing": False,
+            },
+        ],
+    )
     def test_record_response(test_case, tmp_path):
         """
         Test the `record_response` method of the `RecordReplayManager` class.
@@ -885,7 +889,7 @@ class TestResponseHandling:
             assert "existing_hash" in data["unknown_caller"]
 
         prompt_hash = hashlib.sha256(str(test_case["prompt"]).encode()).hexdigest()
-        truncated_hash = prompt_hash[:RecordReplayManager.HASH_DISPLAY_LENGTH]
+        truncated_hash = prompt_hash[: RecordReplayManager.HASH_DISPLAY_LENGTH]
         entry = data["unknown_caller"][truncated_hash]
 
         assert entry["prompt"] == test_case["prompt"]
@@ -920,7 +924,7 @@ class TestResponseHandling:
         manager._calculate_files_hash = Mock(return_value="hash123")
         prompt = {"user": "test prompt"}
         prompt_hash = hashlib.sha256(str(prompt).encode()).hexdigest()
-        truncated_hash = prompt_hash[:RecordReplayManager.HASH_DISPLAY_LENGTH]
+        truncated_hash = prompt_hash[: RecordReplayManager.HASH_DISPLAY_LENGTH]
 
         test_data = {
             "metadata": {"files_hash": "hash123"},
@@ -935,8 +939,10 @@ class TestResponseHandling:
         }
 
         # Mock file operations
-        with patch('builtins.open', mock_open(read_data=yaml.safe_dump(test_data))), \
-                patch.object(Path, 'exists', return_value=True):
+        with (
+            patch("builtins.open", mock_open(read_data=yaml.safe_dump(test_data))),
+            patch.object(Path, "exists", return_value=True),
+        ):
             result = manager.load_recorded_response(
                 "source.py",
                 "test.py",
@@ -945,7 +951,6 @@ class TestResponseHandling:
             )
 
         assert result == ("test response", 5, 10)
-
 
     @staticmethod
     def test_load_recorded_response_nonexistent_caller(tmp_path):
@@ -997,7 +1002,6 @@ class TestResponseHandling:
 
         # Verify results
         assert result is None
-
 
     @staticmethod
     def test_load_recorded_response_file_not_found(tmp_path):

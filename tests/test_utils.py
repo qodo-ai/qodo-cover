@@ -3,6 +3,7 @@ import cover_agent.utils as utils
 
 HASH_DISPLAY_LENGTH = 12
 
+
 def test_truncate_hash_truncates_hash_to_standard_length():
     """
     Test that _truncate_hash correctly truncates a hash to the standard display length.
@@ -22,6 +23,7 @@ def test_truncate_hash_truncates_hash_to_standard_length():
     assert truncated_hash == "1234567890ab"
     assert len(truncated_hash) == HASH_DISPLAY_LENGTH
 
+
 def test_truncate_hash_handles_empty_hash_value():
     """
     Test that _truncate_hash handles an empty hash value gracefully.
@@ -39,6 +41,7 @@ def test_truncate_hash_handles_empty_hash_value():
 
     assert truncated_hash == ""
     assert len(truncated_hash) == 0
+
 
 def test_truncate_hash_handles_shorter_hash_than_standard_length():
     """

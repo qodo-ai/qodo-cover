@@ -9,9 +9,7 @@ from cover_agent.version import get_version
 
 
 # File location of version file is one directory up from this file's location. Use os.path to find this
-VERSION_FILE_LOCATION = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "cover_agent/version.txt"
-)
+VERSION_FILE_LOCATION = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cover_agent/version.txt")
 
 
 class TestGetVersion:

@@ -30,9 +30,7 @@ class TestUnitValidator:
         4. Call the `extract_error_message` method with mock failure details.
         5. Assert that the returned error message is an empty string.
         """
-        with tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_source_file:
+        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
             mock_agent_completion = MagicMock()
             generator = UnitTestValidator(
                 source_file_path=temp_source_file.name,
@@ -54,9 +52,7 @@ class TestUnitValidator:
             )
 
             # Simulate agent_completion raising an exception
-            mock_agent_completion.analyze_test_failure.side_effect = Exception(
-                "Mock exception"
-            )
+            mock_agent_completion.analyze_test_failure.side_effect = Exception("Mock exception")
 
             fail_details = {
                 "stderr": "stderr content",
@@ -88,9 +84,7 @@ class TestUnitValidator:
         5. Call the `run_coverage` method of the `UnitTestValidator` instance.
         6. Assert that the `current_coverage` attribute is updated correctly.
         """
-        with tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_source_file:
+        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
             generator = UnitTestValidator(
                 source_file_path=temp_source_file.name,
                 test_file_path="test_test.py",
@@ -109,9 +103,7 @@ class TestUnitValidator:
                 additional_instructions="",
                 included_files=[],
             )
-            with patch.object(
-                Runner, "run_command", return_value=("", "", 0, datetime.datetime.now())
-            ):
+            with patch.object(Runner, "run_command", return_value=("", "", 0, datetime.datetime.now())):
                 with patch.object(
                     CoverageProcessor,
                     "process_coverage_report",
@@ -138,9 +130,7 @@ class TestUnitValidator:
         6. Assert that the returned error message matches the expected value.
         7. Verify that the `analyze_test_failure` method was called with the correct arguments.
         """
-        with tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_source_file:
+        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
             mock_agent_completion = MagicMock()
             generator = UnitTestValidator(
                 source_file_path=temp_source_file.name,
@@ -181,31 +171,14 @@ class TestUnitValidator:
             }
             error_message = generator.extract_error_message(fail_details)
 
-            assert (
-                error_message.strip()
-                == "error_summary: Test failed due to assertion error in test_example"
-            )
-            mock_agent_completion_call_args = (
-                mock_agent_completion.analyze_test_failure.call_args[1]
-            )
+            assert error_message.strip() == "error_summary: Test failed due to assertion error in test_example"
+            mock_agent_completion_call_args = mock_agent_completion.analyze_test_failure.call_args[1]
             assert fail_details["stderr"] == mock_agent_completion_call_args["stderr"]
             assert fail_details["stdout"] == mock_agent_completion_call_args["stdout"]
-            assert (
-                fail_details["processed_test_file"]
-                == mock_agent_completion_call_args["processed_test_file"]
-            )
-            assert (
-                fail_details["test_file_name"]
-                == mock_agent_completion_call_args["test_file_name"]
-            )
-            assert (
-                fail_details["source_file_name"]
-                in mock_agent_completion_call_args["source_file_name"]
-            )
-            assert (
-                fail_details["source_file"]
-                == mock_agent_completion_call_args["source_file"]
-            )
+            assert fail_details["processed_test_file"] == mock_agent_completion_call_args["processed_test_file"]
+            assert fail_details["test_file_name"] == mock_agent_completion_call_args["test_file_name"]
+            assert fail_details["source_file_name"] in mock_agent_completion_call_args["source_file_name"]
+            assert fail_details["source_file"] == mock_agent_completion_call_args["source_file"]
 
     def test_validate_test_pass_no_coverage_increase_with_prompt(self):
         """
@@ -225,9 +198,7 @@ class TestUnitValidator:
         6. Call the `validate_test` method with the test to validate.
         7. Assert that the method returns a failure status with the correct reason and exit code.
         """
-        with tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_source_file:
+        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
             generator = UnitTestValidator(
                 source_file_path=temp_source_file.name,
                 test_file_path="test_test.py",
@@ -263,10 +234,10 @@ class TestUnitValidator:
             mock_content = "original content"
             mock_file = mock_open(read_data=mock_content)
 
-            with patch("builtins.open", mock_file), patch.object(
-                Runner, "run_command", return_value=("", "", 0, datetime.datetime.now())
-            ), patch.object(
-                CoverageProcessor, "process_coverage_report", return_value=([], [], 0.4)
+            with (
+                patch("builtins.open", mock_file),
+                patch.object(Runner, "run_command", return_value=("", "", 0, datetime.datetime.now())),
+                patch.object(CoverageProcessor, "process_coverage_report", return_value=([], [], 0.4)),
             ):
 
                 result = generator.validate_test(test_to_validate)
@@ -294,9 +265,7 @@ class TestUnitValidator:
            and `testing_framework` are set correctly.
         6. Verify that the mocked methods of the `agent_completion` object were called once.
         """
-        with tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_source_file:
+        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
             mock_agent_completion = MagicMock()
             generator = UnitTestValidator(
                 source_file_path=temp_source_file.name,
@@ -363,9 +332,7 @@ class TestUnitValidator:
         5. Assert that the returned percentage covered and coverage percentages
            match the expected values.
         """
-        with tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_source_file:
+        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
             generator = UnitTestValidator(
                 source_file_path=temp_source_file.name,
                 test_file_path="test_test.py",
@@ -389,8 +356,8 @@ class TestUnitValidator:
                 "process_coverage_report",
                 return_value={"test.py": ([1], [1], 1.0)},
             ):
-                percentage_covered, coverage_percentages = (
-                    generator.post_process_coverage_report(datetime.datetime.now())
+                percentage_covered, coverage_percentages = generator.post_process_coverage_report(
+                    datetime.datetime.now()
                 )
                 assert percentage_covered == 0.5
                 assert coverage_percentages == {"test.py": 1.0}
@@ -414,9 +381,7 @@ class TestUnitValidator:
         5. Call the `post_process_coverage_report` method with the current timestamp.
         6. Assert that the returned percentage covered matches the expected value.
         """
-        with tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_source_file:
+        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
             generator = UnitTestValidator(
                 source_file_path=temp_source_file.name,
                 test_file_path="test_test.py",
@@ -435,11 +400,12 @@ class TestUnitValidator:
                 included_files=[],
                 use_report_coverage_feature_flag=False,
             )
-            with patch.object(generator, "generate_diff_coverage_report"), patch.object(
-                CoverageProcessor, "process_coverage_report", return_value=([], [], 0.8)
+            with (
+                patch.object(generator, "generate_diff_coverage_report"),
+                patch.object(CoverageProcessor, "process_coverage_report", return_value=([], [], 0.8)),
             ):
-                percentage_covered, coverage_percentages = (
-                    generator.post_process_coverage_report(datetime.datetime.now())
+                percentage_covered, coverage_percentages = generator.post_process_coverage_report(
+                    datetime.datetime.now()
                 )
                 assert percentage_covered == 0.8
 
@@ -461,9 +427,7 @@ class TestUnitValidator:
         4. Call the `post_process_coverage_report` method with the current timestamp.
         5. Assert that the returned percentage covered matches the expected value.
         """
-        with tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_source_file:
+        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
             generator = UnitTestValidator(
                 source_file_path=temp_source_file.name,
                 test_file_path="test_test.py",
@@ -482,11 +446,9 @@ class TestUnitValidator:
                 included_files=[],
                 use_report_coverage_feature_flag=False,
             )
-            with patch.object(
-                CoverageProcessor, "process_coverage_report", return_value=([], [], 0.7)
-            ):
-                percentage_covered, coverage_percentages = (
-                    generator.post_process_coverage_report(datetime.datetime.now())
+            with patch.object(CoverageProcessor, "process_coverage_report", return_value=([], [], 0.7)):
+                percentage_covered, coverage_percentages = generator.post_process_coverage_report(
+                    datetime.datetime.now()
                 )
                 assert percentage_covered == 0.7
 
@@ -504,9 +466,7 @@ class TestUnitValidator:
         4. Call the `generate_diff_coverage_report` method.
         5. Assert that the `diff_cover_main` function is called once with the expected arguments.
         """
-        with tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_source_file:
+        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
             generator = UnitTestValidator(
                 source_file_path=temp_source_file.name,
                 test_file_path="test_test.py",
@@ -525,9 +485,7 @@ class TestUnitValidator:
                 included_files=[],
                 use_report_coverage_feature_flag=False,
             )
-            with patch(
-                "cover_agent.unit_test_validator.diff_cover_main"
-            ) as mock_diff_cover_main:
+            with patch("cover_agent.unit_test_validator.diff_cover_main") as mock_diff_cover_main:
                 generator.generate_diff_coverage_report()
                 mock_diff_cover_main.assert_called_once_with(
                     [
@@ -555,9 +513,7 @@ class TestUnitValidator:
         5. Call the `generate_diff_coverage_report` method.
         6. Assert that the logger's `error` method is called with the expected error message.
         """
-        with tempfile.NamedTemporaryFile(
-            suffix=".py", delete=False
-        ) as temp_source_file:
+        with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_source_file:
             generator = UnitTestValidator(
                 source_file_path=temp_source_file.name,
                 test_file_path="test_test.py",
@@ -576,11 +532,12 @@ class TestUnitValidator:
                 included_files=[],
                 use_report_coverage_feature_flag=False,
             )
-            with patch(
-                "cover_agent.unit_test_validator.diff_cover_main",
-                side_effect=Exception("Mock exception"),
-            ), patch.object(generator.logger, "error") as mock_logger_error:
+            with (
+                patch(
+                    "cover_agent.unit_test_validator.diff_cover_main",
+                    side_effect=Exception("Mock exception"),
+                ),
+                patch.object(generator.logger, "error") as mock_logger_error,
+            ):
                 generator.generate_diff_coverage_report()
-                mock_logger_error.assert_called_once_with(
-                    "Error running diff-cover: Mock exception"
-                )
+                mock_logger_error.assert_called_once_with("Error running diff-cover: Mock exception")
