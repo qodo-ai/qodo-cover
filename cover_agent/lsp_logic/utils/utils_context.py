@@ -1,4 +1,5 @@
 import os
+
 from time import sleep
 
 from jinja2 import Environment, StrictUndefined
@@ -7,7 +8,6 @@ from cover_agent.lsp_logic.file_map.file_map import FileMap
 from cover_agent.lsp_logic.multilspy import LanguageServer
 from cover_agent.lsp_logic.multilspy.multilspy_config import MultilspyConfig
 from cover_agent.lsp_logic.multilspy.multilspy_logger import MultilspyLogger
-
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.utils import load_yaml
 
