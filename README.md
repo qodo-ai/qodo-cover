@@ -258,7 +258,7 @@ cover-agent \
 
 
 ## Development
-See [Development](docs/development.md) for more information on how to contribute to this project.
+See [Development](docs/development.md) and [Contributing](CONTRIBUTING.md) for more information on how to contribute to this project.
 
 ## Roadmap
 Below is the roadmap of planned features, with the current implementation status:
