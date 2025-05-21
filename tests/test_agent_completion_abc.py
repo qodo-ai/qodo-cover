@@ -1,4 +1,5 @@
 import pytest
+
 from cover_agent.agent_completion_abc import AgentCompletionABC
 
 

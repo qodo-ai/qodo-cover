@@ -1,7 +1,8 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
 
 from cover_agent.default_agent_completion import DefaultAgentCompletion
-from unittest.mock import MagicMock, patch
 
 
 class TestDefaultAgentCompletion:

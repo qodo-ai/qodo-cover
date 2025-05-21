@@ -1,5 +1,7 @@
 import sys
-from os.path import dirname, abspath, join, exists
+
+from os.path import abspath, dirname, exists, join
+
 from dynaconf import Dynaconf
 
 

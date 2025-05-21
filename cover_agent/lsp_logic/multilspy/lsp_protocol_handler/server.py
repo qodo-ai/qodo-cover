@@ -32,10 +32,12 @@ import asyncio
 import dataclasses
 import json
 import os
+
 from typing import Any, Dict, List, Optional, Union
 
 from .lsp_requests import LspNotification, LspRequest
 from .lsp_types import ErrorCodes
+
 
 StringDict = Dict[str, Any]
 PayloadLike = Union[List[StringDict], StringDict, None]

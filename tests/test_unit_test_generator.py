@@ -1,15 +1,12 @@
-from cover_agent.coverage_processor import CoverageProcessor
-from cover_agent.report_generator import ReportGenerator
-from cover_agent.runner import Runner
-from cover_agent.unit_test_generator import UnitTestGenerator
-import cover_agent.utils
-from unittest.mock import patch, mock_open
-import datetime
-import os
-import pytest
 import tempfile
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, mock_open, patch
+
+import pytest
+
+import cover_agent.utils
+
+from cover_agent.unit_test_generator import UnitTestGenerator
 
 
 class TestUnitTestGenerator:

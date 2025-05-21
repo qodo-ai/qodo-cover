@@ -1,11 +1,10 @@
 import hashlib
+
 from pathlib import Path
-
-import yaml
-
 from unittest.mock import Mock, mock_open, patch
 
 import pytest
+import yaml
 
 from cover_agent.record_replay_manager import RecordReplayManager
 

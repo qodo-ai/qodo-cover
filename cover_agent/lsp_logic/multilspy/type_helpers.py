@@ -4,7 +4,8 @@ This module provides type-helpers used across multilspy implementation
 
 import inspect
 
-from typing import Callable, TypeVar, Type
+from typing import Callable, Type, TypeVar
+
 
 R = TypeVar("R", bound=object)
 

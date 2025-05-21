@@ -5,17 +5,18 @@ This file contains various utility functions like I/O operations, handling paths
 import gzip
 import logging
 import os
-from typing import Tuple
-import requests
+import platform
 import shutil
+import subprocess
 import uuid
 
-import platform
-import subprocess
 from enum import Enum
+from pathlib import Path, PurePath
+from typing import Tuple
+
+import requests
 
 from cover_agent.lsp_logic.multilspy.multilspy_exceptions import MultilspyException
-from pathlib import PurePath, Path
 from cover_agent.lsp_logic.multilspy.multilspy_logger import MultilspyLogger
 
 
@@ -85,12 +86,13 @@ class PathUtils:
         This method was obtained from https://stackoverflow.com/a/61922504
         """
         try:
-            from urllib.parse import urlparse, unquote
+            from urllib.parse import unquote, urlparse
             from urllib.request import url2pathname
         except ImportError:
             # backwards compatability
-            from urlparse import urlparse
             from urllib import unquote, url2pathname
+
+            from urlparse import urlparse
         parsed = urlparse(uri)
         host = "{0}{0}{mnt}{0}".format(os.path.sep, mnt=parsed.netloc)
         return os.path.normpath(os.path.join(host, url2pathname(unquote(parsed.path))))

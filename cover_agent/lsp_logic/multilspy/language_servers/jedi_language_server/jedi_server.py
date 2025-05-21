@@ -6,18 +6,15 @@ import json
 import logging
 import os
 import pathlib
+
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
-from cover_agent.lsp_logic.multilspy.multilspy_logger import MultilspyLogger
 from cover_agent.lsp_logic.multilspy.language_server import LanguageServer
-from cover_agent.lsp_logic.multilspy.lsp_protocol_handler.server import (
-    ProcessLaunchInfo,
-)
-from cover_agent.lsp_logic.multilspy.lsp_protocol_handler.lsp_types import (
-    InitializeParams,
-)
+from cover_agent.lsp_logic.multilspy.lsp_protocol_handler.lsp_types import InitializeParams
+from cover_agent.lsp_logic.multilspy.lsp_protocol_handler.server import ProcessLaunchInfo
 from cover_agent.lsp_logic.multilspy.multilspy_config import MultilspyConfig
+from cover_agent.lsp_logic.multilspy.multilspy_logger import MultilspyLogger
 
 
 class JediServer(LanguageServer):

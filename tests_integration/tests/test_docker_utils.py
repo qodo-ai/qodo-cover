@@ -1,6 +1,5 @@
 import pytest
 
-
 from tests_integration.docker_utils import get_short_docker_image_name
 
 

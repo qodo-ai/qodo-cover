@@ -8,30 +8,26 @@ The details of Language Specific configuration are not exposed to the user.
 import asyncio
 import dataclasses
 import json
-import time
 import logging
 import os
 import pathlib
 import threading
+import time
+
 from contextlib import asynccontextmanager, contextmanager
-
-
-from .lsp_protocol_handler.lsp_constants import LSPConstants
-from .lsp_protocol_handler import lsp_types as LSPTypes
-
-from . import multilspy_types
-from .multilspy_logger import MultilspyLogger
-from .lsp_protocol_handler.server import (
-    LanguageServerHandler,
-    ProcessLaunchInfo,
-)
-from .multilspy_config import MultilspyConfig, Language
-from .multilspy_exceptions import MultilspyException
-from .multilspy_utils import PathUtils, FileUtils, TextUtils
 from pathlib import PurePath
-from typing import AsyncIterator, Iterator, List, Dict, Union, Tuple
+from typing import AsyncIterator, Dict, Iterator, List, Tuple, Union
+
+from ..utils.utils import is_forbidden_directory, uri_to_path
+from . import multilspy_types
+from .lsp_protocol_handler import lsp_types as LSPTypes
+from .lsp_protocol_handler.lsp_constants import LSPConstants
+from .lsp_protocol_handler.server import LanguageServerHandler, ProcessLaunchInfo
+from .multilspy_config import Language, MultilspyConfig
+from .multilspy_exceptions import MultilspyException
+from .multilspy_logger import MultilspyLogger
+from .multilspy_utils import FileUtils, PathUtils, TextUtils
 from .type_helpers import ensure_all_methods_implemented
-from ..utils.utils import uri_to_path, is_forbidden_directory
 
 
 @dataclasses.dataclass
@@ -79,9 +75,7 @@ class LanguageServer:
         :return LanguageServer: A language specific LanguageServer instance.
         """
         if config.code_language == Language.PYTHON:
-            from cover_agent.lsp_logic.multilspy.language_servers.jedi_language_server.jedi_server import (
-                JediServer,
-            )
+            from cover_agent.lsp_logic.multilspy.language_servers.jedi_language_server.jedi_server import JediServer
 
             return JediServer(config, logger, repository_root_path)
         else:

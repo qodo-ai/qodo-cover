@@ -1,9 +1,11 @@
 import os
-import pytest
-from unittest.mock import patch
-from argparse import Namespace
 
-from cover_agent.settings.config_schema import CoverageType, CoverAgentConfig
+from argparse import Namespace
+from unittest.mock import patch
+
+import pytest
+
+from cover_agent.settings.config_schema import CoverAgentConfig, CoverageType
 
 
 class TestCoverAgentConfig:

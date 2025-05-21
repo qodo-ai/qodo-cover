@@ -30,6 +30,7 @@ SOFTWARE.
 """
 
 from typing import List, Union
+
 from cover_agent.lsp_logic.multilspy.lsp_protocol_handler import lsp_types
 
 

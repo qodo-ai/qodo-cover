@@ -1,9 +1,12 @@
-import pytest
 import os
+
 from unittest.mock import mock_open, patch
+
+import pytest
 
 # Import the get_version function from version.py
 from cover_agent.version import get_version
+
 
 # File location of version file is one directory up from this file's location. Use os.path to find this
 VERSION_FILE_LOCATION = os.path.join(

@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch
+
 from cover_agent.runner import Runner
 
 

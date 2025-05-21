@@ -1,7 +1,8 @@
 # This script retrieves the test results from the unit test database and analyzes them using an LLM
 
-from cover_agent.unit_test_db import UnitTestDB
 from cover_agent.ai_caller import AICaller
+from cover_agent.unit_test_db import UnitTestDB
+
 
 PROMPT_TEMPLATE = """
 # Description of Task

@@ -2,8 +2,8 @@ import asyncio
 import copy
 
 from cover_agent.ai_caller import AICaller
-from cover_agent.cove_agent import CoverAgent
-from cover_agent.lsp_logic.ContextHelper import ContextHelper
+from cover_agent.cover_agent import CoverAgent
+from cover_agent.lsp_logic.context_helper import ContextHelper
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.settings.config_schema import CoverAgentConfig
 from cover_agent.utils import find_test_files, parse_args_full_repo

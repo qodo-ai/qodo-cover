@@ -1,11 +1,12 @@
+from typing import Optional, Tuple
+
+from jinja2 import Environment, StrictUndefined
+
 from cover_agent.agent_completion_abc import AgentCompletionABC
 from cover_agent.ai_caller import AICaller
 from cover_agent.custom_logger import CustomLogger
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.utils import load_yaml
-
-from jinja2 import Environment, StrictUndefined
-from typing import Optional, Tuple
 
 
 class DefaultAgentCompletion(AgentCompletionABC):

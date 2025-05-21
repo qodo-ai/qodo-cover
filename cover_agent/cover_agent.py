@@ -8,8 +8,8 @@ from typing import Optional
 import wandb
 
 from cover_agent.agent_completion_abc import AgentCompletionABC
-from cover_agent.ai_caller_replay import AICallerReplay
 from cover_agent.ai_caller import AICaller
+from cover_agent.ai_caller_replay import AICallerReplay
 from cover_agent.custom_logger import CustomLogger
 from cover_agent.default_agent_completion import DefaultAgentCompletion
 from cover_agent.record_replay_manager import RecordReplayManager

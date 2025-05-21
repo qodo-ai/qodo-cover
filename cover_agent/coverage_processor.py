@@ -2,9 +2,9 @@ import csv
 import json
 import os
 import re
-
-from typing import Tuple, Union, List, Optional
 import xml.etree.ElementTree as ET
+
+from typing import List, Optional, Tuple, Union
 
 from cover_agent.custom_logger import CustomLogger
 from cover_agent.settings.config_schema import CoverageType

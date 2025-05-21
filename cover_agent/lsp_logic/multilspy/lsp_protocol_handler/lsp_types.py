@@ -32,6 +32,7 @@ SOFTWARE.
 from enum import Enum, IntEnum, IntFlag
 from typing import Dict, List, Literal, Union
 
+
 try:
     from typing import NotRequired, TypedDict
 except ImportError:  # before Python 3.11

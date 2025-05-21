@@ -1,17 +1,16 @@
 import hashlib
 import os
 
-import yaml
-
 from pathlib import Path
 from typing import Any, Optional
+
+import yaml
 
 from fuzzywuzzy import fuzz
 
 from cover_agent.custom_logger import CustomLogger
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.utils import truncate_hash
-
 
 
 class RecordReplayManager:

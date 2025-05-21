@@ -1,9 +1,10 @@
 import argparse
 import os
-import pytest
 import tempfile
 
 from unittest.mock import MagicMock, mock_open, patch
+
+import pytest
 
 from cover_agent.cover_agent import CoverAgent
 from cover_agent.main import parse_args

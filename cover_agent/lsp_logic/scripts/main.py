@@ -1,12 +1,13 @@
 import argparse
 import asyncio
 import os
+
 from time import sleep
 
 from grep_ast import filename_to_lang
 
-from cover_agent.lsp_logic.multilspy import LanguageServer
 from cover_agent.lsp_logic.file_map.file_map import FileMap
+from cover_agent.lsp_logic.multilspy import LanguageServer
 from cover_agent.lsp_logic.multilspy.multilspy_config import MultilspyConfig
 from cover_agent.lsp_logic.multilspy.multilspy_logger import MultilspyLogger
 

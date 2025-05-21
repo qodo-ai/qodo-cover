@@ -1,4 +1,5 @@
 import pytest
+
 from cover_agent.report_generator import ReportGenerator
 
 

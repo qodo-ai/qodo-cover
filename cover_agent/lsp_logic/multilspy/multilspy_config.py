@@ -2,8 +2,8 @@
 Configuration parameters for Multilspy.
 """
 
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
 
 
 class Language(str, Enum):

@@ -1,10 +1,12 @@
 import os
 import sys
 
+
 # Add the parent directory to the sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from cover_agent.cover_agent import CoverAgent
+
 
 # List of source/test files to iterate over:
 SOURCE_TEST_FILE_LIST = [

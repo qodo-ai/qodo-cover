@@ -1,6 +1,7 @@
-import pytest
-import logging
 import xml.etree.ElementTree as ET
+
+import pytest
+
 from cover_agent.coverage_processor import CoverageProcessor
 
 

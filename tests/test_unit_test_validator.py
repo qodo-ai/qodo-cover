@@ -2,12 +2,11 @@ import datetime
 import os
 import tempfile
 
-from unittest.mock import patch, mock_open, MagicMock
+from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 
 from cover_agent.coverage_processor import CoverageProcessor
-from cover_agent.report_generator import ReportGenerator
 from cover_agent.runner import Runner
 from cover_agent.settings.config_schema import CoverageType
 from cover_agent.unit_test_validator import UnitTestValidator

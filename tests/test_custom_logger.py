@@ -1,8 +1,8 @@
 import logging
 
-import pytest
-
 from unittest.mock import patch
+
+import pytest
 
 from cover_agent.custom_logger import CustomLogger
 

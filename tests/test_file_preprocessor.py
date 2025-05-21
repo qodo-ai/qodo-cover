@@ -1,6 +1,8 @@
-import pytest
 import tempfile
 import textwrap
+
+import pytest
+
 from cover_agent.file_preprocessor import FilePreprocessor
 
 
