@@ -1,7 +1,7 @@
 import pytest
 import logging
 import xml.etree.ElementTree as ET
-from cover_agent.CoverageProcessor import CoverageProcessor
+from cover_agent.coverage_processor import CoverageProcessor
 
 
 @pytest.fixture
@@ -101,11 +101,11 @@ class TestCoverageProcessor:
         """
         # Mocking the necessary methods
         mocker.patch(
-            "cover_agent.CoverageProcessor.CoverageProcessor.extract_package_and_class_java",
+            "cover_agent.coverage_processor.CoverageProcessor.extract_package_and_class_java",
             return_value=("com.example", "Example"),
         )
         mocker.patch(
-            "cover_agent.CoverageProcessor.CoverageProcessor.parse_missed_covered_lines_jacoco_xml",
+            "cover_agent.coverage_processor.CoverageProcessor.parse_missed_covered_lines_jacoco_xml",
             return_value=([], []),
         )
 
@@ -231,10 +231,10 @@ class TestCoverageProcessor:
         Tests the process_coverage_report method for verifying and parsing the coverage report.
         """
         mock_verify = mocker.patch(
-            "cover_agent.CoverageProcessor.CoverageProcessor.verify_report_update"
+            "cover_agent.coverage_processor.CoverageProcessor.verify_report_update"
         )
         mock_parse = mocker.patch(
-            "cover_agent.CoverageProcessor.CoverageProcessor.parse_coverage_report",
+            "cover_agent.coverage_processor.CoverageProcessor.parse_coverage_report",
             return_value=([], [], 0.0),
         )
 
@@ -337,7 +337,7 @@ class TestCoverageProcessor:
         Tests that parse_coverage_report_jacoco raises a ValueError for unsupported JaCoCo report formats.
         """
         mocker.patch(
-            "cover_agent.CoverageProcessor.CoverageProcessor.extract_package_and_class_java",
+            "cover_agent.coverage_processor.CoverageProcessor.extract_package_and_class_java",
             return_value=("com.example", "Example"),
         )
 
@@ -354,7 +354,7 @@ class TestCoverageProcessor:
         Tests that parse_missed_covered_lines_jacoco_xml returns empty lists when the source file is not found in the XML report.
         """
         mocker.patch(
-            "cover_agent.CoverageProcessor.CoverageProcessor.extract_package_and_class_java",
+            "cover_agent.coverage_processor.CoverageProcessor.extract_package_and_class_java",
             return_value=("com.example", "Example"),
         )
 
@@ -401,7 +401,7 @@ class TestCoverageProcessor:
         Tests parsing of missed and covered lines from a JaCoCo XML report.
         """
         mocker.patch(
-            "cover_agent.CoverageProcessor.CoverageProcessor.extract_package_and_class_java",
+            "cover_agent.coverage_processor.CoverageProcessor.extract_package_and_class_java",
             return_value=("com.example", "Example"),
         )
 
@@ -446,7 +446,7 @@ class TestCoverageProcessor:
         Tests parsing of missed and covered lines from a JaCoCo XML report for a Kotlin file.
         """
         mocker.patch(
-            "cover_agent.CoverageProcessor.CoverageProcessor.extract_package_and_class_kotlin",
+            "cover_agent.coverage_processor.CoverageProcessor.extract_package_and_class_kotlin",
             return_value=("com.example", "Example"),
         )
 
@@ -517,7 +517,7 @@ class TestCoverageProcessor:
         Tests that parse_coverage_report calls parse_coverage_report_lcov when the feature flag is enabled.
         """
         mock_parse_lcov = mocker.patch(
-            "cover_agent.CoverageProcessor.CoverageProcessor.parse_coverage_report_lcov",
+            "cover_agent.coverage_processor.CoverageProcessor.parse_coverage_report_lcov",
             return_value=([], [], 0.0),
         )
         processor = CoverageProcessor(
@@ -532,7 +532,7 @@ class TestCoverageProcessor:
         Tests that parse_coverage_report calls parse_coverage_report_cobertura when the feature flag is enabled.
         """
         mock_parse_cobertura = mocker.patch(
-            "cover_agent.CoverageProcessor.CoverageProcessor.parse_coverage_report_cobertura",
+            "cover_agent.coverage_processor.CoverageProcessor.parse_coverage_report_cobertura",
             return_value=([], [], 0.0),
         )
         processor = CoverageProcessor(
@@ -547,7 +547,7 @@ class TestCoverageProcessor:
         Tests that parse_coverage_report calls parse_coverage_report_jacoco when the feature flag is enabled.
         """
         mock_parse_jacoco = mocker.patch(
-            "cover_agent.CoverageProcessor.CoverageProcessor.parse_coverage_report_jacoco",
+            "cover_agent.coverage_processor.CoverageProcessor.parse_coverage_report_jacoco",
             return_value=([], [], 0.0),
         )
         processor = CoverageProcessor(
@@ -607,7 +607,7 @@ class TestCoverageProcessor:
         Tests that parse_coverage_report calls parse_coverage_report_jacoco when the feature flag is disabled.
         """
         mock_parse_jacoco = mocker.patch(
-            "cover_agent.CoverageProcessor.CoverageProcessor.parse_coverage_report_jacoco",
+            "cover_agent.coverage_processor.CoverageProcessor.parse_coverage_report_jacoco",
             return_value=([], [], 0.0),
         )
         processor = CoverageProcessor(
@@ -637,7 +637,7 @@ class TestCoverageProcessor:
         Tests that parse_coverage_report calls parse_coverage_report_lcov when the feature flag is disabled.
         """
         mock_parse_lcov = mocker.patch(
-            "cover_agent.CoverageProcessor.CoverageProcessor.parse_coverage_report_lcov",
+            "cover_agent.coverage_processor.CoverageProcessor.parse_coverage_report_lcov",
             return_value=([], [], 0.0),
         )
         processor = CoverageProcessor(
@@ -653,7 +653,7 @@ class TestCoverageProcessor:
         """
         # Mock the parse_json_diff_coverage_report method
         mock_parse_json = mocker.patch(
-            "cover_agent.CoverageProcessor.CoverageProcessor.parse_json_diff_coverage_report",
+            "cover_agent.coverage_processor.CoverageProcessor.parse_json_diff_coverage_report",
             return_value=([1, 3, 5], [2, 4, 6], 0.5),
         )
 

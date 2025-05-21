@@ -1,5 +1,5 @@
 import pytest
-from cover_agent.AgentCompletionABC import AgentCompletionABC
+from cover_agent.agent_completion_abc import AgentCompletionABC
 
 
 # Dummy subclass that calls the parent's abstract method (executing "pass") then returns dummy values.

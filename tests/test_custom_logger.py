@@ -4,7 +4,7 @@ import pytest
 
 from unittest.mock import patch
 
-from cover_agent.CustomLogger import CustomLogger
+from cover_agent.custom_logger import CustomLogger
 
 
 class TestCustomLogger:

@@ -1,7 +1,7 @@
 import pytest
 import tempfile
 import textwrap
-from cover_agent.FilePreprocessor import FilePreprocessor
+from cover_agent.file_preprocessor import FilePreprocessor
 
 
 class TestFilePreprocessor:

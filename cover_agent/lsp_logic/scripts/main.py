@@ -22,7 +22,7 @@ def parse_arguments():
         "--rel_file",
         type=str,
         help="The relative file path.",
-        default="cover_agent/UnitTestGenerator.py",
+        default="cover_agent/unit_test_generator.py",
     )
     parser.add_argument(
         "--project-language",

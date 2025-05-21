@@ -4,24 +4,24 @@ import sys
 # Add the parent directory to the sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from cover_agent.CoverAgent import CoverAgent
+from cover_agent.cover_agent import CoverAgent
 
 # List of source/test files to iterate over:
 SOURCE_TEST_FILE_LIST = [
-    # ["cover_agent/AgentCompletionABC.py", "tests/test_AgentCompletionABC.py"],
-    # ["cover_agent/AICaller.py", "tests/test_AICaller.py"],
-    # ["cover_agent/CoverAgent.py", "tests/test_CoverAgent.py"],
-    ["cover_agent/CoverageProcessor.py", "tests/test_CoverageProcessor.py"],
-    # ["cover_agent/CustomLogger.py", ""],
-    # ["cover_agent/DefaultAgentCompletion.py", "tests/test_DefaultAgentCompletion.py"],
-    # ["cover_agent/FilePreprocessor.py", "tests/test_FilePreprocessor.py"],
+    # ["cover_agent/agent_completion_abc.py", "tests/test_agent_completion_abc.py"],
+    # ["cover_agent/ai_caller.py", "tests/test_ai_caller.py"],
+    # ["cover_agent/cover_agent.py", "tests/test_cover_agent.py"],
+    ["cover_agent/coverage_processor.py", "tests/test_coverage_processor.py"],
+    # ["cover_agent/custom_logger.py", ""],
+    # ["cover_agent/default_agent_completion.py", "tests/test_default_agent_completion.py"],
+    # ["cover_agent/file_preprocessor.py", "tests/test_file_preprocessor.py"],
     # ["cover_agent/main.py", "tests/test_main.py"],
-    # ["cover_agent/ReportGenerator.py", "tests/test_ReportGenerator.py"],
-    # ["cover_agent/Runner.py", "tests/test_Runner.py"],
+    # ["cover_agent/report_generator.py", "tests/test_report_generator.py"],
+    # ["cover_agent/runner.py", "tests/test_runner.py"],
     # ["cover_agent/settings/config_loader.py", ""],
-    # ["cover_agent/UnitTestDB.py", "tests/test_UnitTestDB.py"],
-    ["cover_agent/UnitTestGenerator.py", "tests/test_UnitTestGenerator.py"],
-    ["cover_agent/UnitTestValidator.py", "tests/test_UnitTestValidator.py"],
+    # ["cover_agent/unit_test_db.py", "tests/test_unit_test_db.py"],
+    ["cover_agent/unit_test_generator.py", "tests/test_unit_test_generator.py"],
+    ["cover_agent/unit_test_validator.py", "tests/test_unit_test_validator.py"],
     # ["cover_agent/utils.py", "tests/test_load_yaml.py"],
     # ["cover_agent/version.py", "tests/test_version.py"],
 ]

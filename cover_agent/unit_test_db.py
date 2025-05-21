@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session, load_only
-from cover_agent.ReportGenerator import ReportGenerator
+from cover_agent.report_generator import ReportGenerator
 
 Base = declarative_base()
 

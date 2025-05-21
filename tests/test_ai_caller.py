@@ -2,7 +2,7 @@ import os
 
 import pytest
 from unittest.mock import patch, Mock
-from cover_agent.AICaller import AICaller
+from cover_agent.ai_caller import AICaller
 
 
 class TestAICaller:
@@ -17,7 +17,7 @@ class TestAICaller:
         """
         return AICaller("test-model", "test-api", enable_retry=False)
 
-    @patch("cover_agent.AICaller.AICaller.call_model")
+    @patch("cover_agent.ai_caller.AICaller.call_model")
     def test_call_model_simplified(self, mock_call_model):
         """
         Test the call_model method with a simplified scenario.
@@ -38,7 +38,7 @@ class TestAICaller:
         # Check if call_model was called correctly
         mock_call_model.assert_called_once_with(prompt)
 
-    @patch("cover_agent.AICaller.litellm.completion")
+    @patch("cover_agent.ai_caller.litellm.completion")
     def test_call_model_with_error(self, mock_completion, ai_caller):
         """
         Test the call_model method when an exception is raised.
@@ -52,7 +52,7 @@ class TestAICaller:
 
         assert str(exc_info.value) == "Test exception"
 
-    @patch("cover_agent.AICaller.litellm.completion")
+    @patch("cover_agent.ai_caller.litellm.completion")
     def test_call_model_error_streaming(self, mock_completion, ai_caller):
         """
         Test the call_model method when an exception is raised during streaming.
@@ -69,9 +69,9 @@ class TestAICaller:
             str(exc_info.value) == "'NoneType' object is not subscriptable"
         )  # this error message might change for different versions of litellm
 
-    @patch("cover_agent.AICaller.litellm.completion")
+    @patch("cover_agent.ai_caller.litellm.completion")
     @patch.dict(os.environ, {"WANDB_API_KEY": "test_key"})
-    @patch("cover_agent.AICaller.Trace.log")
+    @patch("cover_agent.ai_caller.Trace.log")
     def test_call_model_wandb_logging(self, mock_log, mock_completion, ai_caller):
         """
         Test the call_model method with W&B logging enabled.
@@ -80,7 +80,7 @@ class TestAICaller:
             {"choices": [{"delta": {"content": "response"}}]}
         ]
         prompt = {"system": "", "user": "Hello, world!"}
-        with patch("cover_agent.AICaller.litellm.stream_chunk_builder") as mock_builder:
+        with patch("cover_agent.ai_caller.litellm.stream_chunk_builder") as mock_builder:
             mock_builder.return_value = {
                 "choices": [{"message": {"content": "response"}}],
                 "usage": {"prompt_tokens": 2, "completion_tokens": 10},
@@ -91,7 +91,7 @@ class TestAICaller:
             assert response_tokens == 10
             mock_log.assert_called_once()
 
-    @patch("cover_agent.AICaller.litellm.completion")
+    @patch("cover_agent.ai_caller.litellm.completion")
     def test_call_model_api_base(self, mock_completion, ai_caller):
         """
         Test the call_model method with a different API base.
@@ -101,7 +101,7 @@ class TestAICaller:
         ]
         ai_caller.model = "openai/test-model"
         prompt = {"system": "", "user": "Hello, world!"}
-        with patch("cover_agent.AICaller.litellm.stream_chunk_builder") as mock_builder:
+        with patch("cover_agent.ai_caller.litellm.stream_chunk_builder") as mock_builder:
             mock_builder.return_value = {
                 "choices": [{"message": {"content": "response"}}],
                 "usage": {"prompt_tokens": 2, "completion_tokens": 10},
@@ -111,7 +111,7 @@ class TestAICaller:
             assert prompt_tokens == 2
             assert response_tokens == 10
 
-    @patch("cover_agent.AICaller.litellm.completion")
+    @patch("cover_agent.ai_caller.litellm.completion")
     def test_call_model_with_system_key(self, mock_completion, ai_caller):
         """
         Test the call_model method with a system key in the prompt.
@@ -120,7 +120,7 @@ class TestAICaller:
             {"choices": [{"delta": {"content": "response"}}]}
         ]
         prompt = {"system": "System message", "user": "Hello, world!"}
-        with patch("cover_agent.AICaller.litellm.stream_chunk_builder") as mock_builder:
+        with patch("cover_agent.ai_caller.litellm.stream_chunk_builder") as mock_builder:
             mock_builder.return_value = {
                 "choices": [{"message": {"content": "response"}}],
                 "usage": {"prompt_tokens": 2, "completion_tokens": 10},
@@ -142,7 +142,7 @@ class TestAICaller:
             == "\"The prompt dictionary must contain 'system' and 'user' keys.\""
         )
 
-    @patch("cover_agent.AICaller.litellm.completion")
+    @patch("cover_agent.ai_caller.litellm.completion")
     def test_call_model_o1_preview(self, mock_completion, ai_caller):
         """
         Test the call_model method with the 'o1-preview' model.
@@ -162,7 +162,7 @@ class TestAICaller:
         assert prompt_tokens == 2
         assert response_tokens == 10
 
-    @patch("cover_agent.AICaller.litellm.completion")
+    @patch("cover_agent.ai_caller.litellm.completion")
     def test_call_model_streaming_response(self, mock_completion, ai_caller):
         """
         Test the call_model method with a streaming response.
@@ -172,7 +172,7 @@ class TestAICaller:
         mock_chunk = Mock()
         mock_chunk.choices = [Mock(delta=Mock(content="response part"))]
         mock_completion.return_value = [mock_chunk]
-        with patch("cover_agent.AICaller.litellm.stream_chunk_builder") as mock_builder:
+        with patch("cover_agent.ai_caller.litellm.stream_chunk_builder") as mock_builder:
             mock_builder.return_value = {
                 "choices": [{"message": {"content": "response"}}],
                 "usage": {"prompt_tokens": 2, "completion_tokens": 10},
@@ -183,9 +183,9 @@ class TestAICaller:
             assert response == "response"
             assert prompt_tokens == 2
 
-    @patch("cover_agent.AICaller.litellm.completion")
+    @patch("cover_agent.ai_caller.litellm.completion")
     @patch.dict(os.environ, {"WANDB_API_KEY": "test_key"})
-    @patch("cover_agent.AICaller.Trace.log")
+    @patch("cover_agent.ai_caller.Trace.log")
     def test_call_model_wandb_logging_exception(
             self, mock_log, mock_completion, ai_caller
     ):
@@ -200,7 +200,7 @@ class TestAICaller:
         mock_log.side_effect = Exception("Logging error")
         prompt = {"system": "", "user": "Hello, world!"}
 
-        with patch("cover_agent.AICaller.litellm.stream_chunk_builder") as mock_builder, \
+        with patch("cover_agent.ai_caller.litellm.stream_chunk_builder") as mock_builder, \
                 patch.object(ai_caller.logger, 'error') as mock_logger:
             mock_builder.return_value = {
                 "choices": [{"message": {"content": "response"}}],

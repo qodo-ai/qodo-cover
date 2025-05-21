@@ -8,7 +8,7 @@ from typing import Any, Optional
 
 from fuzzywuzzy import fuzz
 
-from cover_agent.CustomLogger import CustomLogger
+from cover_agent.custom_logger import CustomLogger
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.utils import truncate_hash
 

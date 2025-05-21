@@ -9,7 +9,7 @@ import docker
 from dotenv import load_dotenv
 from dynaconf import Dynaconf
 
-from cover_agent.CustomLogger import CustomLogger
+from cover_agent.custom_logger import CustomLogger
 from cover_agent.main import parse_args
 from cover_agent.settings.config_loader import get_settings
 from tests_integration.docker_utils import (

@@ -3,9 +3,9 @@ import os
 
 from typing import Optional
 
-from cover_agent.CustomLogger import CustomLogger
-from cover_agent.FilePreprocessor import FilePreprocessor
-from cover_agent.AgentCompletionABC import AgentCompletionABC
+from cover_agent.custom_logger import CustomLogger
+from cover_agent.file_preprocessor import FilePreprocessor
+from cover_agent.agent_completion_abc import AgentCompletionABC
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.utils import load_yaml
 

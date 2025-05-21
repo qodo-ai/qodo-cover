@@ -1,9 +1,9 @@
 import pytest
 import os
 from datetime import datetime, timedelta
-from cover_agent.UnitTestDB import dump_to_report_cli
-from cover_agent.UnitTestDB import dump_to_report
-from cover_agent.UnitTestDB import UnitTestDB, UnitTestGenerationAttempt
+from cover_agent.unit_test_db import dump_to_report_cli
+from cover_agent.unit_test_db import dump_to_report
+from cover_agent.unit_test_db import UnitTestDB, UnitTestGenerationAttempt
 
 DB_NAME = "unit_test_runs.db"
 DATABASE_URL = f"sqlite:///{DB_NAME}"

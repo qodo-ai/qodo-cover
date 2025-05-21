@@ -2,7 +2,7 @@ import time
 
 from typing import Optional
 
-from cover_agent.CustomLogger import CustomLogger
+from cover_agent.custom_logger import CustomLogger
 from cover_agent.record_replay_manager import RecordReplayManager
 from cover_agent.utils import get_original_caller
 

@@ -3,7 +3,7 @@ import os
 
 from dynaconf import Dynaconf
 
-from cover_agent.CoverAgent import CoverAgent
+from cover_agent.cover_agent import CoverAgent
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.settings.config_schema import CoverAgentConfig
 from cover_agent.version import __version__

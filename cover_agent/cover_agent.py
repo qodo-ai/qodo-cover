@@ -7,16 +7,16 @@ from typing import Optional
 
 import wandb
 
-from cover_agent.AgentCompletionABC import AgentCompletionABC
+from cover_agent.agent_completion_abc import AgentCompletionABC
 from cover_agent.ai_caller_replay import AICallerReplay
-from cover_agent.AICaller import AICaller
-from cover_agent.CustomLogger import CustomLogger
-from cover_agent.DefaultAgentCompletion import DefaultAgentCompletion
+from cover_agent.ai_caller import AICaller
+from cover_agent.custom_logger import CustomLogger
+from cover_agent.default_agent_completion import DefaultAgentCompletion
 from cover_agent.record_replay_manager import RecordReplayManager
 from cover_agent.settings.config_schema import CoverAgentConfig
-from cover_agent.UnitTestDB import UnitTestDB
-from cover_agent.UnitTestGenerator import UnitTestGenerator
-from cover_agent.UnitTestValidator import UnitTestValidator
+from cover_agent.unit_test_db import UnitTestDB
+from cover_agent.unit_test_generator import UnitTestGenerator
+from cover_agent.unit_test_validator import UnitTestValidator
 
 
 class CoverAgent:

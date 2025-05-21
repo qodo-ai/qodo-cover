@@ -1,7 +1,7 @@
-from cover_agent.CoverageProcessor import CoverageProcessor
-from cover_agent.ReportGenerator import ReportGenerator
-from cover_agent.Runner import Runner
-from cover_agent.UnitTestGenerator import UnitTestGenerator
+from cover_agent.coverage_processor import CoverageProcessor
+from cover_agent.report_generator import ReportGenerator
+from cover_agent.runner import Runner
+from cover_agent.unit_test_generator import UnitTestGenerator
 import cover_agent.utils
 from unittest.mock import patch, mock_open
 import datetime

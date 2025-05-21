@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from cover_agent.Runner import Runner
+from cover_agent.runner import Runner
 
 
 class TestRunner:

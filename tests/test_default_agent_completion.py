@@ -1,6 +1,6 @@
 import pytest
 
-from cover_agent.DefaultAgentCompletion import DefaultAgentCompletion
+from cover_agent.default_agent_completion import DefaultAgentCompletion
 from unittest.mock import MagicMock, patch
 
 
@@ -71,7 +71,7 @@ class TestDefaultAgentCompletion:
         mock_caller = MagicMock()
         agent = DefaultAgentCompletion(caller=mock_caller)
 
-        with patch("cover_agent.DefaultAgentCompletion.get_settings") as mock_settings:
+        with patch("cover_agent.default_agent_completion.get_settings") as mock_settings:
             settings = MagicMock()
             settings.system = "{{ invalid_var }}"
             settings.user = "test"
@@ -91,7 +91,7 @@ class TestDefaultAgentCompletion:
         agent = DefaultAgentCompletion(caller=mock_caller)
 
         with patch(
-            "cover_agent.DefaultAgentCompletion.get_settings"
+            "cover_agent.default_agent_completion.get_settings"
         ) as mock_get_settings:
             mock_get_settings.return_value = {"test_file": None}
 
@@ -115,7 +115,7 @@ class TestDefaultAgentCompletion:
         mock_settings.user = "Test {{ value }}"
 
         with patch(
-            "cover_agent.DefaultAgentCompletion.get_settings"
+            "cover_agent.default_agent_completion.get_settings"
         ) as mock_get_settings:
             mock_get_settings.return_value = {"test_file": mock_settings}
 
@@ -133,7 +133,7 @@ class TestDefaultAgentCompletion:
         mock_caller.call_model.return_value = ("invalid yaml content", 100, 50)
         agent = DefaultAgentCompletion(caller=mock_caller)
 
-        with patch("cover_agent.DefaultAgentCompletion.load_yaml") as mock_load_yaml:
+        with patch("cover_agent.default_agent_completion.load_yaml") as mock_load_yaml:
             mock_load_yaml.side_effect = Exception("YAML parsing error")
 
             result = agent.adapt_test_command_for_a_single_test_via_ai(

@@ -39,7 +39,7 @@ For complicated test files with multiple classes, it will not be clear for the A
 
 We can use the `--additional-instructions` flag to provide instructions to the model, so it can focus on the specific class we are interested in.
 
-For example, the file [`cover_agent/test_UnitTestGenerator.py`](../tests/test_UnitTestGenerator.py) has two test classes - `TestUnitTestGenerator` and `TestExtractErrorMessage`.
+For example, the file [`cover_agent/test_UnitTestGenerator.py`](../tests/test_unit_test_generator.py) has two test classes - `TestUnitTestGenerator` and `TestExtractErrorMessage`.
 We can use the `--additional-instructions` flag to instruct the model to focus on the `TestUnitTestGenerator` class.
 
 ```shell

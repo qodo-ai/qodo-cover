@@ -8,11 +8,11 @@ from typing import Optional
 from diff_cover.diff_cover_tool import main as diff_cover_main
 from wandb.sdk.data_types.trace_tree import Trace
 
-from cover_agent.AgentCompletionABC import AgentCompletionABC
-from cover_agent.CoverageProcessor import CoverageProcessor
-from cover_agent.CustomLogger import CustomLogger
-from cover_agent.FilePreprocessor import FilePreprocessor
-from cover_agent.Runner import Runner
+from cover_agent.agent_completion_abc import AgentCompletionABC
+from cover_agent.coverage_processor import CoverageProcessor
+from cover_agent.custom_logger import CustomLogger
+from cover_agent.file_preprocessor import FilePreprocessor
+from cover_agent.runner import Runner
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.settings.config_schema import CoverageType
 from cover_agent.utils import load_yaml

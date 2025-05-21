@@ -10,7 +10,7 @@ import litellm
 from tenacity import retry, stop_after_attempt, wait_fixed
 from wandb.sdk.data_types.trace_tree import Trace
 
-from cover_agent.CustomLogger import CustomLogger
+from cover_agent.custom_logger import CustomLogger
 from cover_agent.record_replay_manager import RecordReplayManager
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.utils import get_original_caller

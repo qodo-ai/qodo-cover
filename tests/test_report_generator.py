@@ -1,5 +1,5 @@
 import pytest
-from cover_agent.ReportGenerator import ReportGenerator
+from cover_agent.report_generator import ReportGenerator
 
 
 class TestReportGeneration:

@@ -6,11 +6,11 @@ from unittest.mock import patch, mock_open, MagicMock
 
 import pytest
 
-from cover_agent.CoverageProcessor import CoverageProcessor
-from cover_agent.ReportGenerator import ReportGenerator
-from cover_agent.Runner import Runner
+from cover_agent.coverage_processor import CoverageProcessor
+from cover_agent.report_generator import ReportGenerator
+from cover_agent.runner import Runner
 from cover_agent.settings.config_schema import CoverageType
-from cover_agent.UnitTestValidator import UnitTestValidator
+from cover_agent.unit_test_validator import UnitTestValidator
 
 
 class TestUnitValidator:
@@ -527,7 +527,7 @@ class TestUnitValidator:
                 use_report_coverage_feature_flag=False,
             )
             with patch(
-                "cover_agent.UnitTestValidator.diff_cover_main"
+                "cover_agent.unit_test_validator.diff_cover_main"
             ) as mock_diff_cover_main:
                 generator.generate_diff_coverage_report()
                 mock_diff_cover_main.assert_called_once_with(
@@ -578,7 +578,7 @@ class TestUnitValidator:
                 use_report_coverage_feature_flag=False,
             )
             with patch(
-                "cover_agent.UnitTestValidator.diff_cover_main",
+                "cover_agent.unit_test_validator.diff_cover_main",
                 side_effect=Exception("Mock exception"),
             ), patch.object(generator.logger, "error") as mock_logger_error:
                 generator.generate_diff_coverage_report()

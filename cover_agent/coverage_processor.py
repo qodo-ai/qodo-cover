@@ -6,7 +6,7 @@ import re
 from typing import Tuple, Union, List, Optional
 import xml.etree.ElementTree as ET
 
-from cover_agent.CustomLogger import CustomLogger
+from cover_agent.custom_logger import CustomLogger
 from cover_agent.settings.config_schema import CoverageType
 
 
