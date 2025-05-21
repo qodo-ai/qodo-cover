@@ -10,9 +10,7 @@ class TokenEncoder:
 
     @classmethod
     def get_token_encoder(cls):
-        if (
-            cls._encoder_instance is None
-        ):  # Check without acquiring the lock for performance
+        if cls._encoder_instance is None:  # Check without acquiring the lock for performance
             with cls._lock:  # Lock acquisition to ensure thread safety
                 if cls._encoder_instance is None:
                     cls._encoder_instance = get_encoding(
