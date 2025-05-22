@@ -2,8 +2,8 @@
 Configuration parameters for Multilspy.
 """
 
-from dataclasses import dataclass
 from enum import Enum
+from dataclasses import dataclass
 
 
 class Language(str, Enum):
@@ -38,4 +38,6 @@ class MultilspyConfig:
         """
         import inspect
 
-        return cls(**{k: v for k, v in env.items() if k in inspect.signature(cls).parameters})
+        return cls(
+            **{k: v for k, v in env.items() if k in inspect.signature(cls).parameters}
+        )

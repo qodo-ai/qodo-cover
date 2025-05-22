@@ -23,6 +23,8 @@ class MultilspySettings:
     @staticmethod
     def get_global_cache_directory() -> str:
         """Returns the cache directory"""
-        global_cache_dir = os.path.join(str(pathlib.Path.home()), ".multilspy", "global_cache")
+        global_cache_dir = os.path.join(
+            str(pathlib.Path.home()), ".multilspy", "global_cache"
+        )
         os.makedirs(global_cache_dir, exist_ok=True)
         return global_cache_dir

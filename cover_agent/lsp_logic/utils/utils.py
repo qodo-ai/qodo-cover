@@ -7,10 +7,8 @@ import subprocess
 import sys
 import tempfile
 import time
-
 from pathlib import Path
 from urllib.parse import unquote, urlparse
-
 
 # import git
 
@@ -38,7 +36,9 @@ def find_relevant_files_in_repo(repo_root: str, chat_files: list[str]):
             # gitignore_content
             relative_path = os.path.relpath(os.path.join(root, file), repo_root)
             if gitignore_content:
-                if any(relative_path.startswith(pattern) for pattern in gitignore_content):
+                if any(
+                    relative_path.startswith(pattern) for pattern in gitignore_content
+                ):
                     continue
             if "venv/" in relative_path:
                 continue
@@ -152,7 +152,9 @@ def format_messages(messages, title=None):
                 if isinstance(item, dict):
                     for key, value in item.items():
                         if isinstance(value, dict) and "url" in value:
-                            output.append(f"{role} {key.capitalize()} URL: {value['url']}")
+                            output.append(
+                                f"{role} {key.capitalize()} URL: {value['url']}"
+                            )
                         else:
                             output.append(f"{role} {key}: {value}")
                 else:
@@ -378,7 +380,9 @@ def check_pip_install_extra(io, module, prompt, pip_install_cmd, self_update=Fal
         print(printable_shell_command(cmd))  # plain print so it doesn't line-wrap
         return
 
-    if not io.confirm_ask("Run pip install?", default="y", subject=printable_shell_command(cmd)):
+    if not io.confirm_ask(
+        "Run pip install?", default="y", subject=printable_shell_command(cmd)
+    ):
         return
 
     success, output = run_install(cmd)

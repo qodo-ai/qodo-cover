@@ -4,13 +4,12 @@ Defines wrapper objects around the types returned by LSP to ensure decoupling be
 
 from __future__ import annotations
 
-from enum import Enum, IntEnum
-
+from enum import IntEnum, Enum
 
 try:
-    from typing import Dict, List, NotRequired, TypedDict, Union
+    from typing import NotRequired, TypedDict, List, Dict, Union
 except ImportError:  # before Python 3.11
-    from typing_extensions import Dict, List, NotRequired, TypedDict, Union
+    from typing_extensions import NotRequired, TypedDict, List, Dict, Union
 
 URI = str
 DocumentUri = str

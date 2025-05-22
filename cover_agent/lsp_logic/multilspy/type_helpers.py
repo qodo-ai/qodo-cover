@@ -4,8 +4,7 @@ This module provides type-helpers used across multilspy implementation
 
 import inspect
 
-from typing import Callable, Type, TypeVar
-
+from typing import Callable, TypeVar, Type
 
 R = TypeVar("R", bound=object)
 
@@ -19,7 +18,9 @@ def ensure_all_methods_implemented(
 
     def check_all_methods_implemented(target_cls: R) -> R:
         for name, _ in inspect.getmembers(source_cls, inspect.isfunction):
-            if name not in target_cls.__dict__ or not callable(target_cls.__dict__[name]):
+            if name not in target_cls.__dict__ or not callable(
+                target_cls.__dict__[name]
+            ):
                 raise NotImplementedError(f"{name} is not implemented in {target_cls}")
 
         return target_cls

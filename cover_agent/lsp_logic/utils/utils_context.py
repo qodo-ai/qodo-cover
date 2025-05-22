@@ -1,5 +1,4 @@
 import os
-
 from time import sleep
 
 from jinja2 import Environment, StrictUndefined
@@ -8,6 +7,7 @@ from cover_agent.lsp_logic.file_map.file_map import FileMap
 from cover_agent.lsp_logic.multilspy import LanguageServer
 from cover_agent.lsp_logic.multilspy.multilspy_config import MultilspyConfig
 from cover_agent.lsp_logic.multilspy.multilspy_logger import MultilspyLogger
+
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.utils import load_yaml
 
@@ -25,7 +25,9 @@ async def analyze_context(test_file, context_files, args, ai_caller):
         test_file_rel_str = os.path.relpath(test_file, args.project_root)
         context_files_rel_filtered_list_str = ""
         for file in context_files:
-            context_files_rel_filtered_list_str += f"`{os.path.relpath(file, args.project_root)}\n`"
+            context_files_rel_filtered_list_str += (
+                f"`{os.path.relpath(file, args.project_root)}\n`"
+            )
         variables = {
             "language": args.project_language,
             "test_file_name_rel": test_file_rel_str,
@@ -33,8 +35,12 @@ async def analyze_context(test_file, context_files, args, ai_caller):
             "context_files_names_rel": context_files_rel_filtered_list_str,
         }
         environment = Environment(undefined=StrictUndefined)
-        system_prompt = environment.from_string(get_settings().analyze_test_against_context.system).render(variables)
-        user_prompt = environment.from_string(get_settings().analyze_test_against_context.user).render(variables)
+        system_prompt = environment.from_string(
+            get_settings().analyze_test_against_context.system
+        ).render(variables)
+        user_prompt = environment.from_string(
+            get_settings().analyze_test_against_context.user
+        ).render(variables)
         response, prompt_token_count, response_token_count = ai_caller.call_model(
             prompt={"system": system_prompt, "user": user_prompt}, stream=False
         )
@@ -48,7 +54,9 @@ async def analyze_context(test_file, context_files, args, ai_caller):
                     context_files_include = [f for f in context_files if f != file]
 
         if source_file:
-            print(f"Test file: `{test_file}`,\nis a unit test file for source file: `{source_file}`")
+            print(
+                f"Test file: `{test_file}`,\nis a unit test file for source file: `{source_file}`"
+            )
         else:
             print(f"Test file: `{test_file}` is not a unit test file")
     except Exception as e:
@@ -101,4 +109,6 @@ async def initialize_language_server(args):
         sleep(0.1)
         return lsp
     else:
-        raise NotImplementedError("Unsupported language: {}".format(args.project_language))
+        raise NotImplementedError(
+            "Unsupported language: {}".format(args.project_language)
+        )
