@@ -25,11 +25,12 @@ Qodo Cover aims to help efficiently increase code coverage, by automatically gen
 </div>
 
 ## Table of Contents
-- [News and Updates](#news-and-updates)
-- [Overview](#overview)
-- [Installation and Usage](#installation-and-usage)
-- [Development](#development)
-- [Roadmap](#roadmap)
+* [News and Updates](#news-and-updates)
+* [Overview](#overview)
+* [Installation and Usage](#installation-and-usage)
+* [Contributing](#contributing)
+* [Documentation](#documentation)
+* [Roadmap](#roadmap)
 
 
 ## News and Updates
@@ -54,6 +55,7 @@ This tool is part of a broader suite of utilities designed to automate the creat
 2. **Coverage Parser:** Validates that code coverage increases as tests are added, ensuring that new tests contribute to the overall test effectiveness.
 3. **Prompt Builder:** Gathers necessary data from the codebase and constructs the prompt to be passed to the Large Language Model (LLM).
 4. **AI Caller:** Interacts with the LLM to generate tests based on the prompt provided.
+
 
 ## Installation and Usage
 ### Requirements
@@ -121,7 +123,6 @@ cover-agent \
 ```
 
 #### Go
-
 For an example using **go** `cd` into `templated_tests/go_webservice`, set up the project following the `README.md`.
 To work with coverage reporting, you need to install `gocov` and `gocov-xml`. Run the following commands to install these tools:
 ```shell
@@ -157,7 +158,7 @@ cover-agent \
   --max-iterations=1
 ```
 
-### 🚧 [WIP Feature] Record & Replay
+### Record & Replay Feature
 To save LLM service credits, a response recording mode is available. The starting point is a group hash, generated from the hashes of the source and test files used in each test run. If either file changes, the corresponding LLM responses should be re-recorded. 
 Run the following command to execute all tests with LLM response recording enabled:
 ```shell
@@ -173,7 +174,6 @@ it will use the recorded responses to generate tests without calling the LLM if 
 You may also record LLM responses from a separate test run. Run a test as you normally would, and add the `--record-mode` flag to the command:
 ```shell
 poetry run python tests_integration/run_test_with_docker.py \
-  --record-mode \
   --docker-image "embeddeddevops/python_fastapi:latest" \
   --source-file-path "app.py" \
   --test-file-path "test_app.py" \
@@ -181,8 +181,7 @@ poetry run python tests_integration/run_test_with_docker.py \
   --test-command "pytest --cov=. --cov-report=xml --cov-report=term" \
   --coverage-type "cobertura" \
   --model "gpt-4o-mini" \
-  --desired-coverage 70 \
-  --max-iterations 3
+  --record-mode
 ```
 
 The table below explains the behavior of the test runner depending on whether the `--record-mode` flag is set and whether a recorded file already exists:
@@ -257,8 +256,17 @@ cover-agent \
 ```
 
 
-## Development
-See [Development](docs/development.md) for more information on how to contribute to this project.
+## Contributing
+See [Contributing](CONTRIBUTING.md) for more information on how to contribute to this project.
+
+## Documentation
+* [Instructions for Adding Another Coverage Type to the `CoverageProcessor` Class](docs/add_new_coverage_type_instructions.md)
+* [Using a Test Database with Cover Agent](docs/database_usage.md)
+* [Cover Agent Feature Flags](docs/features.md)
+* [Repo Coverage](docs/repo_coverage.md)
+* [Top Level Sequence Diagram](docs/top_level_sequence_diagram.md)
+* [Usage Examples](docs/usage_examples.md)
+
 
 ## Roadmap
 Below is the roadmap of planned features, with the current implementation status:
@@ -275,6 +283,7 @@ Below is the roadmap of planned features, with the current implementation status
   - [ ] Connectors for GitHub Actions, Jenkins, CircleCI, Travis CI, and more
   - [ ] Integrate into databases, APIs, OpenTelemetry and other sources of data to extract relevant i/o for the test generation
   - [ ] Add a setting file
+
 
 ## QodoAI
 QodoAI's mission is to enable busy dev teams to increase and maintain their code integrity.
