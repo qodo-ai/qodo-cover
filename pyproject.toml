@@ -51,11 +51,6 @@ pytest-asyncio = "^0.23.8"
 pytest-timeout = "^2.3.1"
 fastapi = "^0.111.1"
 
-# Code formatters
-pre-commit = "^4.2.0"
-isort = "^6.0.1"
-black = "^25.1.0"
-
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
 build-backend = "poetry_dynamic_versioning.backend"
@@ -70,42 +65,3 @@ enable = true
 
 [tool.poetry-dynamic-versioning.from-file]
 source = "cover_agent/version.txt"
-
-[tool.black]
-line-length = 120
-skip-string-normalization = false
-target-version = ["py310", "py311", "py312"]
-# `templated_tests` and `cover_agent/lsp_logic` excluded for now
-exclude = '''
-/(
-    templated_tests
-  | cover_agent/lsp_logic
-  | \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | build
-  | dist
-  | node_modules
-)/
-'''
-
-[tool.isort]
-profile = "black"
-line_length = 120
-skip = ["templated_tests", "cover_agent/lsp_logic"]  # Skipped for now
-length_sort = false
-multi_line_output = 3
-indent = "    "
-lines_between_types = 1
-lines_after_imports = 2
-known_first_party = ["cover_agent", "tests_integration"]
-sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
-default_section = "THIRDPARTY"
-combine_star = true
-include_trailing_comma = true
-use_parentheses = true
-from_first = false
