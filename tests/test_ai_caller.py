@@ -17,7 +17,7 @@ class TestAICaller:
         """
         Fixture to create an instance of AICaller for testing.
         """
-        return AICaller("test-model", "test-api", enable_retry=False)
+        return AICaller(model="test-model", api_base="test-api", enable_retry=False)
 
     @patch("cover_agent.ai_caller.AICaller.call_model")
     def test_call_model_simplified(self, mock_call_model):
@@ -105,6 +105,7 @@ class TestAICaller:
                 "usage": {"prompt_tokens": 2, "completion_tokens": 10},
             }
             response, prompt_tokens, response_tokens = ai_caller.call_model(prompt)
+            assert ai_caller.api_base == "test-api"
             assert response == "response"
             assert prompt_tokens == 2
             assert response_tokens == 10
