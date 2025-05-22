@@ -5,9 +5,11 @@ repos:
     - id: black
       language_version: python3.12
       args: ["--check"]
+      exclude: ^(templated_tests|cover_agent/lsp_logic)/
 
 - repo: https://github.com/pycqa/isort
   rev: 6.0.1
   hooks:
     - id: isort
       args: ["--check-only", "--diff"]
+      exclude: ^(templated_tests|cover_agent/lsp_logic)/

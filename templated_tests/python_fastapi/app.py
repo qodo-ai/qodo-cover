@@ -1,9 +1,6 @@
-import math
-
-from datetime import date
-
 from fastapi import FastAPI, HTTPException
-
+from datetime import date, datetime
+import math
 
 app = FastAPI()
 
@@ -29,8 +26,7 @@ async def current_date():
 @app.get("/add/{num1}/{num2}")
 async def add(num1: int, num2: int):
     """
-    An asynchronous function that takes two integer parameters 'num1' and 'num2', and returns a dictionary containing
-    the result of adding 'num1' and 'num2' under the key 'result'.
+    An asynchronous function that takes two integer parameters 'num1' and 'num2', and returns a dictionary containing the result of adding 'num1' and 'num2' under the key 'result'.
     """
     return {"result": num1 + num2}
 
@@ -96,7 +92,9 @@ async def sqrt(number: float):
     Return the square root of a number. Returns an error for negative numbers.
     """
     if number < 0:
-        raise HTTPException(status_code=400, detail="Cannot take square root of a negative number")
+        raise HTTPException(
+            status_code=400, detail="Cannot take square root of a negative number"
+        )
     return {"result": math.sqrt(number)}
 
 

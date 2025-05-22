@@ -75,9 +75,12 @@ source = "cover_agent/version.txt"
 line-length = 120
 skip-string-normalization = false
 target-version = ["py310", "py311", "py312"]
+# `templated_tests` and `cover_agent/lsp_logic` excluded for now
 exclude = '''
 /(
-    \.eggs
+    templated_tests
+  | cover_agent/lsp_logic
+  | \.eggs
   | \.git
   | \.hg
   | \.mypy_cache
@@ -93,6 +96,7 @@ exclude = '''
 [tool.isort]
 profile = "black"
 line_length = 120
+skip = ["templated_tests", "cover_agent/lsp_logic"]  # Skipped for now
 length_sort = false
 multi_line_output = 3
 indent = "    "
