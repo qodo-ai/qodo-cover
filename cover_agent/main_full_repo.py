@@ -27,7 +27,8 @@ async def run():
         print("LSP server initialized.")
 
         generate_log_files = not args.suppress_log_files
-        ai_caller = AICaller(model=args.model, generate_log_files=generate_log_files)
+        api_base = getattr(args, "api_base", "")
+        ai_caller = AICaller(model=args.model, api_base=api_base, generate_log_files=generate_log_files)
 
         # main loop for analyzing test files
         for test_file in test_files:
