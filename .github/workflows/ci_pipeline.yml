@@ -58,11 +58,8 @@ jobs:
       - name: Install dependencies using Poetry
         run: poetry install
 
-      - name: Check import sorting with isort
-        run: poetry run isort --check-only --diff .
-
-      - name: Check code formatting with black
-        run: poetry run black --check .
+      - name: Run code linters
+        run: make lint-check
 
       - name: Run tests and generate reports
         env:
