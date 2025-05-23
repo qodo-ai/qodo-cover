@@ -168,7 +168,7 @@ class TestCoverageProcessor:
 
     def test_extract_package_and_class_java(self, mocker):
         """
-        Tests extraction of package and class names from a Java file.
+        Tests extraction of package and class names from a Java public Class source file.
         """
         java_file_content = """
         package com.example;
@@ -182,6 +182,84 @@ class TestCoverageProcessor:
         package_name, class_name = processor.extract_package_and_class_java()
         assert package_name == "com.example", "Expected package name to be 'com.example'"
         assert class_name == "MyClass", "Expected class name to be 'MyClass'"
+
+    def test_extract_package_and_class_java_nonpublic(self, mocker):
+        """
+        Tests extraction of package and class names from a Java package scoped Class source file.
+        """
+        java_file_content = """
+        package com.example;
+
+        class MyClass {
+            // class content
+        }
+        """
+        mocker.patch("builtins.open", mocker.mock_open(read_data=java_file_content))
+        processor = CoverageProcessor("fake_path", "path/to/MyClass.java", "jacoco")
+        package_name, class_name = processor.extract_package_and_class_java()
+        assert (
+            package_name == "com.example"
+        ), "Expected package name to be 'com.example'"
+        assert class_name == "MyClass", "Expected class name to be 'MyClass'"
+
+    def test_extract_package_and_class_java_interface(self, mocker):
+        """
+
+        Tests extraction of package and class names from a Java Interface source file.
+
+        """
+        java_file_content = """
+        package com.example;
+
+        interface MyInterface {
+            // interface content
+        }
+        """
+        mocker.patch("builtins.open", mocker.mock_open(read_data=java_file_content))
+        processor = CoverageProcessor("fake_path", "path/to/MyInterface.java", "jacoco")
+        package_name, class_name = processor.extract_package_and_class_java()
+        assert (
+            package_name == "com.example"
+        ), "Expected package name to be 'com.example'"
+        assert class_name == "MyInterface", "Expected class name to be 'MyInterface'"
+
+    def test_extract_package_and_class_java_record(self, mocker):
+        """
+        Tests extraction of package and class names from a Java Record source file.
+        """
+        java_file_content = """
+        package com.example;
+
+        record MyRecord {
+            // record content
+        }
+        """
+        mocker.patch("builtins.open", mocker.mock_open(read_data=java_file_content))
+        processor = CoverageProcessor("fake_path", "path/to/MyRecord.java", "jacoco")
+        package_name, class_name = processor.extract_package_and_class_java()
+        assert (
+                package_name == "com.example"
+        ), "Expected package name to be 'com.example'"
+        assert class_name == "MyRecord", "Expected class name to be 'MyRecord'"
+
+    def test_extract_package_and_class_java_template(self, mocker):
+        """
+        Tests extraction of package and class names from a Java Template source file.
+        """
+        java_file_content = """
+        package com.example;
+
+        class MyTemplate<T> {
+            // template content
+        }
+        """
+        mocker.patch("builtins.open", mocker.mock_open(read_data=java_file_content))
+        processor = CoverageProcessor("fake_path", "path/to/MyTemplate.java", "jacoco")
+        package_name, class_name = processor.extract_package_and_class_java()
+        assert (
+            package_name == "com.example"
+        ), "Expected package name to be 'com.example'"
+        assert class_name == "MyTemplate", "Expected class name to be 'MyTemplate'"
 
     @pytest.mark.skip("no longer an assert. needs rewrite. check out caplog")
     def test_verify_report_update_file_not_updated(self, mocker):
