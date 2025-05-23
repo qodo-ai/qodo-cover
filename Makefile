@@ -23,9 +23,18 @@ e2e-test:
 		--junitxml=testLog_e2e.xml \
 		--log-cli-level=INFO
 
-# Use Python Black to format python files
-format:
-	black .
+# Use black to format Python files
+format-black:
+	poetry run black .
+
+# Use isort to format Python files
+format-isort:
+	poetry run isort .
+
+# Run code linters
+lint-check:
+	poetry run black --check .
+	poetry run isort --check-only --diff .
 
 # Generate wheel file using poetry build command
 build:
@@ -51,4 +60,3 @@ installer:
 		--onefile \
 		--name cover-agent \
 		cover_agent/main.py
-
