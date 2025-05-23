@@ -8,6 +8,11 @@ on:
     branches:
       - main
 
+env:
+  PYTHON_VERSION: '3.12'
+  POETRY_VERSION: '2.1.3'
+  FAKE_OPENAI_API_KEY: "sk-fake-key-for-testing-only"
+
 jobs:
   # Checks for changes in version.txt (used for release job)
   changes:
@@ -16,8 +21,8 @@ jobs:
       version_changed: ${{ steps.filter.outputs.version_changed }}
       relevant_changes: ${{ steps.filter.outputs.relevant_changes }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: dorny/paths-filter@v2
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
@@ -26,52 +31,56 @@ jobs:
             relevant_changes:
               - '!README.md'
               - '!docs/**'
+              - '!*.md'
 
   test:
     needs: [changes]
     if: needs.changes.outputs.relevant_changes == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Ensures we fetch all history for all branches
+          fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ env.PYTHON_VERSION }}
 
-      # Step to cache Poetry dependencies
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
       - name: Cache Poetry dependencies
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.cache/pypoetry
-            ~/.cache/pip
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          path: .venv
+          key: venv-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
-            ${{ runner.os }}-poetry-
+            venv-${{ runner.os }}-${{ env.PYTHON_VERSION }}-
 
-      - name: Install Poetry
-        run: pip install poetry
-
-      - name: Install dependencies using Poetry
-        run: poetry install
+      - name: Install dependencies
+        run: poetry install --no-interaction
 
       - name: Run code linters
         run: make lint-check
 
       - name: Run tests and generate reports
         env:
-          OPENAI_API_KEY: "This_is_a_fake_API_key"
+          OPENAI_API_KEY: ${{ env.FAKE_OPENAI_API_KEY }}
         run: make test
 
-      - name: Upload test report
+      - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-reports
           path: testLog.xml
+          retention-days: 30
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -79,38 +88,47 @@ jobs:
         with:
           name: coverage-reports
           path: cobertura.xml
-        env:
-          pythonLocation: /opt/hostedtoolcache/Python/3.12.2/x64
-          LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.2/x64/lib
+          retention-days: 30
+
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: testLog.xml
 
   package-test:
     needs: test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.12'
+      - uses: actions/checkout@v4
 
-      # Step to cache Poetry dependencies
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
       - name: Cache Poetry dependencies
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.cache/pypoetry
-            ~/.cache/pip
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-poetry-
+          path: .venv
+          key: venv-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/poetry.lock') }}
 
-      - name: Install Poetry
-        run: pip install poetry
-      - name: Install dependencies using Poetry
-        run: poetry install
-      - name: Build, Install and Test Package from Different Location
+      - name: Install dependencies
+        run: poetry install --no-interaction
+
+      - name: Build package
+        run: poetry build
+
+      - name: Test package installation
         run: |
-          poetry build
           pip install dist/*.whl
           cd /tmp
           cover-agent --help
@@ -119,95 +137,108 @@ jobs:
     needs: [test, changes]
     if: needs.changes.outputs.relevant_changes == 'true'
     strategy:
+      fail-fast: false
       matrix:
-       os: [ubuntu-22.04, windows-latest, macos-latest]
+        os: [ubuntu-22.04, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-22.04
+            executable: cover-agent
+          - os: windows-latest
+            executable: cover-agent.exe
+          - os: macos-latest
+            executable: cover-agent
 
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.12'
+    - uses: actions/checkout@v4
 
-    # Step to cache Poetry dependencies
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: ${{ env.POETRY_VERSION }}
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+
     - name: Cache Poetry dependencies
       uses: actions/cache@v4
       with:
-        path: |
-          ~/.cache/pypoetry
-          ~/.cache/pip
-        key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-poetry-
+        path: .venv
+        key: venv-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/poetry.lock') }}
 
     - name: Install Dependencies
       run: |
         make setup-installer
-        poetry install
+        poetry install --no-interaction
+
     - name: Build Executable
       run: make installer
-    - name: Test Executable (Windows)
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: .\dist\cover-agent.exe --help
-      shell: pwsh
-    - name: Test Executable (Unix)
-      if: ${{ matrix.os != 'windows-latest' }}
-      run: ./dist/cover-agent --help
+
+    - name: Test Executable
+      run: |
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          ./dist/${{ matrix.executable }} --help
+        else
+          ./dist/${{ matrix.executable }} --help
+        fi
       shell: bash
+
     - name: Upload Executable
       uses: actions/upload-artifact@v4
       with:
         name: cover-agent-${{ matrix.os }}
-        path: dist/cover-agent*
+        path: dist/${{ matrix.executable }}
+        retention-days: 30
 
   e2e-test:
-    # This job will run after building binary because it needs the binary to run the E2E tests in Docker
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.12'
+      - uses: actions/checkout@v4
 
-      # Download the Ubuntu binary
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
       - name: Download Ubuntu executable
         uses: actions/download-artifact@v4
         with:
           name: cover-agent-ubuntu-22.04
           path: dist
 
-      # Make the binary executable
       - name: Make binary executable
         run: chmod +x dist/cover-agent
 
-      # Cache and install dependencies
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
       - name: Cache Poetry dependencies
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.cache/pypoetry
-            ~/.cache/pip
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-poetry-
+          path: .venv
+          key: venv-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/poetry.lock') }}
 
-      - name: Install Poetry
-        run: pip install poetry
-      - name: Install dependencies using Poetry
-        run: poetry install
+      - name: Install dependencies
+        run: poetry install --no-interaction
 
-      # Run the E2E Docker tests using the Makefile target `e2e-test`
       - name: Run E2E Docker tests
         env:
-          OPENAI_API_KEY: "This_is_a_fake_API_key"
+          OPENAI_API_KEY: ${{ env.FAKE_OPENAI_API_KEY }}
         run: |
           make e2e-test 2>&1 | tee e2e_test_full.log
 
-      # Upload E2E test reports
-      - name: Upload E2E Docker test report
+      - name: Upload E2E test reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -215,12 +246,9 @@ jobs:
           path: |
             testLog_e2e.xml
             e2e_test_full.log
+          retention-days: 30
 
   release:
-    # This job will run only if the following conditions are met:
-    # - The event is a 'push' to the 'main' branch
-    # - The 'version.txt' file has changed
-    # - There are relevant changes outside 'README.md' and the 'docs/' folder
     needs: [build, changes, e2e-test]
     if: >
       github.event_name == 'push' &&
@@ -228,58 +256,45 @@ jobs:
       needs.changes.outputs.version_changed == 'true' &&
       needs.changes.outputs.relevant_changes == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    timeout-minutes: 15
     steps:
-    - uses: actions/checkout@v2
-    - name: Download executables (Ubuntu)
+    - uses: actions/checkout@v4
+
+    - name: Download all executables
       uses: actions/download-artifact@v4
       with:
-        name: cover-agent-ubuntu-22.04
-        path: dist/ubuntu-22.04
-    - uses: actions/download-artifact@v4
-      with:
-        name: cover-agent-windows-latest
-        path: dist/windows-latest
-    - uses: actions/download-artifact@v4
-      with:
-        name: cover-agent-macos-latest
-        path: dist/macos-latest
+        pattern: cover-agent-*
+        path: dist
+        merge-multiple: false
+
     - name: Extract version
+      id: version
       run: |
-        echo "VERSION=$(cat cover_agent/version.txt)" >> $GITHUB_ENV
+        VERSION=$(cat cover_agent/version.txt)
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
     - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ env.VERSION }}
-        release_name: Release ${{ env.VERSION }}
+        name: Release ${{ env.VERSION }}
         draft: false
         prerelease: false
-    - name: Upload Release Asset (Ubuntu)
-      uses: actions/upload-release-asset@v1
+        files: |
+          dist/cover-agent-ubuntu-22.04/cover-agent
+          dist/cover-agent-windows-latest/cover-agent.exe
+          dist/cover-agent-macos-latest/cover-agent
+        body: |
+          ## Release ${{ env.VERSION }}
+
+          ### Downloads
+          - **Ubuntu/Linux**: cover-agent
+          - **Windows**: cover-agent.exe
+          - **macOS**: cover-agent
+
+          Built from commit: ${{ github.sha }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/ubuntu-22.04/cover-agent
-        asset_name: cover-agent-ubuntu
-        asset_content_type: application/octet-stream
-    - name: Upload Release Asset (Windows)
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/windows-latest/cover-agent.exe
-        asset_name: cover-agent-windows.exe
-        asset_content_type: application/octet-stream
-    - name: Upload Release Asset (macOS)
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/macos-latest/cover-agent
-        asset_name: cover-agent-macos
-        asset_content_type: application/octet-stream
