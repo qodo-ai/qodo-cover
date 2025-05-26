@@ -86,6 +86,54 @@ You can use a different LLM by passing in the `--model` and `--api-base` paramet
 ```
 For any other LLM that requires more environment variables to be set, you will need to update the shell script and pass in the variables within the Docker command.
 
+### Record & Replay
+To save LLM service credits, a response recording mode is available. The starting point is a group hash, generated from the hashes of the source and test files used in each test run. If either file changes, the corresponding LLM responses should be re-recorded. 
+Run the following command to execute all tests with LLM response recording enabled:
+```shell
+poetry run python tests_integration/run_test_all.py --record-mode
+```
+
+If you run the same command without the `--record-mode` flag:
+```shell
+poetry run python tests_integration/run_test_all.py
+```
+it will use the recorded responses to generate tests without calling the LLM if recordings are available. Otherwise, it will call the LLM to run the tests.
+
+You may also record LLM responses from a separate test run. Run a test as you normally would, and add the `--record-mode` flag to the command:
+```shell
+poetry run python tests_integration/run_test_with_docker.py \
+  --record-mode \
+  --docker-image "embeddeddevops/python_fastapi:latest" \
+  --source-file-path "app.py" \
+  --test-file-path "test_app.py" \
+  --code-coverage-report-path "coverage.xml" \
+  --test-command "pytest --cov=. --cov-report=xml --cov-report=term" \
+  --coverage-type "cobertura" \
+  --model "gpt-4o-mini" \
+  --desired-coverage 70 \
+  --max-iterations 3
+```
+
+The table below explains the behavior of the test runner depending on whether the `--record-mode` flag is set and whether a recorded file already exists:
+
+|    Flag     | Record File | Result                                |
+|:-----------:|:-----------:|:--------------------------------------|
+|      ❌      |      ❌      | Regular test run (file not recorded)  |
+|      ✅      |      ❌      | Records a new file                    |
+|      ✅      |      ✅      | Overwrites an existing file           |
+|      ❌      |      ✅      | Replays a recorded file               |
+
+Recorded responses are stored in the `stored_responses` folder. Files are named based on the test name and a hash value that depends on the contents of the source and test files.
+```shell
+<test_name>_responses_<hash_value>.yml
+
+# i.e.
+python_fastapi_responses_a9d9de927a82a7d776889738d2880bec7166c5f69d3518837183a20ef48b2a37.yml
+```
+A response file corresponding to the same source and test files group hash in a file name is updated during each recording session with new prompt hash entries.
+To regenerate it from scratch, you can delete the existing response file and run a new recording session. 
+
+
 ### Suppressing Log Files
 You can suppress logs using the `--suppress-log-files` flag. This prevents the creation of the `run.log`, `test_results.html`, and the test results `db` files:
 * Running all tests:
