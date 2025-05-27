@@ -17,6 +17,7 @@ COVERAGE_TYPE="cobertura"
 CODE_COVERAGE_REPORT_PATH="coverage.xml"
 MAX_ITERATIONS=3  # Default value
 DESIRED_COVERAGE=70  # Default value
+MAX_RUN_TIME_SEC=30 # Default value
 LOG_DB_PATH="${LOG_DB_PATH:-}"
 SUPPRESS_LOG_FILES=""
 
@@ -46,6 +47,7 @@ while [ "$#" -gt 0 ]; do
     --coverage-type) COVERAGE_TYPE="$2"; shift ;;
     --code-coverage-report-path) CODE_COVERAGE_REPORT_PATH="$2"; shift ;;
     --max-iterations) MAX_ITERATIONS="$2"; shift ;;
+    --max-run-time-sec) MAX_RUN_TIME_SEC="$2"; shift ;;
     --desired-coverage) DESIRED_COVERAGE="$2"; shift ;;
     --log-db-path) LOG_DB_PATH="$2"; shift ;;
     --suppress-log-files) SUPPRESS_LOG_FILES="--suppress-log-files" ;;
@@ -114,6 +116,10 @@ COMMAND="/usr/local/bin/cover-agent \
   --desired-coverage $DESIRED_COVERAGE \
   --max-iterations $MAX_ITERATIONS \
   --strict-coverage"
+
+if [ -n "$MAX_RUN_TIME_SEC" ]; then
+  COMMAND="$COMMAND --max-run-time-sec $MAX_RUN_TIME_SEC"
+fi
 
 if [ -n "$MODEL" ]; then
   COMMAND="$COMMAND --model \"$MODEL\""
