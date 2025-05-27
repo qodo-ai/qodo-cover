@@ -2,7 +2,7 @@ from argparse import Namespace
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import AsyncIterator, List, Tuple, Optional
-from cover_agent.AICaller import AICaller
+from cover_agent.ai_caller import AICaller
 from cover_agent.lsp_logic.utils.utils_context import (
     analyze_context,
     find_test_file_context,

@@ -13,3 +13,9 @@ def test_root():
     response = client.get("/")
     assert response.status_code == 200
     assert response.json() == {"message": "Welcome to the FastAPI application!"}
+
+
+def test_divide_by_zero():
+    response = client.get("/divide/10/0")
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Cannot divide by zero"}
