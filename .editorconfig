@@ -1,0 +1,35 @@
+# http://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{py,rst,ini,json,sh}]
+indent_style = space
+indent_size = 4
+
+[*.py]
+line_length=120
+known_first_party=cover_agent,tests_integration
+multi_line_output=3
+default_section=THIRDPARTY
+
+[*.{html,css,scss,js}]
+indent_style = space
+indent_size = 2
+
+[*.yml]
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[Makefile]
+indent_style = tab
+
+[makefile-local]
+indent_style = tab
