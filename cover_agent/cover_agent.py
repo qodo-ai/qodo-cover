@@ -316,7 +316,7 @@ class CoverAgent:
         if self.test_validator.current_coverage >= (desired_coverage / 100):
             self.logger.info(
                 f"Reached above target coverage of {desired_coverage}% "
-                f"(Current Coverage: {current_coverage}%) in {iteration_count} iterations."
+                f"(Current Coverage: {current_coverage}%) in {iteration_count + 1} iterations."
             )
         elif iteration_count == self.config.max_iterations:
             coverage_type = "diff coverage" if self.config.diff_coverage else "coverage"
