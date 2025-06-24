@@ -34,6 +34,8 @@ Qodo Cover aims to help efficiently increase code coverage, by automatically gen
 
 
 ## News and Updates
+### 2025-06-15
+> **⚠️ This repository is no longer maintained. Please fork it if you wish to continue development or use it in your own projects.**
 
 ### 2024-12-04:
 New mode - [Run Qodo Cover Pro in your GitHub CI workflow](https://github.com/qodo-ai/qodo-ci). Currently in preview and available for free for a limited time for Python projects, leveraging your own LLM API key from your favorite LLM provider. It's a practical way to improve code quality and reliability. For more details, reach out to the [Qodo team](https://www.qodo.ai/book-a-demo).
