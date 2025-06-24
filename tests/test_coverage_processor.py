@@ -381,7 +381,7 @@ class TestCoverageProcessor:
         assert missed_lines == [2], "Expected line 2 to be missed for app.py"
         assert coverage_pct == 2 / 3, "Expected 66.67% coverage for app.py"
 
-    def test_parse_coverage_report_unsupported_type(self, mocker):
+    def test_parse_coverage_report_jacoco_unsupported_type(self, mocker):
         """
         Tests that parse_coverage_report_jacoco raises a ValueError for unsupported JaCoCo report formats.
         """
