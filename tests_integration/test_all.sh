@@ -98,6 +98,7 @@ sh tests_integration/test_with_docker.sh \
   --coverage-type "jacoco" \
   --code-coverage-report-path "build/reports/jacoco/test/jacocoTestReport.csv" \
   --model $MODEL \
+  --max-run-time-sec 240 \
   $log_db_arg \
   $SUPPRESS_LOG_FILES
 
