@@ -42,7 +42,7 @@ def parse_args(settings: Dynaconf) -> argparse.Namespace:
         (
             "--included-files",
             dict(
-                type=list,
+                type=str,
                 default=None,
                 nargs="*",
                 help=(
