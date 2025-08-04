@@ -54,6 +54,7 @@ class TestUnitTestDB:
             "source_file": "sample source code",
             "original_test_file": "sample test code",
             "processed_test_file": "sample new test code",
+            "error_summary": "sample error summary",
         }
 
         # Insert the test result into the database
@@ -74,6 +75,7 @@ class TestUnitTestDB:
         assert attempt.source_file == "sample source code"
         assert attempt.original_test_file == "sample test code"
         assert attempt.processed_test_file == "sample new test code"
+        assert attempt.error_summary == "sample error summary"
 
     def test_dump_to_report(self, unit_test_db, tmp_path):
         """
@@ -94,6 +96,7 @@ class TestUnitTestDB:
             "source_file": "sample source code",
             "original_test_file": "sample test code",
             "processed_test_file": "sample new test code",
+            "error_summary": "sample error summary",
         }
 
         # Insert the test result into the database

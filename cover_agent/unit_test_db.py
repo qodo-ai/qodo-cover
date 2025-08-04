@@ -28,6 +28,7 @@ class UnitTestGenerationAttempt(Base):
     source_file = Column(Text)
     original_test_file = Column(Text)
     processed_test_file = Column(Text)
+    error_summary = Column(Text)
 
 
 class UnitTestDB:
@@ -52,6 +53,7 @@ class UnitTestDB:
                 source_file=test_result.get("source_file"),
                 original_test_file=test_result.get("original_test_file"),
                 processed_test_file=test_result.get("processed_test_file"),
+                error_summary=test_result.get("error_summary"),
             )
             session.add(new_attempt)
             session.commit()
@@ -83,6 +85,7 @@ class UnitTestDB:
                 "source_file": attempt.source_file,
                 "original_test_file": attempt.original_test_file,
                 "processed_test_file": attempt.processed_test_file,
+                "error_summary": attempt.error_summary,
             }
             for attempt in attempts
         ]
