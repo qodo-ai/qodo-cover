@@ -13,7 +13,7 @@ from wandb.sdk.data_types.trace_tree import Trace
 from cover_agent.custom_logger import CustomLogger
 from cover_agent.record_replay_manager import RecordReplayManager
 from cover_agent.settings.config_loader import get_settings
-from cover_agent.utils import get_original_caller
+from cover_agent.utils import get_original_caller, contains_any_substring
 
 
 def conditional_retry(func):
@@ -109,7 +109,8 @@ class AICaller:
         }
 
         # Model-specific adjustments
-        if self.model in ["o1-preview", "o1-mini", "o1", "o3-mini"]:
+        model_names = ["o1-preview", "o1-mini", "o1", "o3-mini", "o4-mini"]
+        if contains_any_substring(self.model, model_names):
             stream = False  # o1 doesn't support streaming
             completion_params["temperature"] = 1
             completion_params["stream"] = False  # o1 doesn't support streaming

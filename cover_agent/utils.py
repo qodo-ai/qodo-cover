@@ -446,3 +446,16 @@ def truncate_hash(hash_value: str, hash_display_length: int) -> str:
         truncate_hash("abcdef123456", 6)  # Returns "abcdef"
     """
     return hash_value[:hash_display_length]
+
+def contains_any_substring(main_string, substrings):
+  """
+  Checks if any of the substrings exist in the main string.
+
+  Args:
+    main_string: The string to search within.
+    substrings: A list or tuple of substrings to search for.
+
+  Returns:
+    True if any substring is found, False otherwise.
+  """
+  return any(sub in main_string for sub in substrings)

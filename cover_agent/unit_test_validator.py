@@ -15,7 +15,7 @@ from cover_agent.file_preprocessor import FilePreprocessor
 from cover_agent.runner import Runner
 from cover_agent.settings.config_loader import get_settings
 from cover_agent.settings.config_schema import CoverageType
-from cover_agent.utils import load_yaml
+from cover_agent.utils import load_yaml, get_included_files
 
 
 class UnitTestValidator:
@@ -77,7 +77,7 @@ class UnitTestValidator:
         self.code_coverage_report_path = code_coverage_report_path
         self.test_command = test_command
         self.test_command_dir = test_command_dir
-        self.included_files = self.get_included_files(included_files)
+        self.included_files = get_included_files(included_files, project_root, True)
         self.coverage_type = coverage_type
         self.desired_coverage = desired_coverage
         self.additional_instructions = additional_instructions
@@ -225,12 +225,16 @@ class UnitTestValidator:
             relevant_line_number_to_insert_imports_after = None
             counter_attempts = 0
             while not relevant_line_number_to_insert_tests_after and counter_attempts < allowed_attempts:
+                test_file_content_numbered = "\n".join(
+                            f"{i + 1} {line}"
+                            for i, line in enumerate(
+                                self._read_file(self.test_file_path).split("\n")
+                            )
+                        )
                 response, prompt_token_count, response_token_count, prompt = (
                     self.agent_completion.analyze_test_insert_line(
                         language=self.language,
-                        test_file_numbered="\n".join(
-                            f"{i + 1} {line}" for i, line in enumerate(self._read_file(self.test_file_path).split("\n"))
-                        ),
+                        test_file_numbered=test_file_content_numbered,
                         additional_instructions_text=self.additional_instructions,
                         test_file_name=os.path.relpath(self.test_file_path, self.project_root),
                     )
@@ -242,6 +246,12 @@ class UnitTestValidator:
                 relevant_line_number_to_insert_tests_after = tests_dict.get(
                     "relevant_line_number_to_insert_tests_after", None
                 )
+
+                if relevant_line_number_to_insert_tests_after:
+                    file_len = len(test_file_content_numbered.splitlines())
+                    if relevant_line_number_to_insert_tests_after == file_len:
+                        relevant_line_number_to_insert_tests_after -= 1
+
                 relevant_line_number_to_insert_imports_after = tests_dict.get(
                     "relevant_line_number_to_insert_imports_after", None
                 )
@@ -256,6 +266,7 @@ class UnitTestValidator:
                 raise Exception(
                     f"Failed to analyze the relevant line number to insert new imports. tests_dict: {tests_dict}"
                 )
+
 
             self.test_headers_indentation = test_headers_indentation
             self.relevant_line_number_to_insert_tests_after = relevant_line_number_to_insert_tests_after
@@ -306,34 +317,6 @@ class UnitTestValidator:
             with open(self.code_coverage_report_path, "r") as f:
                 self.code_coverage_report = f.read()
 
-    @staticmethod
-    def get_included_files(included_files):
-        """
-        A method to read and concatenate the contents of included files into a single string.
-
-        Parameters:
-            included_files (list): A list of paths to included files.
-
-        Returns:
-            str: A string containing the concatenated contents of the included files, or an empty string if the input list is empty.
-        """
-        if included_files:
-            included_files_content = []
-            file_names = []
-            for file_path in included_files:
-                try:
-                    with open(file_path, "r") as file:
-                        included_files_content.append(file.read())
-                        file_names.append(file_path)
-                except IOError as e:
-                    print(f"Error reading file {file_path}: {str(e)}")
-            out_str = ""
-            if included_files_content:
-                for i, content in enumerate(included_files_content):
-                    out_str += f"file_path: `{file_names[i]}`\ncontent:\n```\n{content}\n```\n"
-
-            return out_str.strip()
-        return ""
 
     def validate_test(self, generated_test: dict):
         """
@@ -448,6 +431,15 @@ class UnitTestValidator:
                     with open(self.test_file_path, "w") as test_file:
                         test_file.write(original_content)
                     self.logger.info(f"Skipping a generated test that failed")
+
+                    error_message = self.extract_error_message(processed_test, stdout, stderr)
+                    if error_message:
+                        logging.error(f"Error message summary:\n{error_message}")
+
+                    self.failed_test_runs.append(
+                        {"code": generated_test, "error_message": error_message}
+                    )  # Append failure details to the list
+
                     fail_details = {
                         "status": "FAIL",
                         "reason": "Test failed",
@@ -459,15 +451,10 @@ class UnitTestValidator:
                         "source_file": self.source_code,
                         "original_test_file": original_content,
                         "processed_test_file": processed_test,
+                        "error_summary": error_message,
                     }
 
-                    error_message = self.extract_error_message(fail_details)
-                    if error_message:
-                        logging.error(f"Error message summary:\n{error_message}")
 
-                    self.failed_test_runs.append(
-                        {"code": generated_test, "error_message": error_message}
-                    )  # Append failure details to the list
 
                     if "WANDB_API_KEY" in os.environ:
                         fail_details["error_message"] = error_message
@@ -618,7 +605,7 @@ class UnitTestValidator:
     def to_json(self):
         return json.dumps(self.to_dict())
 
-    def extract_error_message(self, fail_details):
+    def extract_error_message(self, processed_test_file, stdout, stderr):
         """
         Extracts the error message from the provided fail details.
 
@@ -627,8 +614,9 @@ class UnitTestValidator:
         Logs errors encountered during the process.
 
         Parameters:
-            fail_details (dict): Dictionary containing test failure details including stderr, stdout,
-                               and processed test file contents.
+            processed_test_file: The test file under processing
+            stdout: Output message
+            stderr: Error message
 
         Returns:
             str: The error summary extracted from the response or an empty string if extraction fails.
@@ -638,9 +626,9 @@ class UnitTestValidator:
             response, prompt_token_count, response_token_count, prompt = self.agent_completion.analyze_test_failure(
                 source_file_name=os.path.relpath(self.source_file_path, self.project_root),
                 source_file=self._read_file(self.source_file_path),
-                processed_test_file=fail_details["processed_test_file"],
-                stderr=fail_details["stderr"],
-                stdout=fail_details["stdout"],
+                processed_test_file=processed_test_file,
+                stderr=stderr,
+                stdout=stdout,
                 test_file_name=os.path.relpath(self.test_file_path, self.project_root),
             )
             self.total_input_token_count += prompt_token_count

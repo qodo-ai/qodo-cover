@@ -59,7 +59,9 @@ class TestUnitValidator:
                 "stdout": "stdout content",
                 "processed_test_file": "",
             }
-            error_message = generator.extract_error_message(fail_details)
+            error_message = generator.extract_error_message(fail_details["processed_test_file"],
+                                                            fail_details["stdout"],
+                                                            fail_details["stderr"])
 
             # Should return an empty string on failure
             assert error_message == ""
@@ -169,7 +171,9 @@ class TestUnitValidator:
                 "source_file_name": temp_source_file.name,
                 "source_file": "",
             }
-            error_message = generator.extract_error_message(fail_details)
+            error_message = generator.extract_error_message(fail_details["processed_test_file"],
+                                                            fail_details["stdout"],
+                                                            fail_details["stderr"])
 
             assert error_message.strip() == "error_summary: Test failed due to assertion error in test_example"
             mock_agent_completion_call_args = mock_agent_completion.analyze_test_failure.call_args[1]

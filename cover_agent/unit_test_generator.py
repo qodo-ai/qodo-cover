@@ -7,7 +7,7 @@ from cover_agent.agent_completion_abc import AgentCompletionABC
 from cover_agent.custom_logger import CustomLogger
 from cover_agent.file_preprocessor import FilePreprocessor
 from cover_agent.settings.config_loader import get_settings
-from cover_agent.utils import load_yaml
+from cover_agent.utils import load_yaml, get_included_files
 
 
 class UnitTestGenerator:
@@ -60,7 +60,7 @@ class UnitTestGenerator:
         self.code_coverage_report_path = code_coverage_report_path
         self.test_command = test_command
         self.test_command_dir = test_command_dir
-        self.included_files = included_files
+        self.included_files = get_included_files(included_files, project_root, True)
         self.coverage_type = coverage_type
         self.additional_instructions = additional_instructions
         self.language = self.get_code_language(source_file_path)
