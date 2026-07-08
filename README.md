@@ -46,6 +46,9 @@ See more details [here](docs/repo_coverage.md).
 
 
 # Qodo-Cover
+
+[![Listed on TakoAPI](https://takoapi.com/api/badge/qodo-ai-qodo-cover)](https://takoapi.com/agents/qodo-ai-qodo-cover)
+
 Welcome to Qodo-Cover. This focused project utilizes Generative AI to automate and enhance the generation of tests (currently mostly unit tests), aiming to streamline development workflows. Qodo-Cover can run via a terminal, and is planned to be integrated into popular CI platforms.
 
 We invite the community to collaborate and help extend the capabilities of Qodo Cover, continuing its development as a cutting-edge solution in the automated unit test generation domain. We also wish to inspire researchers to leverage this open-source tool to explore new test-generation techniques.
