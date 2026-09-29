@@ -20,6 +20,7 @@ sqlalchemy = "^2.0.38"
 diff-cover = "^9.2.3"
 tenacity = "^9.0.0"
 python-dotenv = "^1.1.0"
+defusedxml = "^0.7.1"
 
 # Infrastructure Dependencies
 docker = "^7.1.0"
